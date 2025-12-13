@@ -1,4 +1,4 @@
-#include <Windows.h>
+ï»¿#include <Windows.h>
 #include <windowsx.h>
 #include <gl/GL.h>
 #include <gl/GLU.h>
@@ -109,8 +109,8 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 			// --------------- invert if you prefer -----------
 
 			// Clamp pitch to prevent flipping upside down
-			if (camPitch > 89.0f) camPitch = 89.0f;  // Can't look more than 89° up
-			if (camPitch < -89.0f) camPitch = -89.0f; // Can't look more than 89° down
+			if (camPitch > 89.0f) camPitch = 89.0f;  // Can't look more than 89ï¿½ up
+			if (camPitch < -89.0f) camPitch = -89.0f; // Can't look more than 89ï¿½ down
 		}
 		else if (middleMouseDown) {
 			// pan/translate: move target in camera's right & up directions
@@ -129,7 +129,7 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 			vec3_cross(upv, forward, rightv); // Calculate camera's right vector // right = up x forward (cross product)
 			vec3_norm(rightv); // normalize the vector, only left direction vector
 			float camUpWorld[3];
-			vec3_cross(forward, rightv, camUpWorld);  // Calculate camera's up vector (forward × right)
+			vec3_cross(forward, rightv, camUpWorld);  // Calculate camera's up vector (forward ï¿½ right)
 
 			// apply pan (screen-space -> world)
 			// Move target based on mouse movement
@@ -145,7 +145,7 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 	case WM_MOUSEWHEEL:
 	{
 		int zDelta = GET_WHEEL_DELTA_WPARAM(wParam); // Get scroll amount (+120 or -120 per notch)
-		// zoom (dolly) — scroll forward = zoom in
+		// zoom (dolly) ï¿½ scroll forward = zoom in
 		float factor = 1.0f - (zDelta / 120.0f) * zoomSpeed; // Calculate zoom factor
 		// Apply zoom
 		camDistance *= factor;
@@ -317,6 +317,48 @@ bool initPixelFormat(HDC hdc)
 }
 //--------------------------------------------------------------------
 
+void drawCube() {
+	glBegin(GL_QUADS);
+	// Front (Z+)
+	glNormal3f(0.0f, 0.0f, 1.0f);
+	glVertex3f(-0.5f, -0.5f, 0.5f); glVertex3f(0.5f, -0.5f, 0.5f);
+	glVertex3f(0.5f, 0.5f, 0.5f);   glVertex3f(-0.5f, 0.5f, 0.5f);
+	// Back (Z-)
+	glNormal3f(0.0f, 0.0f, -1.0f);
+	glVertex3f(-0.5f, -0.5f, -0.5f); glVertex3f(-0.5f, 0.5f, -0.5f);
+	glVertex3f(0.5f, 0.5f, -0.5f);   glVertex3f(0.5f, -0.5f, -0.5f);
+	// Top (Y+)
+	glNormal3f(0.0f, 1.0f, 0.0f);
+	glVertex3f(-0.5f, 0.5f, -0.5f); glVertex3f(-0.5f, 0.5f, 0.5f);
+	glVertex3f(0.5f, 0.5f, 0.5f);   glVertex3f(0.5f, 0.5f, -0.5f);
+	// Bottom (Y-)
+	glNormal3f(0.0f, -1.0f, 0.0f);
+	glVertex3f(-0.5f, -0.5f, -0.5f); glVertex3f(0.5f, -0.5f, -0.5f);
+	glVertex3f(0.5f, -0.5f, 0.5f);   glVertex3f(-0.5f, -0.5f, 0.5f);
+	// Right (X+)
+	glNormal3f(1.0f, 0.0f, 0.0f);
+	glVertex3f(0.5f, -0.5f, -0.5f); glVertex3f(0.5f, 0.5f, -0.5f);
+	glVertex3f(0.5f, 0.5f, 0.5f);   glVertex3f(0.5f, -0.5f, 0.5f);
+	// Left (X-)
+	glNormal3f(-1.0f, 0.0f, 0.0f);
+	glVertex3f(-0.5f, -0.5f, -0.5f); glVertex3f(-0.5f, -0.5f, 0.5f);
+	glVertex3f(-0.5f, 0.5f, 0.5f);   glVertex3f(-0.5f, 0.5f, -0.5f);
+	glEnd();
+}
+
+void drawPyramid() {
+	glBegin(GL_TRIANGLES);
+	// Front
+	glVertex3f(0.0f, 0.5f, 0.0f); glVertex3f(-0.5f, -0.5f, 0.5f); glVertex3f(0.5f, -0.5f, 0.5f);
+	// Right
+	glVertex3f(0.0f, 0.5f, 0.0f); glVertex3f(0.5f, -0.5f, 0.5f); glVertex3f(0.5f, -0.5f, -0.5f);
+	// Back
+	glVertex3f(0.0f, 0.5f, 0.0f); glVertex3f(0.5f, -0.5f, -0.5f); glVertex3f(-0.5f, -0.5f, -0.5f);
+	// Left
+	glVertex3f(0.0f, 0.5f, 0.0f); glVertex3f(-0.5f, -0.5f, -0.5f); glVertex3f(-0.5f, -0.5f, 0.5f);
+	glEnd();
+}
+
 void Display(HWND hWnd)
 {
 	glEnable(GL_DEPTH_TEST);
@@ -474,7 +516,110 @@ void Display(HWND hWnd)
 	break;
 	case 2:
 	{
+		glPushMatrix();
+		glScalef(0.5f, 0.5f, 0.5f);
 
+		glPushMatrix();
+		glTranslatef(0.0f, 3.2f, 0.0f);
+
+		// Head (White Box)
+		glColor3f(1.0f, 1.0f, 1.0f);
+		glPushMatrix();
+		glScalef(0.8f, 0.8f, 0.8f);
+		drawCube();
+		glPopMatrix();
+
+		// Antenna
+		glColor3f(1.0f, 0.9f, 0.0f);
+		glPushMatrix();
+		glTranslatef(0.0f, 0.45f, 0.0f); // On top
+		glScalef(1.5f, 0.4f, 0.1f);
+		drawPyramid();
+		glPopMatrix();
+
+		glPopMatrix();
+
+		// Chest (Blue)
+		glPushMatrix();
+		glColor3f(0.0f, 0.2f, 0.8f);
+		glTranslatef(0.0f, 2.0f, 0.0f);
+		glScalef(1.4f, 1.2f, 1.0f);
+		drawCube();
+		glPopMatrix();
+
+		// Waist (Red)
+		glPushMatrix();
+		glColor3f(0.8f, 0.0f, 0.0f);
+		glTranslatef(0.0f, 1.0f, 0.0f);
+		glScalef(1.1f, 0.8f, 0.9f);
+		drawCube();
+		glPopMatrix();
+
+		// Left Arm
+		glPushMatrix();
+		glTranslatef(-1.1f, 2.4f, 0.0f);
+		glColor3f(0.6f, 0.6f, 0.6f);     // Grey Shoulder
+		gluSphere(gluObject, 0.45f, 20, 20);
+
+		glColor3f(1.0f, 1.0f, 1.0f);     // White Arm
+		glPushMatrix();
+		glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+		gluCylinder(gluObject, 0.3f, 0.25f, 1.5f, 16, 2);
+		glPopMatrix();
+
+		glColor3f(0.2f, 0.2f, 0.2f);     // Dark Hand
+		glTranslatef(0.0f, -1.6f, 0.0f);
+		gluSphere(gluObject, 0.3f, 10, 10);
+		glPopMatrix();
+
+		// Right Arm
+		glPushMatrix();
+		glTranslatef(1.1f, 2.4f, 0.0f);
+		glColor3f(0.6f, 0.6f, 0.6f);
+		gluSphere(gluObject, 0.45f, 20, 20);
+
+		glColor3f(1.0f, 1.0f, 1.0f);
+		glPushMatrix();
+		glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+		gluCylinder(gluObject, 0.3f, 0.25f, 1.5f, 16, 2);
+		glPopMatrix();
+
+		glColor3f(0.2f, 0.2f, 0.2f);
+		glTranslatef(0.0f, -1.6f, 0.0f);
+		gluSphere(gluObject, 0.3f, 10, 10);
+		glPopMatrix();
+
+		// Left Leg
+		glPushMatrix();
+		glTranslatef(-0.4f, 0.6f, 0.0f);
+		glColor3f(1.0f, 1.0f, 1.0f);
+		glPushMatrix();
+		glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+		gluCylinder(gluObject, 0.4f, 0.5f, 2.0f, 16, 2);
+		glPopMatrix();
+
+		glColor3f(0.8f, 0.0f, 0.0f); // Red Foot
+		glTranslatef(0.0f, -2.1f, 0.2f);
+		glScalef(0.7f, 0.4f, 1.2f);
+		drawCube();
+		glPopMatrix();
+
+		// Right Leg
+		glPushMatrix();
+		glTranslatef(0.4f, 0.6f, 0.0f);
+		glColor3f(1.0f, 1.0f, 1.0f);
+		glPushMatrix();
+		glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+		gluCylinder(gluObject, 0.4f, 0.5f, 2.0f, 16, 2);
+		glPopMatrix();
+
+		glColor3f(0.8f, 0.0f, 0.0f);
+		glTranslatef(0.0f, -2.1f, 0.2f);
+		glScalef(0.7f, 0.4f, 1.2f);
+		drawCube();
+		glPopMatrix();
+
+		glPopMatrix();
 
 	}
 	break;
