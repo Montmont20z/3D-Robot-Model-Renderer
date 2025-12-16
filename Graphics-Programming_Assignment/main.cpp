@@ -62,6 +62,24 @@ inline void vec3_cross(const float a[3], const float b[3], float out[3]) {
 	out[1] = a[2] * b[0] - a[0] * b[2];
 	out[2] = a[0] * b[1] - a[1] * b[0];
 }
+void computeNormal(Vec3 a, Vec3 b, Vec3 c) {
+    Vec3 u = { b.x - a.x, b.y - a.y, b.z - a.z };
+    Vec3 v = { c.x - a.x, c.y - a.y, c.z - a.z };
+
+    Vec3 n = {
+        u.y * v.z - u.z * v.y,
+        u.z * v.x - u.x * v.z,
+        u.x * v.y - u.y * v.x
+    };
+
+    float len = sqrt(n.x*n.x + n.y*n.y + n.z*n.z);
+    if (len > 0.0f) {
+        n.x /= len; n.y /= len; n.z /= len;
+    }
+
+    glNormal3f(n.x, n.y, n.z);
+}
+
 
 
 GLUquadric* gluObject = nullptr;
@@ -254,6 +272,7 @@ bool initPixelFormat(HDC hdc)
 void initLighting() {
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
+	glEnable(GL_NORMALIZE); // IMPORTANT when scaling
     glEnable(GL_COLOR_MATERIAL);
     glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
     
@@ -622,29 +641,46 @@ void drawShield() {
 	// Front (red)
 	glColor3f(0.8f, 0.0f, 0.0f);
 	glBegin(GL_POLYGON);
-	for (int i = 0; i < 6; i++)
+	glNormal3f(0.0f, 0.0f, 1.0f);
+	for (int i = 0; i < 6; i++) {
 		glVertex3f(front[i].x, front[i].y, front[i].z);
+	}
 	glEnd();
 
 	// Back (white)
 	glColor3f(1.0f, 1.0f, 1.0f);
 	glBegin(GL_POLYGON);
-	for (int i = 0; i < 6; i++)
+	glNormal3f(0.0f, 0.0f, -1.0f);
+	for (int i = 5; i >= 0; i--){ // reverse winding!
 		glVertex3f(back[i].x, back[i].y, back[i].z);
+	}
 	glEnd();
 
-	glColor3f(0.9f, 0.9f, 0.9f); // metallic edge
+
+
+
+	// side quad
+	glColor3f(0.9f, 0.9f, 0.9f);
 	glBegin(GL_QUADS);
 
 	for (int i = 0; i < 6; i++) {
 		int next = (i + 1) % 6;
+
+		computeNormal(
+			front[i],
+			front[next],
+			back[next]
+		);
 
 		glVertex3f(front[i].x, front[i].y, front[i].z);
 		glVertex3f(front[next].x, front[next].y, front[next].z);
 		glVertex3f(back[next].x,  back[next].y,  back[next].z);
 		glVertex3f(back[i].x,      back[i].y,      back[i].z);
 	}
+
 	glEnd();
+
+
 
 
 
