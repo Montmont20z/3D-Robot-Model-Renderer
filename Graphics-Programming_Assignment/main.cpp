@@ -14,9 +14,24 @@ const double PI = 3.14159265358979323846f;
 
 #define WINDOW_TITLE "OpenGL Window"
 
-int questionToDisplay = 1;
+struct Vec3 {
+    float x, y, z;
+};
+
 float rotateX = 0.0f, rotateY = 0.0f, rotateZ = 0.0f;
 float positionX = 0.0f, positionY = 0.0f, positionZ = 0.0f;
+
+
+// Robot variable
+float leftShoulderAngle = 0.0f;
+float leftElbowAngle = 0.0f;
+float rightShoulderAngle = 0.0f;
+float rightElbowAngle = 0.0f;
+float leftHipAngle = 0.0f;
+float leftKneeAngle = 0.0f;
+float rightHipAngle = 0.0f;
+float rightKneeAngle = 0.0f;
+float headRotation = 0.0f;
 
 
 // ------------------- camera state -----------------------
@@ -50,7 +65,6 @@ inline void vec3_cross(const float a[3], const float b[3], float out[3]) {
 
 
 GLUquadric* gluObject = nullptr;
-float starPoints = 10.0f;
 
 enum ProjectMode { ORTHO = 0, PERSPECTIVE = 1, FRUSTUM = 2 };
 ProjectMode projMode = ORTHO;
@@ -59,6 +73,11 @@ float fovy = 45.0f;
 float zNear = 0.1f, zFar = 10.0f;
 
 void updateProjection(int width, int height);
+
+void drawRightArm();
+
+void drawSword();
+void drawShield();
 
 
 LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -160,105 +179,21 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 	case WM_KEYDOWN:
 		switch (wParam)
 		{
-		case '1': questionToDisplay = 1; break;
-		case '2': questionToDisplay = 2; break;
-		case '3': questionToDisplay = 3; break;
-		case '4': questionToDisplay = 4; break;
-		case '5': questionToDisplay = 5; break;
-		case '6': questionToDisplay = 6; break;
-		case '7': questionToDisplay = 7; break;
-		case '8': questionToDisplay = 8; break;
-		case '9': questionToDisplay = 9; break;
+		// robot control
+		case '1': rightShoulderAngle += 5.0f; break;
+		case '2': rightShoulderAngle -= 5.0f; break;
+		case '3': rightElbowAngle += 5.0f; break;
+		case '4': rightElbowAngle -= 5.0f; break;
+			// add more ...
+
+
+
 		case VK_ESCAPE: PostQuitMessage(0); break;
-			// WASD pan target horizontally (relative to camera)
-		case 'W': case 'w': // forward pan (toward camera forward)
-		{
-			// move target along camera forward vector
-			float yawR = camYaw * DEG2RAD;
-			float pitchR = camPitch * DEG2RAD;
-			float forward[3] = {
-				-cosf(pitchR) * sinf(yawR),
-				-sinf(pitchR),
-				-cosf(pitchR) * cosf(yawR)
-			};
-			camTargetX += forward[0] * 0.1f;
-			camTargetY += forward[1] * 0.1f;
-			camTargetZ += forward[2] * 0.1f;
-		}
-		break;
-		case 'S': case 's':
-		{
-			float yawR = camYaw * DEG2RAD;
-			float pitchR = camPitch * DEG2RAD;
-			float forward[3] = {
-				-cosf(pitchR) * sinf(yawR),
-				-sinf(pitchR),
-				-cosf(pitchR) * cosf(yawR)
-			};
-			camTargetX -= forward[0] * 0.1f;
-			camTargetY -= forward[1] * 0.1f;
-			camTargetZ -= forward[2] * 0.1f;
-		}
-		break;
-		case 'A': case 'a':
-		{
-			// pan left using right vector
-			float yawR = camYaw * DEG2RAD;
-			float forward[3] = {
-				-cosf(camPitch * DEG2RAD) * sinf(yawR),
-				-sinf(camPitch * DEG2RAD),
-				-cosf(camPitch * DEG2RAD) * cosf(yawR)
-			};
-			float upv[3] = { 0.0f,1.0f,0.0f };
-			float rightv[3];
-			vec3_cross(upv, forward, rightv);
-			vec3_norm(rightv);
-			camTargetX -= rightv[0] * 0.1f;
-			camTargetY -= rightv[1] * 0.1f;
-			camTargetZ -= rightv[2] * 0.1f;
-		}
-		break;
-		case 'D': case 'd':
-		{
-			float yawR = camYaw * DEG2RAD;
-			float forward[3] = {
-				-cosf(camPitch * DEG2RAD) * sinf(yawR),
-				-sinf(camPitch * DEG2RAD),
-				-cosf(camPitch * DEG2RAD) * cosf(yawR)
-			};
-			float upv[3] = { 0.0f,1.0f,0.0f };
-			float rightv[3];
-			vec3_cross(upv, forward, rightv);
-			vec3_norm(rightv);
-			camTargetX += rightv[0] * 0.1f;
-			camTargetY += rightv[1] * 0.1f;
-			camTargetZ += rightv[2] * 0.1f;
-		}
-		break;
-		// R / F to move target up/down
-		case 'R': case 'r': camTargetY += 0.1f; break;
-		case 'F': case 'f': camTargetY -= 0.1f; break;
-			// Arrow keys rotate camera a bit (alternate to mouse)
-		case VK_LEFT: camYaw -= 2.0f; break;
-		case VK_RIGHT: camYaw += 2.0f; break;
-		case VK_UP: camPitch += 2.0f; if (camPitch > 89.0f) camPitch = 89.0f; break;
-		case VK_DOWN: camPitch -= 2.0f; if (camPitch < -89.0f) camPitch = -89.0f; break;
-
-		case VK_SPACE:
-			glLoadIdentity();
-			rotateX = rotateY = rotateZ = 0.0f;
-			positionX = positionY = positionZ = 0.0f;
-			break;
-
 			// Projection controls
 		case 'P': case 'p': // perspective (gluPerspective)
 			projMode = PERSPECTIVE;
 			updateProjection(WINDOW_WIDTH, WINDOW_HEIGHT); // call with a reasonable default - WM_SIZE will set correct viewport
 			break;
-			//case 'F': // frustum (glFrustum)
-			//	projMode = FRUSTUM;
-			//	updateProjection(WINDOW_WIDTH, WINDOW_HEIGHT); // call with a reasonable default - WM_SIZE will set correct viewport
-			//	break;
 		case 'O': case 'o': // orthographic
 			projMode = ORTHO;
 			updateProjection(WINDOW_WIDTH, WINDOW_HEIGHT); // call with a reasonable default - WM_SIZE will set correct viewport
@@ -314,6 +249,24 @@ bool initPixelFormat(HDC hdc)
 	{
 		return false;
 	}
+}
+
+void initLighting() {
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+    glEnable(GL_COLOR_MATERIAL);
+    glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+    
+    // Light position
+    GLfloat light_pos[] = { 5.0f, 5.0f, 5.0f, 1.0f };
+    GLfloat light_ambient[] = { 0.2f, 0.2f, 0.2f, 1.0f };
+    GLfloat light_diffuse[] = { 0.8f, 0.8f, 0.8f, 1.0f };
+    GLfloat light_specular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    
+    glLightfv(GL_LIGHT0, GL_POSITION, light_pos);
+    glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
 }
 //--------------------------------------------------------------------
 
@@ -394,128 +347,13 @@ void Display(HWND hWnd)
 	//glRotatef(rotateX, 1.0f, 0.0f, 0.0f); // x axis
 	//glRotatef(rotateZ, 0.0f, 0.0f, 1.0f); // z axis
 
-	switch (questionToDisplay) {
-	case 1:
-	{
-		// high arm
-		glPushMatrix();
-		glTranslatef(0.5f, 0.5f, 0.5f);
-		// Front - black
-		glColor3f(0.0f, 0.0f, 0.0f);
-		glBegin(GL_QUADS);
-		glVertex3f(0.0f, 0.0f, 0.0f);
-		glVertex3f(1.0f, 0.0f, 0.0f);
-		glVertex3f(1.0f, 0.5f, 0.0f);
+	glPushMatrix();
+	glTranslatef(1.0f, 1.0f, 1.0f);
+	drawSword();
+	glTranslatef(1.0f, 1.0f, 1.0f);
+	drawShield();
+	glPopMatrix();
 
-		glVertex3f(0.0f, 0.5f, 0.0f);
-		glEnd();
-
-		// Left - yellow
-		glColor3f(1.0f, 1.0f, 0.0f);
-		glBegin(GL_QUADS);
-		glVertex3f(0.0f, 0.0f, 0.0f);
-		glVertex3f(0.0f, 0.0f, 1.0f);
-		glVertex3f(0.0f, 0.5f, 1.0f);
-		glVertex3f(0.0f, 0.5f, 0.0f);
-		glEnd();
-
-		// Top - blue
-		glColor3f(0.0f, 0.0f, 1.0f);
-		glBegin(GL_QUADS);
-		glVertex3f(0.0f, 0.5f, 0.0f);
-		glVertex3f(0.0f, 0.5f, 1.0f);
-		glVertex3f(1.0f, 0.5f, 1.0f);
-		glVertex3f(1.0f, 0.5f, 0.0f);
-		glEnd();
-		// right - green
-		glColor3f(0.0f, 1.0f, 0.0f);
-		glBegin(GL_QUADS);
-		glVertex3f(1.0f, 0.5f, 0.0f);
-		glVertex3f(1.0f, 0.5f, 1.0f);
-		glVertex3f(1.0f, 0.0f, 1.0f);
-		glVertex3f(1.0f, 0.0f, 0.0f);
-		glEnd();
-		// Bottom - red
-		glColor3f(1.0f, 0.0f, 0.0f);
-		glBegin(GL_QUADS);
-		glVertex3f(0.0f, 0.0f, 0.0f);
-		glVertex3f(0.0f, 0.0f, 1.0f);
-		glVertex3f(1.0f, 0.0f, 1.0f);
-		glVertex3f(1.0f, 0.0f, 0.0f);
-		glEnd();
-		// Back - white
-		glColor3f(1.0f, 1.0f, 1.0f);
-		glBegin(GL_QUADS);
-		glVertex3f(0.0f, 0.5f, 1.0f);
-		glVertex3f(1.0f, 0.5f, 1.0f);
-		glVertex3f(1.0f, 0.0f, 1.0f);
-		glVertex3f(0.0f, 0.0f, 1.0f);
-		glEnd();
-		glPopMatrix();
-
-		// lower arm
-		glPushMatrix();
-		glTranslatef(-0.5f, 0.0f, 0.0f);
-		// Front - white
-		glColor3f(1.0f, 1.0f, 1.0f);
-		glBegin(GL_QUADS);
-		glVertex3f(0.0f, 0.0f, 0.0f);
-		glVertex3f(1.0f, 0.0f, 0.0f);
-		glVertex3f(1.0f, 0.5f, 0.0f);
-		glVertex3f(0.0f, 0.5f, 0.0f);
-		glEnd();
-
-		// Left - red
-		glColor3f(1.0f, 0.0f, 0.0f);
-		glBegin(GL_QUADS);
-		glVertex3f(0.0f, 0.0f, 0.0f);
-		glVertex3f(0.0f, 0.0f, 1.0f);
-		glVertex3f(0.0f, 0.5f, 1.0f);
-		glVertex3f(0.0f, 0.5f, 0.0f);
-		glEnd();
-
-		// Top - green
-		glColor3f(0.0f, 1.0f, 0.0f);
-		glBegin(GL_QUADS);
-		glVertex3f(0.0f, 0.5f, 0.0f);
-		glVertex3f(0.0f, 0.5f, 1.0f);
-		glVertex3f(1.0f, 0.5f, 1.0f);
-		glVertex3f(1.0f, 0.5f, 0.0f);
-		glEnd();
-		// right - blue
-		glColor3f(0.0f, 0.0f, 1.0f);
-		glBegin(GL_QUADS);
-		glVertex3f(1.0f, 0.5f, 0.0f);
-		glVertex3f(1.0f, 0.5f, 1.0f);
-		glVertex3f(1.0f, 0.0f, 1.0f);
-		glVertex3f(1.0f, 0.0f, 0.0f);
-		glEnd();
-		// Bottom - yellow
-		glColor3f(1.0f, 1.0f, 0.0f);
-		glBegin(GL_QUADS);
-		glVertex3f(0.0f, 0.0f, 0.0f);
-		glVertex3f(0.0f, 0.0f, 1.0f);
-		glVertex3f(1.0f, 0.0f, 1.0f);
-		glVertex3f(1.0f, 0.0f, 0.0f);
-		glEnd();
-		// Back - black
-		glColor3f(0.0f, 0.0f, 0.0f);
-		glBegin(GL_QUADS);
-		glVertex3f(0.0f, 0.5f, 1.0f);
-		glVertex3f(1.0f, 0.5f, 1.0f);
-		glVertex3f(1.0f, 0.0f, 1.0f);
-		glVertex3f(0.0f, 0.0f, 1.0f);
-		glEnd();
-		glPopMatrix();
-
-
-
-
-
-	}
-	break;
-	case 2:
-	{
 		glPushMatrix();
 		glScalef(0.5f, 0.5f, 0.5f);
 
@@ -573,21 +411,7 @@ void Display(HWND hWnd)
 		glPopMatrix();
 
 		// Right Arm
-		glPushMatrix();
-		glTranslatef(1.1f, 2.4f, 0.0f);
-		glColor3f(0.6f, 0.6f, 0.6f);
-		gluSphere(gluObject, 0.45f, 20, 20);
-
-		glColor3f(1.0f, 1.0f, 1.0f);
-		glPushMatrix();
-		glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
-		gluCylinder(gluObject, 0.3f, 0.25f, 1.5f, 16, 2);
-		glPopMatrix();
-
-		glColor3f(0.2f, 0.2f, 0.2f);
-		glTranslatef(0.0f, -1.6f, 0.0f);
-		gluSphere(gluObject, 0.3f, 10, 10);
-		glPopMatrix();
+		drawRightArm();
 
 		// Left Leg
 		glPushMatrix();
@@ -621,17 +445,8 @@ void Display(HWND hWnd)
 
 		glPopMatrix();
 
-	}
-	break;
-	case 3:
-	{
-
-
-	}
-	break;
-
-	}
 }
+
 //--------------------------------------------------------------------
 
 int main(HINSTANCE hInst, HINSTANCE, LPSTR, int nCmdShow)
@@ -682,6 +497,7 @@ int main(HINSTANCE hInst, HINSTANCE, LPSTR, int nCmdShow)
 	updateProjection(WINDOW_WIDTH, WINDOW_HEIGHT);
 
 	glMatrixMode(GL_MODELVIEW);
+	initLighting();
 
 
 	while (true)
@@ -750,4 +566,113 @@ void updateProjection(int width, int height)
 
 
 	glMatrixMode(GL_MODELVIEW);
+}
+
+
+// Polygon Function
+void drawSword() {
+    // Handle
+    glColor3f(0.3f, 0.2f, 0.1f); // Brown
+    glPushMatrix();
+    glRotatef(90, 1, 0, 0);
+    gluCylinder(gluObject, 0.08f, 0.08f, 0.4f, 12, 2);
+    glPopMatrix();
+    
+    // Guard
+    glColor3f(0.7f, 0.7f, 0.7f); // Silver
+    glPushMatrix();
+    glTranslatef(0, 0.4f, 0);
+    glScalef(0.5f, 0.05f, 0.1f);
+    drawCube();
+    glPopMatrix();
+    
+    // Blade
+    glColor3f(0.9f, 0.9f, 1.0f); // Steel
+    glPushMatrix();
+    glTranslatef(0, 0.45f, 0);
+    glScalef(0.08f, 1.5f, 0.15f);
+    drawPyramid(); // Use for blade tip
+    // Add rectangular blade base
+    glPopMatrix();
+}
+
+// Attach to right hand when animation triggers
+
+void drawShield() {
+
+	Vec3 front[6] = {
+		{-0.25f,  1.0f,  0.0f},  // Top Left
+		{-0.5f,   0.0f,  0.0f},  // Left
+		{-0.25f, -1.0f,  0.0f},  // Bottom Left
+		{ 0.25f, -1.0f,  0.0f},  // Bottom Right
+		{ 0.5f,   0.0f,  0.0f},  // Right
+		{ 0.25f,  1.0f,  0.0f}   // Top Right
+	};
+
+	Vec3 back[6];
+	float depth = -0.2f;     // thickness
+	float scale = 1.35f;      // outline size
+
+	for (int i = 0; i < 6; i++) {
+		back[i].x = front[i].x * scale;
+		back[i].y = front[i].y * scale;
+		back[i].z = depth;
+	}
+
+	// Front (red)
+	glColor3f(0.8f, 0.0f, 0.0f);
+	glBegin(GL_POLYGON);
+	for (int i = 0; i < 6; i++)
+		glVertex3f(front[i].x, front[i].y, front[i].z);
+	glEnd();
+
+	// Back (white)
+	glColor3f(1.0f, 1.0f, 1.0f);
+	glBegin(GL_POLYGON);
+	for (int i = 0; i < 6; i++)
+		glVertex3f(back[i].x, back[i].y, back[i].z);
+	glEnd();
+
+	glColor3f(0.9f, 0.9f, 0.9f); // metallic edge
+	glBegin(GL_QUADS);
+
+	for (int i = 0; i < 6; i++) {
+		int next = (i + 1) % 6;
+
+		glVertex3f(front[i].x, front[i].y, front[i].z);
+		glVertex3f(front[next].x, front[next].y, front[next].z);
+		glVertex3f(back[next].x,  back[next].y,  back[next].z);
+		glVertex3f(back[i].x,      back[i].y,      back[i].z);
+	}
+	glEnd();
+
+
+
+
+
+    
+    // Center boss (metal dome)
+    glColor3f(0.7f, 0.7f, 0.7f);
+    gluSphere(gluObject, 0.15f, 16, 16);
+    
+
+}
+
+void drawRightArm()
+{
+	glPushMatrix();
+	glTranslatef(1.1f, 2.4f, 0.0f);
+	glColor3f(0.6f, 0.6f, 0.6f);
+	gluSphere(gluObject, 0.45f, 20, 20);
+
+	glColor3f(1.0f, 1.0f, 1.0f);
+	glPushMatrix();
+	glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+	gluCylinder(gluObject, 0.3f, 0.25f, 1.5f, 16, 2);
+	glPopMatrix();
+
+	glColor3f(0.2f, 0.2f, 0.2f);
+	glTranslatef(0.0f, -1.6f, 0.0f);
+	gluSphere(gluObject, 0.3f, 10, 10);
+	glPopMatrix();
 }
