@@ -11,6 +11,7 @@ const int WINDOW_HEIGHT = 1200;
 const double PI = 3.14159265358979323846f;
 
 #pragma comment (lib, "OpenGL32.lib")
+#pragma comment (lib, "GLU32.lib")
 
 #define WINDOW_TITLE "OpenGL Window"
 
@@ -865,10 +866,153 @@ void drawSword() {
 }
 
 // Attach to right hand when animation triggers
+//void drawShield() {
+//	// --- GEOMETRY DEFINITIONS ---
+//
+//	// Base hexagon shape (The "Inner" Red shape)
+//	Vec3 inner[6] = {
+//		{-0.25f,  1.0f,  0.0f},  // Top Left
+//		{-0.5f,   0.0f,  0.0f},  // Left
+//		{-0.25f, -1.0f,  0.0f},  // Bottom Left
+//		{ 0.25f, -1.0f,  0.0f},  // Bottom Right
+//		{ 0.5f,   0.0f,  0.0f},  // Right
+//		{ 0.25f,  1.0f,  0.0f}   // Top Right
+//	};
+//
+//	// The White Border (Scaled up slightly from the red shape)
+//	Vec3 outer[6];
+//	// The Back of the shield (Scaled up more)
+//	Vec3 back[6];
+//
+//	float borderScale = 1.1f;    // White rim thickness
+//	float backScale = 1.25f;     // Back outline size
+//	float thickness = -0.2f;     // Edge thickness
+//	float concaveDepth = -0.35f; // Center of back (deeper than edges)
+//
+//	for (int i = 0; i < 6; i++) {
+//		outer[i].x = inner[i].x * borderScale;
+//		outer[i].y = inner[i].y * borderScale;
+//		outer[i].z = -0.01f;     // Slightly behind red face to avoid z-fighting
+//
+//		back[i].x = inner[i].x * backScale;
+//		back[i].y = inner[i].y * backScale;
+//		back[i].z = thickness;
+//	}
+//
+//	// --- DRAWING ---
+//
+//	// 1. The Red Face (The main plate)
+//	glColor3f(0.8f, 0.05f, 0.05f); // Deep Gundam Red
+//	glBegin(GL_POLYGON);
+//	glNormal3f(0.0f, 0.0f, 1.0f);
+//	for (int i = 0; i < 6; i++) {
+//		glVertex3f(inner[i].x, inner[i].y, inner[i].z);
+//	}
+//	glEnd();
+//
+//	// 2. The White Border (Front facing rim)
+//	// This creates the "2 color" look on the front edges
+//	glColor3f(1.0f, 1.0f, 1.0f); // White
+//	glBegin(GL_QUADS);
+//	glNormal3f(0.0f, 0.0f, 1.0f);
+//	for (int i = 0; i < 6; i++) {
+//		int next = (i + 1) % 6;
+//		glVertex3f(inner[i].x, inner[i].y, inner[i].z);     // Inner Red Edge
+//		glVertex3f(outer[i].x, outer[i].y, outer[i].z);     // Outer White Edge
+//		glVertex3f(outer[next].x, outer[next].y, outer[next].z);
+//		glVertex3f(inner[next].x, inner[next].y, inner[next].z);
+//	}
+//	glEnd();
+//
+//	// 3. The Side Slope (Connecting Front Border to Back)
+//	// Darker white/grey for shading contrast
+//	glColor3f(0.9f, 0.9f, 0.9f);
+//	glBegin(GL_QUADS);
+//	for (int i = 0; i < 6; i++) {
+//		int next = (i + 1) % 6;
+//		// Simple normal calculation (outward)
+//		float nx = (outer[i].x + outer[next].x) / 2.0f;
+//		float ny = (outer[i].y + outer[next].y) / 2.0f;
+//		glNormal3f(nx, ny, 0.0f);
+//
+//		glVertex3f(outer[i].x, outer[i].y, outer[i].z);
+//		glVertex3f(back[i].x, back[i].y, back[i].z);
+//		glVertex3f(back[next].x, back[next].y, back[next].z);
+//		glVertex3f(outer[next].x, outer[next].y, outer[next].z);
+//	}
+//	glEnd();
+//
+//	// 4. The Concave Back (White)
+//	// Uses TRIANGLE_FAN to pull the center point deeper
+//	glColor3f(0.85f, 0.85f, 0.85f);
+//	glBegin(GL_TRIANGLE_FAN);
+//	glNormal3f(0.0f, 0.0f, -1.0f);
+//
+//	// Center point is deeper than the rim (concave effect)
+//	glVertex3f(0.0f, 0.0f, concaveDepth);
+//
+//	// Draw the rim vertices (reverse order for back-facing normal)
+//	for (int i = 6; i >= 0; i--) {
+//		int idx = i % 6;
+//		glVertex3f(back[idx].x, back[idx].y, back[idx].z);
+//	}
+//	glEnd();
+//
+//	// 5. The Yellow Star / Cross
+//	// Drawn slightly above the red face (z = 0.02)
+//	glColor3f(1.0f, 0.9f, 0.0f); // Gundam Yellow
+//	float zStar = 0.02f;
+//
+//	// Vertical part of cross
+//	glBegin(GL_QUADS);
+//	glNormal3f(0.0f, 0.0f, 1.0f);
+//	glVertex3f(-0.1f, 0.5f, zStar);
+//	glVertex3f(-0.1f, -0.4f, zStar); // Bottom leg is usually slightly shorter on some models
+//	glVertex3f(0.1f, -0.4f, zStar);
+//	glVertex3f(0.1f, 0.5f, zStar);
+//	glEnd();
+//
+//	// Horizontal part of cross
+//	glBegin(GL_QUADS);
+//	glNormal3f(0.0f, 0.0f, 1.0f);
+//	glVertex3f(-0.35f, 0.15f, zStar);
+//	glVertex3f(-0.35f, -0.05f, zStar); // Center of cross roughly at y=0.05
+//	glVertex3f(0.35f, -0.05f, zStar);
+//	glVertex3f(0.35f, 0.15f, zStar);
+//	glEnd();
+//
+//	// 6. Back Handle (Simple bracket)
+//	// Drawn on the back side
+//	glColor3f(0.3f, 0.3f, 0.3f); // Dark Grey
+//	float hDepth = concaveDepth - 0.1f; // Stick out from the concave back
+//	float hWidth = 0.15f;
+//	float hHeight = 0.3f;
+//
+//	glBegin(GL_QUADS);
+//	// Left strut
+//	glVertex3f(-hWidth, hHeight, concaveDepth);
+//	glVertex3f(-hWidth, -hHeight, concaveDepth);
+//	glVertex3f(-hWidth, -hHeight, hDepth);
+//	glVertex3f(-hWidth, hHeight, hDepth);
+//
+//	// Right strut
+//	glVertex3f(hWidth, hHeight, hDepth);
+//	glVertex3f(hWidth, -hHeight, hDepth);
+//	glVertex3f(hWidth, -hHeight, concaveDepth);
+//	glVertex3f(hWidth, hHeight, concaveDepth);
+//
+//	// Crossbar (Handle grip)
+//	glVertex3f(-hWidth, 0.1f, hDepth);
+//	glVertex3f(-hWidth, -0.1f, hDepth);
+//	glVertex3f(hWidth, -0.1f, hDepth);
+//	glVertex3f(hWidth, 0.1f, hDepth);
+//	glEnd();
+//}
 
 void drawShield() {
+	// --- GEOMETRY DEFINITIONS ---
 
-	Vec3 front[6] = {
+	Vec3 inner[6] = {
 		{-0.25f,  1.0f,  0.0f},  // Top Left
 		{-0.5f,   0.0f,  0.0f},  // Left
 		{-0.25f, -1.0f,  0.0f},  // Bottom Left
@@ -877,70 +1021,186 @@ void drawShield() {
 		{ 0.25f,  1.0f,  0.0f}   // Top Right
 	};
 
+	Vec3 outer[6];
 	Vec3 back[6];
-	float depth = -0.2f;     // thickness
-	float scale = 1.35f;      // outline size
+
+	float borderScale = 1.1f;
+	float backScale = 1.25f;
+	float thickness = -0.2f;
+	float concaveDepth = -0.35f;
 
 	for (int i = 0; i < 6; i++) {
-		back[i].x = front[i].x * scale;
-		back[i].y = front[i].y * scale;
-		back[i].z = depth;
+		outer[i].x = inner[i].x * borderScale;
+		outer[i].y = inner[i].y * borderScale;
+		outer[i].z = -0.01f;
+
+		back[i].x = inner[i].x * backScale;
+		back[i].y = inner[i].y * backScale;
+		back[i].z = thickness;
 	}
 
-	// Front (red)
-	glColor3f(0.8f, 0.0f, 0.0f);
+	// --- DRAWING ---
+
+	// 1. Red Face
+	glColor3f(0.8f, 0.05f, 0.05f);
 	glBegin(GL_POLYGON);
 	glNormal3f(0.0f, 0.0f, 1.0f);
-	for (int i = 0; i < 6; i++) {
-		glVertex3f(front[i].x, front[i].y, front[i].z);
-	}
+	for (int i = 0; i < 6; i++) glVertex3f(inner[i].x, inner[i].y, inner[i].z);
 	glEnd();
 
-	// Back (white)
+	// 2. White Border
 	glColor3f(1.0f, 1.0f, 1.0f);
-	glBegin(GL_POLYGON);
-	glNormal3f(0.0f, 0.0f, -1.0f);
-	for (int i = 5; i >= 0; i--){ // reverse winding!
-		glVertex3f(back[i].x, back[i].y, back[i].z);
-	}
-	glEnd();
-
-
-
-
-	// side quad
-	glColor3f(0.9f, 0.9f, 0.9f);
 	glBegin(GL_QUADS);
-
+	glNormal3f(0.0f, 0.0f, 1.0f);
 	for (int i = 0; i < 6; i++) {
 		int next = (i + 1) % 6;
-
-		computeNormal(
-			front[i],
-			front[next],
-			back[next]
-		);
-
-		glVertex3f(front[i].x, front[i].y, front[i].z);
-		glVertex3f(front[next].x, front[next].y, front[next].z);
-		glVertex3f(back[next].x,  back[next].y,  back[next].z);
-		glVertex3f(back[i].x,      back[i].y,      back[i].z);
+		glVertex3f(inner[i].x, inner[i].y, inner[i].z);
+		glVertex3f(outer[i].x, outer[i].y, outer[i].z);
+		glVertex3f(outer[next].x, outer[next].y, outer[next].z);
+		glVertex3f(inner[next].x, inner[next].y, inner[next].z);
 	}
+	glEnd();
 
+	// 3. Side Slope
+	glColor3f(0.9f, 0.9f, 0.9f);
+	glBegin(GL_QUADS);
+	for (int i = 0; i < 6; i++) {
+		int next = (i + 1) % 6;
+		float nx = (outer[i].x + outer[next].x) / 2.0f;
+		float ny = (outer[i].y + outer[next].y) / 2.0f;
+		glNormal3f(nx, ny, 0.0f); // Approximate side normal
+
+		glVertex3f(outer[i].x, outer[i].y, outer[i].z);
+		glVertex3f(back[i].x, back[i].y, back[i].z);
+		glVertex3f(back[next].x, back[next].y, back[next].z);
+		glVertex3f(outer[next].x, outer[next].y, outer[next].z);
+	}
+	glEnd();
+
+	// 4. Concave Back
+	glColor3f(0.85f, 0.85f, 0.85f);
+	glBegin(GL_TRIANGLE_FAN);
+	glNormal3f(0.0f, 0.0f, -1.0f);
+	glVertex3f(0.0f, 0.0f, concaveDepth);
+	for (int i = 6; i >= 0; i--) {
+		int idx = i % 6;
+		glVertex3f(back[idx].x, back[idx].y, back[idx].z);
+	}
+	glEnd();
+
+	// 5. The Convex Yellow Star / Cross
+	// We draw this using triangles to create a "roof" shape (Ridge in the middle)
+
+	glColor3f(1.0f, 0.9f, 0.0f);
+
+	float zBase = 0.0f;  // Surface of shield
+	float zPeak = 0.12f; // How much it sticks out (Convex height)
+
+	// --- Vertical Arm Geometry ---
+	float vx_w = 0.1f;    // Width
+	float vy_top = 0.5f;  // Top Y
+	float vy_bot = -0.4f; // Bottom Y
+
+	glBegin(GL_TRIANGLES);
+	// Vertical Ridge (Left Slope)
+	glNormal3f(-1.0f, 0.0f, 1.0f); // Normal points Up-Left
+	glVertex3f(0.0f, vy_top, zPeak);    // Ridge Top
+	glVertex3f(-vx_w, vy_top, zBase);   // Edge Top
+	glVertex3f(-vx_w, vy_bot, zBase);   // Edge Bottom
+
+	glVertex3f(0.0f, vy_top, zPeak);    // Ridge Top
+	glVertex3f(-vx_w, vy_bot, zBase);   // Edge Bottom
+	glVertex3f(0.0f, vy_bot, zPeak);    // Ridge Bottom
+
+	// Vertical Ridge (Right Slope)
+	glNormal3f(1.0f, 0.0f, 1.0f); // Normal points Up-Right
+	glVertex3f(0.0f, vy_top, zPeak);
+	glVertex3f(vx_w, vy_bot, zBase);
+	glVertex3f(vx_w, vy_top, zBase);
+
+	glVertex3f(0.0f, vy_top, zPeak);
+	glVertex3f(0.0f, vy_bot, zPeak);
+	glVertex3f(vx_w, vy_bot, zBase);
+
+	// Vertical Cap (Top Bevel)
+	glNormal3f(0.0f, 1.0f, 1.0f);
+	glVertex3f(0.0f, vy_top, zPeak);
+	glVertex3f(vx_w, vy_top, zBase);
+	glVertex3f(-vx_w, vy_top, zBase);
+
+	// Vertical Cap (Bottom Bevel)
+	glNormal3f(0.0f, -1.0f, 1.0f);
+	glVertex3f(0.0f, vy_bot, zPeak);
+	glVertex3f(-vx_w, vy_bot, zBase);
+	glVertex3f(vx_w, vy_bot, zBase);
+	glEnd();
+
+	// --- Horizontal Arm Geometry ---
+	float hx_left = -0.35f;
+	float hx_right = 0.35f;
+	float hy_w = 0.1f; // Half-height of horizontal arm
+	float hy_c = 0.05f; // Center Y offset (cross is slightly higher up)
+
+	glBegin(GL_TRIANGLES);
+	// Horizontal Ridge (Top Slope)
+	glNormal3f(0.0f, 1.0f, 1.0f);
+	glVertex3f(hx_left, hy_c, zPeak);     // Ridge Left
+	glVertex3f(hx_right, hy_c, zPeak);    // Ridge Right
+	glVertex3f(hx_right, hy_c + hy_w, zBase); // Edge Right
+
+	glVertex3f(hx_left, hy_c, zPeak);
+	glVertex3f(hx_right, hy_c + hy_w, zBase);
+	glVertex3f(hx_left, hy_c + hy_w, zBase);  // Edge Left
+
+	// Horizontal Ridge (Bottom Slope)
+	glNormal3f(0.0f, -1.0f, 1.0f);
+	glVertex3f(hx_left, hy_c, zPeak);
+	glVertex3f(hx_right, hy_c - hy_w, zBase);
+	glVertex3f(hx_right, hy_c, zPeak);
+
+	glVertex3f(hx_left, hy_c, zPeak);
+	glVertex3f(hx_left, hy_c - hy_w, zBase);
+	glVertex3f(hx_right, hy_c - hy_w, zBase);
+
+	// Horizontal Cap (Left Bevel)
+	glNormal3f(-1.0f, 0.0f, 1.0f);
+	glVertex3f(hx_left, hy_c, zPeak);
+	glVertex3f(hx_left, hy_c + hy_w, zBase);
+	glVertex3f(hx_left, hy_c - hy_w, zBase);
+
+	// Horizontal Cap (Right Bevel)
+	glNormal3f(1.0f, 0.0f, 1.0f);
+	glVertex3f(hx_right, hy_c, zPeak);
+	glVertex3f(hx_right, hy_c - hy_w, zBase);
+	glVertex3f(hx_right, hy_c + hy_w, zBase);
 	glEnd();
 
 
+	// 6. Back Handle
+	glColor3f(0.3f, 0.3f, 0.3f);
+	float hDepth = concaveDepth - 0.1f;
+	float hWidth = 0.15f;
+	float hHeight = 0.3f;
 
+	glBegin(GL_QUADS);
+	// Left strut
+	glVertex3f(-hWidth, hHeight, concaveDepth);
+	glVertex3f(-hWidth, -hHeight, concaveDepth);
+	glVertex3f(-hWidth, -hHeight, hDepth);
+	glVertex3f(-hWidth, hHeight, hDepth);
 
+	// Right strut
+	glVertex3f(hWidth, hHeight, hDepth);
+	glVertex3f(hWidth, -hHeight, hDepth);
+	glVertex3f(hWidth, -hHeight, concaveDepth);
+	glVertex3f(hWidth, hHeight, concaveDepth);
 
-
-
-    
-    // Center boss (metal dome)
-    glColor3f(0.7f, 0.7f, 0.7f);
-    gluSphere(gluObject, 0.15f, 16, 16);
-    
-
+	// Crossbar
+	glVertex3f(-hWidth, 0.1f, hDepth);
+	glVertex3f(-hWidth, -0.1f, hDepth);
+	glVertex3f(hWidth, -0.1f, hDepth);
+	glVertex3f(hWidth, 0.1f, hDepth);
+	glEnd();
 }
 
 void drawRightArm()
