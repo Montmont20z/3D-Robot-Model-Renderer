@@ -21,7 +21,6 @@ struct Vec3 {
 float rotateX = 0.0f, rotateY = 0.0f, rotateZ = 0.0f;
 float positionX = 0.0f, positionY = 0.0f, positionZ = 0.0f;
 
-
 // Robot variable
 float leftShoulderAngle = 0.0f;
 float leftElbowAngle = 0.0f;
@@ -32,7 +31,6 @@ float leftKneeAngle = 0.0f;
 float rightHipAngle = 0.0f;
 float rightKneeAngle = 0.0f;
 float headRotation = 0.0f;
-
 
 // ------------------- camera state -----------------------
 float camTargetX = 0.0f, camTargetY = 0.0f, camTargetZ = 0.0f;
@@ -79,7 +77,6 @@ void computeNormal(Vec3 a, Vec3 b, Vec3 c) {
 
     glNormal3f(n.x, n.y, n.z);
 }
-
 
 
 GLUquadric* gluObject = nullptr;
@@ -318,6 +315,78 @@ void drawCube() {
 	glEnd();
 }
 
+void drawCube1(float size) {
+	float halfSize = size / 2.0f;
+	glBegin(GL_QUADS);
+	// Front face
+	glNormal3f(0.0, 0.0, 1.0);
+	glVertex3f(-halfSize, -halfSize, halfSize);
+	glVertex3f(halfSize, -halfSize, halfSize);
+	glVertex3f(halfSize, halfSize, halfSize);
+	glVertex3f(-halfSize, halfSize, halfSize);
+	// Back face
+	glNormal3f(0.0, 0.0, -1.0);
+	glVertex3f(-halfSize, -halfSize, -halfSize);
+	glVertex3f(-halfSize, halfSize, -halfSize);
+	glVertex3f(halfSize, halfSize, -halfSize);
+	glVertex3f(halfSize, -halfSize, -halfSize);
+	// Top face
+	glNormal3f(0.0, 1.0, 0.0);
+	glVertex3f(-halfSize, halfSize, -halfSize);
+	glVertex3f(-halfSize, halfSize, halfSize);
+	glVertex3f(halfSize, halfSize, halfSize);
+	glVertex3f(halfSize, halfSize, -halfSize);
+	// Bottom face
+	glNormal3f(0.0, -1.0, 0.0);
+	glVertex3f(-halfSize, -halfSize, -halfSize);
+	glVertex3f(halfSize, -halfSize, -halfSize);
+	glVertex3f(halfSize, -halfSize, halfSize);
+	glVertex3f(-halfSize, -halfSize, halfSize);
+	// Right face
+	glNormal3f(1.0, 0.0, 0.0);
+	glVertex3f(halfSize, -halfSize, -halfSize);
+	glVertex3f(halfSize, halfSize, -halfSize);
+	glVertex3f(halfSize, halfSize, halfSize);
+	glVertex3f(halfSize, -halfSize, halfSize);
+	// Left face
+	glNormal3f(-1.0, 0.0, 0.0);
+	glVertex3f(-halfSize, -halfSize, -halfSize);
+	glVertex3f(-halfSize, -halfSize, halfSize);
+	glVertex3f(-halfSize, halfSize, halfSize);
+	glVertex3f(-halfSize, halfSize, -halfSize);
+	glEnd();
+}
+
+void drawWedge(float width, float height, float depth) {
+	glBegin(GL_QUADS);
+	// Front face
+	glVertex3f(-width / 2, 0, depth / 2);
+	glVertex3f(width / 2, 0, depth / 2);
+	glVertex3f(width / 2, -height, depth / 2);
+	glVertex3f(-width / 2, -height, depth / 2);
+	// Top face
+	glVertex3f(-width / 2, 0, depth / 2);
+	glVertex3f(-width / 2, 0, -depth / 2);
+	glVertex3f(width / 2, 0, -depth / 2);
+	glVertex3f(width / 2, 0, depth / 2);
+	// Bottom face
+	glVertex3f(-width / 2, -height, depth / 2);
+	glVertex3f(width / 2, -height, depth / 2);
+	glVertex3f(0, -height, -depth / 2);
+	glVertex3f(0, -height, -depth / 2);
+	glEnd();
+	glBegin(GL_TRIANGLES);
+	// Left side
+	glVertex3f(-width / 2, 0, depth / 2);
+	glVertex3f(0, -height, -depth / 2);
+	glVertex3f(-width / 2, 0, -depth / 2);
+	// Right side
+	glVertex3f(width / 2, 0, depth / 2);
+	glVertex3f(width / 2, 0, -depth / 2);
+	glVertex3f(0, -height, -depth / 2);
+	glEnd();
+}
+
 void drawPyramid() {
 	glBegin(GL_TRIANGLES);
 	// Front
@@ -329,6 +398,187 @@ void drawPyramid() {
 	// Left
 	glVertex3f(0.0f, 0.5f, 0.0f); glVertex3f(-0.5f, -0.5f, -0.5f); glVertex3f(-0.5f, -0.5f, 0.5f);
 	glEnd();
+}
+
+void drawPyramid1(float size) {
+	float s = size / 2.0f;
+	float h = size / 2.0f;
+
+	glBegin(GL_TRIANGLES);
+	// Front face
+	glNormal3f(0, 0.707, 0.707);
+	glVertex3f(0, h, 0);
+	glVertex3f(-s, -h, s);
+	glVertex3f(s, -h, s);
+	// Right face
+	glNormal3f(0.707, 0.707, 0);
+	glVertex3f(0, h, 0);
+	glVertex3f(s, -h, s);
+	glVertex3f(s, -h, -s);
+	// Back face
+	glNormal3f(0, 0.707, -0.707);
+	glVertex3f(0, h, 0);
+	glVertex3f(s, -h, -s);
+	glVertex3f(-s, -h, -s);
+	// Left face
+	glNormal3f(-0.707, 0.707, 0);
+	glVertex3f(0, h, 0);
+	glVertex3f(-s, -h, -s);
+	glVertex3f(-s, -h, s);
+	glEnd();
+
+	// Base
+	glBegin(GL_QUADS);
+	glNormal3f(0, -1, 0);
+	glVertex3f(-s, -h, s);
+	glVertex3f(s, -h, s);
+	glVertex3f(s, -h, -s);
+	glVertex3f(-s, -h, -s);
+	glEnd();
+}
+
+void drawGundamHead() {
+	glColor3f(0.95f, 0.95f, 0.95f); // Off-white
+	// Central Core
+	glPushMatrix();
+	glTranslatef(0.0f, 0.2f, 0.0f);
+	glScalef(1.8f, 1.6f, 1.2f);
+	drawCube1(1.0f);
+	glPopMatrix();
+	// Top Crest Base
+	glPushMatrix();
+	glTranslatef(0.0f, 0.9f, 0.0f);
+	glScalef(0.6f, 0.3f, 0.8f);
+	drawCube1(1.0f);
+	glPopMatrix();
+	// Rear Armor
+	glPushMatrix();
+	glTranslatef(0.0f, 0.2f, -0.75f);
+	glScalef(1.6f, 1.4f, 0.3f);
+	drawCube1(1.0f);
+	glPopMatrix();
+
+	//Pointed Chin
+	glPushMatrix();
+	glColor3f(0.95f, 0.95f, 0.95f);
+	glTranslatef(0.0f, -0.9f, 0.0f);
+	glScalef(0.8f, 1.0f, 0.8f);
+	drawPyramid1(1.0f);
+	glPopMatrix();
+
+	// --- Face Plate ---
+	glPushMatrix();
+	glColor3f(0.85f, 0.85f, 0.85f); // Slightly darker
+	glTranslatef(0.0f, -0.1f, 0.71f);
+	glScalef(1.6f, 1.0f, 0.1f);
+	drawCube1(1.0f);
+	glPopMatrix();
+
+	// Left Eye
+	glPushMatrix();
+	// Eye Socket Housing
+	glColor3f(0.7f, 0.7f, 0.7f);
+	glTranslatef(-0.5f, 0.2f, 0.5f);
+	glScalef(0.6f, 0.5f, 0.3f);
+	drawCube1(1.0f);
+	// Recessed "Lens" (a smaller, darker cube)
+	glColor3f(0.05f, 0.05f, 0.05f);
+	glTranslatef(0.0f, 0.0f, 0.6f); // Was 0.4f
+	glScalef(0.8f, 0.8f, 0.5f);
+	drawCube1(1.0f);
+	// Inner "Sensor" (a bright, small cube)
+	glColor3f(0.2f, 0.8f, 1.0f); // Cyan
+	glTranslatef(0.0f, 0.0f, 0.7f); // Was 0.5f
+	glScalef(0.5f, 0.5f, 0.2f);
+	drawCube1(1.0f);
+	glPopMatrix();
+
+	// Right Eye 
+	glPushMatrix();
+	glColor3f(0.7f, 0.7f, 0.7f);
+	glTranslatef(0.5f, 0.2f, 0.5f);
+	glScalef(0.6f, 0.5f, 0.3f);
+	drawCube1(1.0f);
+
+	glColor3f(0.05f, 0.05f, 0.05f);
+	glTranslatef(0.0f, 0.0f, 0.6f); // Was 0.4f
+	glScalef(0.8f, 0.8f, 0.5f);
+	drawCube1(1.0f);
+
+	glColor3f(0.2f, 0.8f, 1.0f);
+	glTranslatef(0.0f, 0.0f, 0.7f); // Was 0.5f
+	glScalef(0.5f, 0.5f, 0.2f);
+	drawCube1(1.0f);
+	glPopMatrix();
+
+	glColor3f(0.95f, 0.95f, 0.95f); // White
+	// Central Base
+	glPushMatrix();
+	glTranslatef(0.0f, 1.3f, 0.0f);
+	glScalef(0.2f, 0.4f, 0.3f);
+	drawCube1(1.0f);
+	glPopMatrix();
+	// Left Blade (Pyramid)
+	glPushMatrix();
+	glTranslatef(-0.25f, 1.7f, 0.0f); // Positioned on top of the base
+	glRotatef(-20.0f, 0.0f, 1.0f, 0.0f); // Tilted outwards
+	glScalef(0.3f, 1.2f, 0.3f);
+	drawPyramid1(1.0f);
+	glPopMatrix();
+	// Right Blade (Pyramid)
+	glPushMatrix();
+	glTranslatef(0.25f, 1.7f, 0.0f); // Positioned on top of the base
+	glRotatef(20.0f, 0.0f, 1.0f, 0.0f); // Tilted outwards
+	glScalef(0.3f, 1.2f, 0.3f);
+	drawPyramid1(1.0f);
+	glPopMatrix();
+
+	//Side Armor 
+	glColor3f(0.8f, 0.8f, 0.8f); // Gray
+	// Left Side Armor
+	glPushMatrix();
+	glTranslatef(-1.1f, 0.2f, 0.0f);
+	glScalef(0.2f, 0.8f, 1.2f);
+	drawCube1(1.0f);
+	// Layer 1
+	glTranslatef(-1.5f, 0.0f, 0.0f);
+	glScalef(0.5f, 0.8f, 0.8f);
+	drawCube1(1.0f);
+	// Layer 2 
+	glTranslatef(0.0f, -0.6f, 0.0f);
+	glScalef(1.0f, 0.3f, 1.0f);
+	drawCube1(1.0f);
+	glPopMatrix();
+
+	// Right Side Armor
+	glPushMatrix();
+	glTranslatef(1.1f, 0.2f, 0.0f);
+	glScalef(0.2f, 0.8f, 1.2f);
+	drawCube1(1.0f);
+	// Layer 1
+	glTranslatef(1.5f, 0.0f, 0.0f);
+	glScalef(0.5f, 0.8f, 0.8f);
+	drawCube1(1.0f);
+	// Layer 2 
+	glTranslatef(0.0f, -0.6f, 0.0f);
+	glScalef(1.0f, 0.3f, 1.0f);
+	drawCube1(1.0f);
+	glPopMatrix();
+
+	//Rear Sensor 
+	glColor3f(0.2f, 0.2f, 0.2f); // Dark gray
+	glPushMatrix();
+	glTranslatef(0.0f, 0.3f, -0.81f);
+	glScalef(0.5f, 0.3f, 0.1f);
+	drawCube1(1.0f);
+	glPopMatrix();
+	// Sensor Pyramid
+	glPushMatrix();
+	glColor3f(0.5f, 0.5f, 0.5f);
+	glTranslatef(0.0f, 0.5f, -0.85f);
+	glScalef(0.3f, 0.3f, 0.3f);
+	drawPyramid1(1.0f);
+	glPopMatrix();
 }
 
 void Display(HWND hWnd)
@@ -379,11 +629,10 @@ void Display(HWND hWnd)
 		glPushMatrix();
 		glTranslatef(0.0f, 3.2f, 0.0f);
 
-		// Head (White Box)
-		glColor3f(1.0f, 1.0f, 1.0f);
+		// Head 
 		glPushMatrix();
 		glScalef(0.8f, 0.8f, 0.8f);
-		drawCube();
+		drawGundamHead();
 		glPopMatrix();
 
 		// Antenna
