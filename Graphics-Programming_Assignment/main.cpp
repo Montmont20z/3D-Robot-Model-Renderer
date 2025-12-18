@@ -86,7 +86,7 @@ enum ProjectMode { ORTHO = 0, PERSPECTIVE = 1, FRUSTUM = 2 };
 ProjectMode projMode = ORTHO;
 
 float fovy = 45.0f;
-float zNear = 0.1f, zFar = 10.0f;
+float zNear = 0.1f, zFar = 20.0f;
 
 void updateProjection(int width, int height);
 
@@ -1387,16 +1387,16 @@ void Display(HWND hWnd)
     drawRightArm();
 
     // Left Leg (detailed)
-    glPushMatrix();
-    glTranslatef(-0.4f, 0.6f, 0.0f);
-    drawDetailedLeftLeg();
-    glPopMatrix();
+    //glPushMatrix();
+    //glTranslatef(-0.4f, 0.6f, 0.0f);
+    //drawDetailedLeftLeg();
+    //glPopMatrix();
 
-    // Right Leg (detailed)
-    glPushMatrix();
-    glTranslatef(0.4f, 0.6f, 0.0f);
-    drawDetailedRightLeg();
-    glPopMatrix();
+    //// Right Leg (detailed)
+    //glPushMatrix();
+    //glTranslatef(0.4f, 0.6f, 0.0f);
+    //drawDetailedRightLeg();
+    //glPopMatrix();
 
     glPopMatrix();
 
@@ -1555,12 +1555,12 @@ void drawShield() {
     // --- GEOMETRY DEFINITIONS ---
 
     Vec3 inner[6] = {
-        {-0.25f,  1.0f,  0.0f},  // Top Left
+        {-0.25f,  1.5f,  0.0f},  // Top Left
         {-0.5f,   0.0f,  0.0f},  // Left
-        {-0.25f, -1.0f,  0.0f},  // Bottom Left
-        { 0.25f, -1.0f,  0.0f},  // Bottom Right
+        {-0.25f, -1.5f,  0.0f},  // Bottom Left
+        { 0.25f, -1.5f,  0.0f},  // Bottom Right
         { 0.5f,   0.0f,  0.0f},  // Right
-        { 0.25f,  1.0f,  0.0f}   // Top Right
+        { 0.25f,  1.5f,  0.0f}   // Top Right
     };
 
     Vec3 outer[6];
@@ -1604,35 +1604,59 @@ void drawShield() {
     glEnd();
 
     // 3. Side Slope
+    // --- New Geometry for the split side ---
+    Vec3 mid[6];
+    for (int i = 0; i < 6; i++) {
+        mid[i].x = (outer[i].x + back[i].x) / 2.0f;
+        mid[i].y = (outer[i].y + back[i].y) / 2.0f;
+        mid[i].z = (outer[i].z + back[i].z) / 2.0f;
+    }
+
+    // 3. Side Slope (Front Half - Red)
+    glColor3f(0.9f, 0.2f, 0.2f);
+    glBegin(GL_QUADS);
+    for (int i = 0; i < 6; i++) {
+        int next = (i + 1) % 6;
+        float nx = (outer[i].x + outer[next].x) / 2.0f;
+        float ny = (outer[i].y + outer[next].y) / 2.0f;
+        glNormal3f(nx, ny, 0.0f);
+
+        glVertex3f(outer[i].x, outer[i].y, outer[i].z);
+        glVertex3f(mid[i].x, mid[i].y, mid[i].z);
+        glVertex3f(mid[next].x, mid[next].y, mid[next].z);
+        glVertex3f(outer[next].x, outer[next].y, outer[next].z);
+    }
+    glEnd();
+
+    // 3. Side Slope (Back Half - White)
     glColor3f(0.9f, 0.9f, 0.9f);
     glBegin(GL_QUADS);
     for (int i = 0; i < 6; i++) {
         int next = (i + 1) % 6;
         float nx = (outer[i].x + outer[next].x) / 2.0f;
         float ny = (outer[i].y + outer[next].y) / 2.0f;
-        glNormal3f(nx, ny, 0.0f); // Approximate side normal
+        glNormal3f(nx, ny, 0.0f);
 
-        glVertex3f(outer[i].x, outer[i].y, outer[i].z);
+        glVertex3f(mid[i].x, mid[i].y, mid[i].z);
         glVertex3f(back[i].x, back[i].y, back[i].z);
         glVertex3f(back[next].x, back[next].y, back[next].z);
-        glVertex3f(outer[next].x, outer[next].y, outer[next].z);
+        glVertex3f(mid[next].x, mid[next].y, mid[next].z);
     }
     glEnd();
 
-    // 4. Concave Back
-    glColor3f(0.85f, 0.85f, 0.85f);
+    // 4. Convex Back
+    glColor3f(0.2f, 0.2f, 0.2f);
     glBegin(GL_TRIANGLE_FAN);
     glNormal3f(0.0f, 0.0f, -1.0f);
     glVertex3f(0.0f, 0.0f, concaveDepth);
     for (int i = 6; i >= 0; i--) {
         int idx = i % 6;
+        //glColor3f(0.85f, 0.0f + i, 0.85f);
         glVertex3f(back[idx].x, back[idx].y, back[idx].z);
     }
     glEnd();
 
     // 5. The Convex Yellow Star / Cross
-    // We draw this using triangles to create a "roof" shape (Ridge in the middle)
-
     glColor3f(1.0f, 0.9f, 0.0f);
 
     float zBase = 0.0f;  // Surface of shield
