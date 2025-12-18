@@ -4,6 +4,7 @@
 #include <gl/GLU.h>
 #include <iostream>
 #include <cmath>
+#include "main.h"
 
 const int WINDOW_WIDTH = 1600;
 const int WINDOW_HEIGHT = 1200;
@@ -365,6 +366,7 @@ void drawCube1(float size) {
     glVertex3f(-halfSize, halfSize, -halfSize);
     glEnd();
 }
+
 
 void drawWedge(float width, float height, float depth) {
     glBegin(GL_QUADS);
@@ -1325,7 +1327,7 @@ void Display(HWND hWnd)
 
     glPushMatrix();
     glTranslatef(1.0f, 1.0f, 1.0f);
-    drawSword();
+    //drawSword();
     glTranslatef(1.0f, 1.0f, 1.0f);
     drawShield();
     glPopMatrix();
@@ -1384,7 +1386,11 @@ void Display(HWND hWnd)
     glPopMatrix();
 
     // Right Arm
+
+    glPushMatrix();
+    glTranslatef(2.0f, 2.0f, 2.0f);
     drawRightArm();
+    glPopMatrix();
 
     // Left Leg (detailed)
     //glPushMatrix();
@@ -1551,6 +1557,8 @@ void drawSword() {
     glPopMatrix();
 }
 
+// faces count
+// 40 faces
 void drawShield() {
     // --- GEOMETRY DEFINITIONS ---
 
@@ -1662,7 +1670,7 @@ void drawShield() {
     float zBase = 0.0f;  // Surface of shield
     float zPeak = 0.12f; // How much it sticks out (Convex height)
 
-    // --- Vertical Arm Geometry ---
+    // --- Vertical Cross Geometry ---
     float vx_w = 0.1f;    // Width
     float vy_top = 0.5f;  // Top Y
     float vy_bot = -0.4f; // Bottom Y
@@ -1701,7 +1709,7 @@ void drawShield() {
     glVertex3f(vx_w, vy_bot, zBase);
     glEnd();
 
-    // --- Horizontal Arm Geometry ---
+    // --- Horizontal Cross Geometry ---
     float hx_left = -0.35f;
     float hx_right = 0.35f;
     float hy_w = 0.1f; // Half-height of horizontal arm
@@ -1769,21 +1777,607 @@ void drawShield() {
     glEnd();
 }
 
-void drawRightArm()
-{
+void drawCube(float x, float y, float z, float w, float h, float d, float r = 1.0f, float g = 1.0f, float b = 1.0f) {
+    glColor3f(r, g, b);
     glPushMatrix();
-    glTranslatef(1.1f, 2.4f, 0.0f);
-    glColor3f(0.6f, 0.6f, 0.6f);
-    gluSphere(gluObject, 0.45f, 20, 20);
+    glTranslatef(x, y, z);
 
-    glColor3f(1.0f, 1.0f, 1.0f);
+    // Front
+    glBegin(GL_QUADS);
+    glVertex3f(0, 0, 0);
+    glVertex3f(w, 0, 0);
+    glVertex3f(w, h, 0);
+    glVertex3f(0, h, 0);
+    glEnd();
+
+    // Back
+    glColor3f(r * 0.8f, g * 0.8f, b * 0.8f);
+    glBegin(GL_QUADS);
+    glVertex3f(0, 0, d);
+    glVertex3f(0, h, d);
+    glVertex3f(w, h, d);
+    glVertex3f(w, 0, d);
+    glEnd();
+
+    // Left
+    glColor3f(r * 0.9f, g * 0.9f, b * 0.9f);
+    glBegin(GL_QUADS);
+    glVertex3f(0, 0, 0);
+    glVertex3f(0, h, 0);
+    glVertex3f(0, h, d);
+    glVertex3f(0, 0, d);
+    glEnd();
+
+    // Right
+    glColor3f(r * 0.9f, g * 0.9f, b * 0.9f);
+    glBegin(GL_QUADS);
+    glVertex3f(w, 0, 0);
+    glVertex3f(w, 0, d);
+    glVertex3f(w, h, d);
+    glVertex3f(w, h, 0);
+    glEnd();
+
+    // Top
+    glColor3f(r * 1.1f, g * 1.1f, b * 1.1f);
+    glBegin(GL_QUADS);
+    glVertex3f(0, h, 0);
+    glVertex3f(w, h, 0);
+    glVertex3f(w, h, d);
+    glVertex3f(0, h, d);
+    glEnd();
+
+    // Bottom
+    glColor3f(r * 0.7f, g * 0.7f, b * 0.7f);
+    glBegin(GL_QUADS);
+    glVertex3f(0, 0, 0);
+    glVertex3f(0, 0, d);
+    glVertex3f(w, 0, d);
+    glVertex3f(w, 0, 0);
+    glEnd();
+
+    glPopMatrix();
+};
+
+// Draw a cube with chamfered edges (octagon-like cross-section)
+// width, height, depth are full dimensions
+// chamfer is the size of the beveled edge (e.g., 0.05)
+void drawChamferedCube(float width, float height, float depth, float chamfer) {
+    float hw = width / 2.0f;   // half width
+    float hh = height / 2.0f;  // half height
+    float hd = depth / 2.0f;   // half depth
+
+    // Define the 26 vertices of a chamfered cube
+    // Each corner becomes 3 vertices, each edge becomes 2 vertices
+
+    // Top face (y = hh)
+    Vec3 topVerts[8] = {
+        // Front edge
+        {-hw + chamfer, hh, hd},           // 0
+        {hw - chamfer, hh, hd},            // 1
+        // Right edge
+        {hw, hh, hd - chamfer},            // 2
+        {hw, hh, -hd + chamfer},           // 3
+        // Back edge
+        {hw - chamfer, hh, -hd},           // 4
+        {-hw + chamfer, hh, -hd},          // 5
+        // Left edge
+        {-hw, hh, -hd + chamfer},          // 6
+        {-hw, hh, hd - chamfer}            // 7
+    };
+
+    // Bottom face (y = -hh)
+    Vec3 bottomVerts[8] = {
+        // Front edge
+        {-hw + chamfer, -hh, hd},          // 8
+        {hw - chamfer, -hh, hd},           // 9
+        // Right edge
+        {hw, -hh, hd - chamfer},           // 10
+        {hw, -hh, -hd + chamfer},          // 11
+        // Back edge
+        {hw - chamfer, -hh, -hd},          // 12
+        {-hw + chamfer, -hh, -hd},         // 13
+        // Left edge
+        {-hw, -hh, -hd + chamfer},         // 14
+        {-hw, -hh, hd - chamfer}           // 15
+    };
+
+    // Draw top face (octagon)
+    glBegin(GL_POLYGON);
+    glNormal3f(0.0f, 1.0f, 0.0f);
+    for (int i = 0; i < 8; i++) {
+        glVertex3f(topVerts[i].x, topVerts[i].y, topVerts[i].z);
+    }
+    glEnd();
+
+    // Draw bottom face (octagon)
+    glBegin(GL_POLYGON);
+    glNormal3f(0.0f, -1.0f, 0.0f);
+    for (int i = 7; i >= 0; i--) {
+        glVertex3f(bottomVerts[i].x, bottomVerts[i].y, bottomVerts[i].z);
+    }
+    glEnd();
+
+    // Draw 8 main side faces (large rectangles)
+    glBegin(GL_QUADS);
+
+    // Front face
+    glNormal3f(0.0f, 0.0f, 1.0f);
+    glVertex3f(topVerts[0].x, topVerts[0].y, topVerts[0].z);
+    glVertex3f(topVerts[1].x, topVerts[1].y, topVerts[1].z);
+    glVertex3f(bottomVerts[1].x, bottomVerts[1].y, bottomVerts[1].z);
+    glVertex3f(bottomVerts[0].x, bottomVerts[0].y, bottomVerts[0].z);
+
+    // Right face
+    glNormal3f(1.0f, 0.0f, 0.0f);
+    glVertex3f(topVerts[2].x, topVerts[2].y, topVerts[2].z);
+    glVertex3f(topVerts[3].x, topVerts[3].y, topVerts[3].z);
+    glVertex3f(bottomVerts[3].x, bottomVerts[3].y, bottomVerts[3].z);
+    glVertex3f(bottomVerts[2].x, bottomVerts[2].y, bottomVerts[2].z);
+
+    // Back face
+    glNormal3f(0.0f, 0.0f, -1.0f);
+    glVertex3f(topVerts[4].x, topVerts[4].y, topVerts[4].z);
+    glVertex3f(topVerts[5].x, topVerts[5].y, topVerts[5].z);
+    glVertex3f(bottomVerts[5].x, bottomVerts[5].y, bottomVerts[5].z);
+    glVertex3f(bottomVerts[4].x, bottomVerts[4].y, bottomVerts[4].z);
+
+    // Left face
+    glNormal3f(-1.0f, 0.0f, 0.0f);
+    glVertex3f(topVerts[6].x, topVerts[6].y, topVerts[6].z);
+    glVertex3f(topVerts[7].x, topVerts[7].y, topVerts[7].z);
+    glVertex3f(bottomVerts[7].x, bottomVerts[7].y, bottomVerts[7].z);
+    glVertex3f(bottomVerts[6].x, bottomVerts[6].y, bottomVerts[6].z);
+
+    glEnd();
+
+    // Draw 8 small chamfer faces (corners)
+    glBegin(GL_QUADS);
+
+    // Front-right chamfer
+    glNormal3f(0.707f, 0.0f, 0.707f);
+    glVertex3f(topVerts[1].x, topVerts[1].y, topVerts[1].z);
+    glVertex3f(topVerts[2].x, topVerts[2].y, topVerts[2].z);
+    glVertex3f(bottomVerts[2].x, bottomVerts[2].y, bottomVerts[2].z);
+    glVertex3f(bottomVerts[1].x, bottomVerts[1].y, bottomVerts[1].z);
+
+    // Back-right chamfer
+    glNormal3f(0.707f, 0.0f, -0.707f);
+    glVertex3f(topVerts[3].x, topVerts[3].y, topVerts[3].z);
+    glVertex3f(topVerts[4].x, topVerts[4].y, topVerts[4].z);
+    glVertex3f(bottomVerts[4].x, bottomVerts[4].y, bottomVerts[4].z);
+    glVertex3f(bottomVerts[3].x, bottomVerts[3].y, bottomVerts[3].z);
+
+    // Back-left chamfer
+    glNormal3f(-0.707f, 0.0f, -0.707f);
+    glVertex3f(topVerts[5].x, topVerts[5].y, topVerts[5].z);
+    glVertex3f(topVerts[6].x, topVerts[6].y, topVerts[6].z);
+    glVertex3f(bottomVerts[6].x, bottomVerts[6].y, bottomVerts[6].z);
+    glVertex3f(bottomVerts[5].x, bottomVerts[5].y, bottomVerts[5].z);
+
+    // Front-left chamfer
+    glNormal3f(-0.707f, 0.0f, 0.707f);
+    glVertex3f(topVerts[7].x, topVerts[7].y, topVerts[7].z);
+    glVertex3f(topVerts[0].x, topVerts[0].y, topVerts[0].z);
+    glVertex3f(bottomVerts[0].x, bottomVerts[0].y, bottomVerts[0].z);
+    glVertex3f(bottomVerts[7].x, bottomVerts[7].y, bottomVerts[7].z);
+
+    glEnd();
+}
+
+// Example usage:
+// drawChamferedCube(1.0f, 1.0f, 1.0f, 0.1f);  // 1x1x1 cube with 0.1 chamfer
+
+
+void drawCenteredCube(float w, float h, float d, float r = 1.0f, float g = 1.0f, float b = 1.0f) {
+    glColor3f(r, g, b);
+    float hw = w / 2.0f;
+    float hh = h / 2.0f;
+    float hd = d / 2.0f;
+
     glPushMatrix();
-    glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
-    gluCylinder(gluObject, 0.3f, 0.25f, 1.5f, 16, 2);
+
+    // Front
+    glBegin(GL_QUADS);
+    glNormal3f(0, 0, 1);
+    glVertex3f(-hw, -hh, hd);
+    glVertex3f(hw, -hh, hd);
+    glVertex3f(hw, hh, hd);
+    glVertex3f(-hw, hh, hd);
+    glEnd();
+
+    // Back
+    glColor3f(r * 0.8f, g * 0.8f, b * 0.8f);
+    glBegin(GL_QUADS);
+    glNormal3f(0, 0, -1);
+    glVertex3f(-hw, -hh, -hd);
+    glVertex3f(-hw, hh, -hd);
+    glVertex3f(hw, hh, -hd);
+    glVertex3f(hw, -hh, -hd);
+    glEnd();
+
+    // Left
+    glColor3f(r * 0.9f, g * 0.9f, b * 0.9f);
+    glBegin(GL_QUADS);
+    glNormal3f(-1, 0, 0);
+    glVertex3f(-hw, -hh, -hd);
+    glVertex3f(-hw, -hh, hd);
+    glVertex3f(-hw, hh, hd);
+    glVertex3f(-hw, hh, -hd);
+    glEnd();
+
+    // Right
+    glColor3f(r * 0.9f, g * 0.9f, b * 0.9f);
+    glBegin(GL_QUADS);
+    glNormal3f(1, 0, 0);
+    glVertex3f(hw, -hh, -hd);
+    glVertex3f(hw, hh, -hd);
+    glVertex3f(hw, hh, hd);
+    glVertex3f(hw, -hh, hd);
+    glEnd();
+
+    // Top
+    glColor3f(r * 1.1f, g * 1.1f, b * 1.1f);
+    glBegin(GL_QUADS);
+    glNormal3f(0, 1, 0);
+    glVertex3f(-hw, hh, -hd);
+    glVertex3f(-hw, hh, hd);
+    glVertex3f(hw, hh, hd);
+    glVertex3f(hw, hh, -hd);
+    glEnd();
+
+    // Bottom
+    glColor3f(r * 0.7f, g * 0.7f, b * 0.7f);
+    glBegin(GL_QUADS);
+    glNormal3f(0, -1, 0);
+    glVertex3f(-hw, -hh, -hd);
+    glVertex3f(hw, -hh, -hd);
+    glVertex3f(hw, -hh, hd);
+    glVertex3f(-hw, -hh, hd);
+    glEnd();
+
+    glPopMatrix();
+}
+
+void drawCenteredCylinder(float radius, float height, int segments) {
+    glPushMatrix();
+    glTranslatef(0.0f, -height / 2.0f, 0.0f);
+    glRotatef(-90, 1.0f, 0.0f, 0.0f);
+    gluCylinder(gluObject, radius, radius, height, segments, 1);
+
+    glPushMatrix();
+    glTranslatef(0.0f, 0.0f, height);
+    gluDisk(gluObject, 0.0f, radius, segments, 1);
     glPopMatrix();
 
-    glColor3f(0.2f, 0.2f, 0.2f);
-    glTranslatef(0.0f, -1.6f, 0.0f);
-    gluSphere(gluObject, 0.3f, 10, 10);
+    glRotatef(180, 1.0f, 0.0f, 0.0f);
+    gluDisk(gluObject, 0.0f, radius, segments, 1);
     glPopMatrix();
+}
+
+void drawRightArm() {
+    float white[3] = { 0.95f, 0.95f, 0.95f };
+    float darkGrey[3] = { 0.25f, 0.25f, 0.25f };
+    float red[3] = { 0.8f, 0.1f, 0.1f };
+
+    // =================================================================
+    // PART 1: SHOULDER ARMOR (Shield-like trapezoidal shape)
+    // =================================================================
+    glPushMatrix();
+    glTranslatef(-0.4f, 0.4f, 0.0f);
+
+    // shoulder trapezoidal (front)
+    // 7 vertex
+    Vec3 front[7] = {
+        { 0.0f,  0.1f,  0.35f},  // Bottom left 1
+        { 0.1f,  0.0f,  0.35f},  // Bottom left 2
+        { 0.7f,  0.2f,  0.35f},  // Bottom Right 
+        { 0.8f,  0.7f,  0.35f},   // Top Right 1
+        { 0.6f,  0.9f,  0.35f},  // Top right 2
+        { 0.1f,  0.9f,  0.35f},   // Top left 1
+        { 0.0f,  0.8f,  0.35f}   // Top left 2
+    };
+
+	Vec3 back[7] = {
+		{ -0.1f,  0.0f,  0.35f},  // Bottom left 1
+        { 0.1f,  -0.1f,  0.35f},  // Bottom left 2
+        { 0.8f,  0.1f,  0.35f},  // Bottom Right 
+        { 0.9f,  0.7f,  0.35f},   // Top Right 1
+        { 0.7f,  1.0f,  0.35f},  // Top right 2
+        { 0.1f,  1.0f,  0.35f},   // Top left 1
+        { -0.1f,  0.8f,  0.35f}   // Top left 2
+    };
+
+    float backExtrude = 0.10f;
+
+    for (int i = 0; i < 7; i++) {
+        //back[i].x = front[i].x * scaleBack;
+        //back[i].y = front[i].y * scaleBack;
+        back[i].z = back[i].z - backExtrude;
+    }
+
+    // draw Front face
+    glColor3fv(white);
+    glBegin(GL_POLYGON);
+    glNormal3f(0.0f, 0.0f, 1.0f);
+    for (int i = 0; i < 7; i++) glVertex3f(front[i].x, front[i].y, front[i].z);
+    glEnd();
+
+    // draw Back face
+    glBegin(GL_POLYGON);
+    glNormal3f(0.0f, 0.0f, -1.0f);
+    for (int i = 6; i >= 0; i--) glVertex3f(back[i].x, back[i].y, back[i].z);
+    glEnd();
+
+    // Sloped sides connect front and back edges
+    glColor3fv(white);
+    glBegin(GL_QUADS);
+    for (int i = 0; i < 7; i++) {
+        int next = (i + 1) % 7;
+
+        // Calculate approximate normal for this side face
+        Vec3 v1 = { back[i].x - front[i].x, back[i].y - front[i].y, back[i].z - front[i].z };
+        Vec3 v2 = { front[next].x - front[i].x, front[next].y - front[i].y, front[next].z - front[i].z };
+
+        // Cross product for normal
+        float nx = v1.y * v2.z - v1.z * v2.y;
+        float ny = v1.z * v2.x - v1.x * v2.z;
+        float nz = v1.x * v2.y - v1.y * v2.x;
+
+        // Normalize
+        float len = sqrt(nx * nx + ny * ny + nz * nz);
+        if (len > 0.001f) {
+            nx /= len; ny /= len; nz /= len;
+        }
+
+        glNormal3f(nx, ny, nz);
+        glVertex3f(front[i].x, front[i].y, front[i].z);
+        glVertex3f(front[next].x, front[next].y, front[next].z);
+        glVertex3f(back[next].x, back[next].y, back[next].z);
+        glVertex3f(back[i].x, back[i].y, back[i].z);
+    }
+    glEnd();
+
+    // shoulder trapezoidal (back)
+    // 7 vertex
+    Vec3 front2[7] = {
+        { 0.0f,  0.1f,  -0.35f},  // Bottom left 1
+        { 0.1f,  0.0f,  -0.35f},  // Bottom left 2
+        { 0.7f,  0.2f,  -0.35f},  // Bottom Right 
+        { 0.8f,  0.7f,  -0.35f},   // Top Right 1
+        { 0.6f,  0.9f,  -0.35f},  // Top right 2
+        { 0.1f,  0.9f,  -0.35f},   // Top left 1
+        { 0.0f,  0.8f,  -0.35f}   // Top left 2
+    };
+
+    Vec3 back2[7] = {
+        { -0.1f,  0.0f,  -0.35f},  // Bottom left 1
+        { 0.1f,  -0.1f,  -0.35f},  // Bottom left 2
+        { 0.8f,  0.1f,  -0.35f},  // Bottom Right 
+        { 0.9f,  0.7f,  -0.35f},   // Top Right 1
+        { 0.7f,  1.0f,  -0.35f},  // Top right 2
+        { 0.1f,  1.0f,  -0.35f},   // Top left 1
+        { -0.1f,  0.8f,  -0.35f}   // Top left 2
+    };
+
+    //float backExtrude = 0.05f;
+
+    for (int i = 0; i < 7; i++) {
+        back2[i].z = back2[i].z + backExtrude;
+    }
+
+    // draw Front face
+    glColor3fv(white);
+    glBegin(GL_POLYGON);
+    glNormal3f(0.0f, 0.0f, -1.0f);
+    for (int i = 0; i < 7; i++) glVertex3f(front2[i].x, front2[i].y, front2[i].z);
+    glEnd();
+
+    // draw Back face
+    glBegin(GL_POLYGON);
+    glNormal3f(0.0f, 0.0f, 1.0f);
+    for (int i = 6; i >= 0; i--) glVertex3f(back2[i].x, back2[i].y, back2[i].z);
+    glEnd();
+
+    // Sloped sides connect front and back edges
+    glColor3fv(white);
+    glBegin(GL_QUADS);
+    for (int i = 0; i < 7; i++) {
+        int next = (i + 1) % 7;
+
+        // Calculate approximate normal for this side face
+        Vec3 v1 = { back2[i].x - front2[i].x, back2[i].y - front2[i].y, back2[i].z - front2[i].z };
+        Vec3 v2 = { front2[next].x - front2[i].x, front2[next].y - front2[i].y, front2[next].z - front2[i].z };
+
+        // Cross product for normal
+        float nx = v1.y * v2.z - v1.z * v2.y;
+        float ny = v1.z * v2.x - v1.x * v2.z;
+        float nz = v1.x * v2.y - v1.y * v2.x;
+
+        // Normalize
+        float len = sqrt(nx * nx + ny * ny + nz * nz);
+        if (len > 0.001f) {
+            nx /= len; ny /= len; nz /= len;
+        }
+
+        glNormal3f(-nx, -ny, -nz);
+        glVertex3f(front2[i].x, front2[i].y, front2[i].z);
+        glVertex3f(front2[next].x, front2[next].y, front2[next].z);
+        glVertex3f(back2[next].x, back2[next].y, back2[next].z);
+        glVertex3f(back2[i].x, back2[i].y, back2[i].z);
+    }
+    glEnd();
+
+    // ==================== connecting both back faces ===========================
+    glColor3fv(white);
+    glBegin(GL_QUADS);
+
+    // Connect each edge between back and back2 arrays
+    for (int i = 0; i < 7; i++) {
+        int next = (i + 1) % 7;
+
+        // Skip the edge between vertex 3 and 4 (Top Right 1 to Top Right 2)
+        if ( i == 2) {
+            continue; // Skip this quad to leave it open
+        }
+
+        // Calculate normal for this connecting face
+        Vec3 v1 = { back2[i].x - back[i].x, back2[i].y - back[i].y, back2[i].z - back[i].z };
+        Vec3 v2 = { back[next].x - back[i].x, back[next].y - back[i].y, back[next].z - back[i].z };
+
+        // Cross product for normal
+        float nx = v1.y * v2.z - v1.z * v2.y;
+        float ny = v1.z * v2.x - v1.x * v2.z;
+        float nz = v1.x * v2.y - v1.y * v2.x;
+
+        // Normalize
+        float len = sqrt(nx * nx + ny * ny + nz * nz);
+        if (len > 0.001f) {
+            nx /= len; ny /= len; nz /= len;
+        }
+
+        glNormal3f(nx, ny, nz);
+        glVertex3f(back[i].x, back[i].y, back[i].z);           // Current vertex on front shoulder back
+        glVertex3f(back[next].x, back[next].y, back[next].z);   // Next vertex on front shoulder back
+        glVertex3f(back2[next].x, back2[next].y, back2[next].z); // Next vertex on back shoulder back
+        glVertex3f(back2[i].x, back2[i].y, back2[i].z);         // Current vertex on back shoulder back
+    }
+
+    glEnd();
+
+
+    // Internal connecting cylinder
+    glColor3fv(darkGrey);
+    glPushMatrix();
+		glRotatef(90, 0.0f, 1.0f, 0.0f);
+        glTranslatef(0.0f, 0.4f, 0.5f);
+		glColor3fv(darkGrey);
+		glPushMatrix();
+		glRotatef(90, 0.0f, 0.0f, 1.0f);
+		drawCenteredCylinder(0.32f, 0.5f, 20);
+		glPopMatrix();
+
+		// Decorative rings on flat faces
+		glColor3fv(white);
+		glPushMatrix();
+		glRotatef(90, 0.0f, 0.0f, 1.0f);
+		glTranslatef(0.00f, 0.0f, 0.0f);
+		//gluDisk(gluObject, 0.12f, 0.30f, 20, 1);
+		drawCenteredCylinder(0.22f, 0.6f, 20);
+		glPopMatrix();
+
+		glPushMatrix();
+		glTranslatef(-0.26f, 0.0f, 0.0f);
+		glRotatef(-90, 0.0f, 1.0f, 0.0f);
+		gluDisk(gluObject, 0.22f, 0.30f, 20, 1);
+		glPopMatrix();
+    glPopMatrix();
+
+    glPopMatrix(); // End shoulder armor
+
+    // =================================================================
+    // PART 2: SHOULDER CONNECTOR
+    // =================================================================
+    glPushMatrix();
+    glTranslatef(0.0f, 0.2f, 0.0f);
+    glColor3fv(white);
+    drawCenteredCube(0.50f, 0.25f, 0.50f);
+    glPopMatrix();
+
+    // =================================================================
+    // PART 3: UPPER ARM
+    // =================================================================
+    glPushMatrix();
+    glTranslatef(0.0f, -0.25f, 0.0f);
+    glColor3fv(white);
+    drawChamferedCube(0.6f, 0.7f, 0.6f, 0.05f);
+    glPopMatrix();
+
+    // =================================================================
+    // PART 4: ELBOW JOINT (Cylinder pointing left-right)
+    // =================================================================
+    glPushMatrix();
+    glTranslatef(0.0f, -0.75f, 0.0f);
+
+    glColor3fv(darkGrey);
+    glPushMatrix();
+    glRotatef(90, 0.0f, 0.0f, 1.0f);
+    drawCenteredCylinder(0.28f, 0.7f, 20);
+    glPopMatrix();
+
+    // Decorative rings on flat faces
+    glColor3f(0.5f, 0.5f, 0.5f);
+    glPushMatrix();
+    glTranslatef(0.36f, 0.0f, 0.0f);
+    glRotatef(90, 0.0f, 1.0f, 0.0f);
+    gluDisk(gluObject, 0.12f, 0.20f, 20, 1);
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(-0.36f, 0.0f, 0.0f);
+    glRotatef(-90, 0.0f, 1.0f, 0.0f);
+    gluDisk(gluObject, 0.12f, 0.20f, 20, 1);
+    glPopMatrix();
+
+    glPopMatrix(); // End elbow
+
+    // =================================================================
+    // PART 5: FOREARM
+    // =================================================================
+    glPushMatrix();
+    glTranslatef(0.0f, -1.5f, 0.0f);
+    glColor3fv(white);
+    //drawCenteredCube(0.38f, 0.9f, 0.38f);
+    drawChamferedCube(0.6f, 0.9f, 0.6f, 0.05f);
+    glPopMatrix();
+
+    // Forearm cuff detail
+    glPushMatrix();
+    glTranslatef(0.0f, -2.05f, 0.0f);
+    glColor3fv(darkGrey);
+    drawCenteredCube(0.42f, 0.12f, 0.42f);
+    glPopMatrix();
+
+    // =================================================================
+    // PART 6: WRIST JOINT (Small connector)
+    // =================================================================
+    glPushMatrix();
+    glTranslatef(0.0f, -2.25f, 0.0f);
+    glColor3fv(darkGrey);
+    drawCenteredCube(0.32f, 0.15f, 0.32f);
+    glPopMatrix();
+
+    // =================================================================
+    // PART 7: HAND (Palm + Fingers)
+    // =================================================================
+    glPushMatrix();
+    glTranslatef(0.0f, -2.55f, 0.0f);
+
+    // Palm base
+    glColor3fv(darkGrey);
+    drawCenteredCube(0.35f, 0.35f, 0.38f);
+
+    // Finger mass (clenched fist)
+    glPushMatrix();
+    glTranslatef(0.0f, -0.35f, 0.0f);
+    drawCenteredCube(0.32f, 0.4f, 0.35f);
+
+    // Finger grooves (vertical lines suggesting fingers)
+    glColor3f(0.15f, 0.15f, 0.15f);
+    for (int i = -1; i <= 1; i++) {
+        glPushMatrix();
+        glTranslatef(i * 0.08f, 0.0f, 0.18f);
+        drawCenteredCube(0.015f, 0.38f, 0.02f);
+        glPopMatrix();
+    }
+    glPopMatrix();
+
+    // Thumb
+    glPushMatrix();
+    glTranslatef(0.25f, -0.15f, 0.1f);
+    glRotatef(-25, 0.0f, 0.0f, 1.0f);
+    glColor3fv(darkGrey);
+    drawCenteredCube(0.12f, 0.3f, 0.18f);
+    glPopMatrix();
+
+    glPopMatrix(); // End hand
 }
