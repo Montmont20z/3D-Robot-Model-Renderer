@@ -97,12 +97,9 @@ void drawDetailedRightLeg();
 
 void drawSword();
 void drawShield();
-void drawDetailedChest();
-void drawDetailedAbdomen();
-void drawDetailedWaist();
-void drawSkirtArmor();
-void drawDetailedUpperBody();
-void drawDetailedLowerBody();
+void drawUpperBody();
+void drawLowerBody();
+void drawGundamHead();
 
 
 LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -367,37 +364,6 @@ void drawCube1(float size) {
     glEnd();
 }
 
-
-void drawWedge(float width, float height, float depth) {
-    glBegin(GL_QUADS);
-    // Front face
-    glVertex3f(-width / 2, 0, depth / 2);
-    glVertex3f(width / 2, 0, depth / 2);
-    glVertex3f(width / 2, -height, depth / 2);
-    glVertex3f(-width / 2, -height, depth / 2);
-    // Top face
-    glVertex3f(-width / 2, 0, depth / 2);
-    glVertex3f(-width / 2, 0, -depth / 2);
-    glVertex3f(width / 2, 0, -depth / 2);
-    glVertex3f(width / 2, 0, depth / 2);
-    // Bottom face
-    glVertex3f(-width / 2, -height, depth / 2);
-    glVertex3f(width / 2, -height, depth / 2);
-    glVertex3f(0, -height, -depth / 2);
-    glVertex3f(0, -height, -depth / 2);
-    glEnd();
-    glBegin(GL_TRIANGLES);
-    // Left side
-    glVertex3f(-width / 2, 0, depth / 2);
-    glVertex3f(0, -height, -depth / 2);
-    glVertex3f(-width / 2, 0, -depth / 2);
-    // Right side
-    glVertex3f(width / 2, 0, depth / 2);
-    glVertex3f(width / 2, 0, -depth / 2);
-    glVertex3f(0, -height, -depth / 2);
-    glEnd();
-}
-
 void drawPyramid() {
     glBegin(GL_TRIANGLES);
     // Front
@@ -449,104 +415,135 @@ void drawPyramid1(float size) {
 }
 
 void drawGundamHead() {
-    glColor3f(0.95f, 0.95f, 0.95f); // Off-white
-    // Central Core
+    glColor3f(0.95f, 0.95f, 0.95f);
+    //Centre box
     glPushMatrix();
     glTranslatef(0.0f, 0.2f, 0.0f);
     glScalef(1.8f, 1.6f, 1.2f);
     drawCube1(1.0f);
     glPopMatrix();
-    // Top Crest Base
+
+    //Base armor
     glPushMatrix();
-    glTranslatef(0.0f, 0.9f, 0.0f);
-    glScalef(0.6f, 0.3f, 0.8f);
+    glTranslatef(0.0f, 1.0f, 0.0f);
+    glScalef(1.2f, 0.1f, 0.8f);
     drawCube1(1.0f);
     glPopMatrix();
-    // Rear Armor
+
+    //rear armor
     glPushMatrix();
     glTranslatef(0.0f, 0.2f, -0.75f);
     glScalef(1.6f, 1.4f, 0.3f);
     drawCube1(1.0f);
     glPopMatrix();
-
-    //Pointed Chin
+    //neck
     glPushMatrix();
     glColor3f(0.95f, 0.95f, 0.95f);
-    glTranslatef(0.0f, -0.9f, 0.0f);
-    glScalef(0.8f, 1.0f, 0.8f);
-    drawPyramid1(1.0f);
+    glTranslatef(0.0f, -0.8f, 0.0f);
+    glScalef(0.6f, 0.6f, 0.6f);
+    drawCube1(1.0f);
     glPopMatrix();
-
-    // --- Face Plate ---
+    //face plate
     glPushMatrix();
-    glColor3f(0.85f, 0.85f, 0.85f); // Slightly darker
-    glTranslatef(0.0f, -0.1f, 0.71f);
-    glScalef(1.6f, 1.0f, 0.1f);
+    glColor3f(1.0f, 0.85f, 0.85f);
+    glTranslatef(0.0f, 0.0f, 0.65f);
+    glScalef(1.6f, 1.2f, 0.1f);
     drawCube1(1.0f);
     glPopMatrix();
 
-    // Left Eye
+    //Left Eye
     glPushMatrix();
-    // Eye Socket Housing
+    //eyesocket 
     glColor3f(0.7f, 0.7f, 0.7f);
-    glTranslatef(-0.5f, 0.2f, 0.5f);
-    glScalef(0.6f, 0.5f, 0.3f);
+    glTranslatef(-0.5f, 0.2f, 0.78f);
+    glScalef(0.6f, 0.5f, 0.15f);
     drawCube1(1.0f);
-    // Recessed "Lens" (a smaller, darker cube)
+    //eye 
     glColor3f(0.05f, 0.05f, 0.05f);
-    glTranslatef(0.0f, 0.0f, 0.6f); // Was 0.4f
+    glTranslatef(0.0f, 0.0f, 0.8f);
     glScalef(0.8f, 0.8f, 0.5f);
     drawCube1(1.0f);
-    // Inner "Sensor" (a bright, small cube)
-    glColor3f(0.2f, 0.8f, 1.0f); // Cyan
-    glTranslatef(0.0f, 0.0f, 0.7f); // Was 0.5f
+    //eyeball
+    glColor3f(0.3f, 0.3f, 0.3f);
+    glTranslatef(0.0f, 0.0f, 0.8f);
     glScalef(0.5f, 0.5f, 0.2f);
     drawCube1(1.0f);
     glPopMatrix();
 
-    // Right Eye 
+    //Right Eye 
     glPushMatrix();
+    //eyesocket
     glColor3f(0.7f, 0.7f, 0.7f);
-    glTranslatef(0.5f, 0.2f, 0.5f);
-    glScalef(0.6f, 0.5f, 0.3f);
+    glTranslatef(0.5f, 0.2f, 0.78f);
+    glScalef(0.6f, 0.5f, 0.15f);
     drawCube1(1.0f);
-
+    //eye
     glColor3f(0.05f, 0.05f, 0.05f);
-    glTranslatef(0.0f, 0.0f, 0.6f); // Was 0.4f
+    glTranslatef(0.0f, 0.0f, 0.8f);
     glScalef(0.8f, 0.8f, 0.5f);
     drawCube1(1.0f);
-
-    glColor3f(0.2f, 0.8f, 1.0f);
-    glTranslatef(0.0f, 0.0f, 0.7f); // Was 0.5f
+    //eyeball
+    glColor3f(0.3f, 0.3f, 0.3f);
+    glTranslatef(0.0f, 0.0f, 0.8f);
     glScalef(0.5f, 0.5f, 0.2f);
     drawCube1(1.0f);
     glPopMatrix();
 
-    glColor3f(0.95f, 0.95f, 0.95f); // White
-    // Central Base
+    //mouth
+    glLineWidth(3.0f);
+    glBegin(GL_LINES);
+    glColor3f(0.2f, 0.2f, 0.2f);
+    //teeth
+    glVertex3f(-0.5f, -0.2f, 0.78f);
+    glVertex3f(-0.5f, -0.4f, 0.78f);
+    glVertex3f(0.5f, -0.2f, 0.78f);
+    glVertex3f(0.5f, -0.4f, 0.78f);
+    glVertex3f(-0.3f, -0.2f, 0.78f);
+    glVertex3f(-0.3f, -0.4f, 0.78f);
+    glVertex3f(0.3f, -0.2f, 0.78f);
+    glVertex3f(0.3f, -0.4f, 0.78f);
+    glVertex3f(-0.1f, -0.2f, 0.78f);
+    glVertex3f(-0.1f, -0.4f, 0.78f);
+    glVertex3f(0.1f, -0.2f, 0.78f);
+    glVertex3f(0.1f, -0.4f, 0.78f);
+    glEnd();
+
+    glLineWidth(3.0f);
+    glBegin(GL_LINE_LOOP);
+    glColor3f(0.6f, 0.6f, 0.6f);
+    glVertex3f(-0.7f, -0.2f, 0.78f);
+    glVertex3f(0.7f, -0.2f, 0.78f);
+    glVertex3f(0.7f, -0.4f, 0.78f);
+    glVertex3f(-0.7f, -0.4f, 0.78f);
+    glEnd();
+
+    glColor3f(0.95f, 0.95f, 0.95f);
+    //base between blade
     glPushMatrix();
     glTranslatef(0.0f, 1.3f, 0.0f);
-    glScalef(0.2f, 0.4f, 0.3f);
+    glScalef(0.2f, 0.5f, 0.3f);
     drawCube1(1.0f);
     glPopMatrix();
-    // Left Blade (Pyramid)
+
+    //Left Blade
     glPushMatrix();
-    glTranslatef(-0.25f, 1.7f, 0.0f); // Positioned on top of the base
-    glRotatef(-20.0f, 0.0f, 1.0f, 0.0f); // Tilted outwards
+    glTranslatef(-0.30f, 1.65f, 0.0f);
+    glRotatef(-20.0f, 0.0f, 1.0f, 0.0f);
     glScalef(0.3f, 1.2f, 0.3f);
     drawPyramid1(1.0f);
     glPopMatrix();
-    // Right Blade (Pyramid)
+
+    // Right Blade 
     glPushMatrix();
-    glTranslatef(0.25f, 1.7f, 0.0f); // Positioned on top of the base
-    glRotatef(20.0f, 0.0f, 1.0f, 0.0f); // Tilted outwards
+    glTranslatef(0.30f, 1.65f, 0.0f);
+    glRotatef(20.0f, 0.0f, 1.0f, 0.0f);
     glScalef(0.3f, 1.2f, 0.3f);
     drawPyramid1(1.0f);
     glPopMatrix();
 
     //Side Armor 
-    glColor3f(0.8f, 0.8f, 0.8f); // Gray
-    // Left Side Armor
+    glColor3f(0.8f, 0.8f, 0.8f);
+    //Left Armor
     glPushMatrix();
     glTranslatef(-1.1f, 0.2f, 0.0f);
     glScalef(0.2f, 0.8f, 1.2f);
@@ -561,7 +558,7 @@ void drawGundamHead() {
     drawCube1(1.0f);
     glPopMatrix();
 
-    // Right Side Armor
+    //Right Armor
     glPushMatrix();
     glTranslatef(1.1f, 0.2f, 0.0f);
     glScalef(0.2f, 0.8f, 1.2f);
@@ -577,393 +574,124 @@ void drawGundamHead() {
     glPopMatrix();
 
     //Rear Sensor 
-    glColor3f(0.2f, 0.2f, 0.2f); // Dark gray
+    glColor3f(0.2f, 0.2f, 0.2f);
     glPushMatrix();
-    glTranslatef(0.0f, 0.3f, -0.81f);
-    glScalef(0.5f, 0.3f, 0.1f);
+    glTranslatef(0.0f, 0.3f, -0.9f);
+    glScalef(0.8f, 0.5f, 0.1f);
     drawCube1(1.0f);
-    glPopMatrix();
-    // Sensor Pyramid
-    glPushMatrix();
-    glColor3f(0.5f, 0.5f, 0.5f);
-    glTranslatef(0.0f, 0.5f, -0.85f);
-    glScalef(0.3f, 0.3f, 0.3f);
-    drawPyramid1(1.0f);
     glPopMatrix();
 }
 
-void drawDetailedChest() {
-    // Main chest frame (white)
+void drawUpperBody()
+{
+    glPushMatrix();
+    glScalef(1.2f, 1.2f, 1.2f);
+    //main
+    glColor3f(0.0f, 0.35f, 0.7f);
+    glPushMatrix();
+    glScalef(2.2f, 1.4f, 1.7f);
+    glTranslatef(0.0f, 0.2f, 0.0f);
+    drawCube1(1.0f);
+    glPopMatrix();
+
+    glColor3f(0.0f, 0.0f, 0.0f);
+    glPushMatrix();
+    glTranslatef(0.0f, 0.3f, 0.85f);
+    glBegin(GL_TRIANGLE_STRIP);
+    glVertex3f(-1.1f, 0.6f, 0.1f);
+    glVertex3f(-0.9f, -0.7f, 0.1f);
+    glVertex3f(0.0f, 0.7f, 0.2f);
+    glVertex3f(0.0f, -0.9f, 0.2f);
+    glVertex3f(1.1f, 0.6f, 0.1f);
+    glVertex3f(0.9f, -0.7f, 0.1f);
+    glEnd();
+    glPopMatrix();
+
+    // White Hatch 
     glColor3f(0.95f, 0.95f, 0.95f);
     glPushMatrix();
-    glScalef(2.8f, 2.2f, 1.8f);
+    glTranslatef(0.0f, 0.2f, 1.05f);
+    glScalef(0.6f, 0.8f, 0.05f);
     drawCube1(1.0f);
     glPopMatrix();
 
-    // Central blue chest panel
-    glColor3f(0.1f, 0.3f, 0.9f);
+    //yellow vent
+    glColor3f(1.0f, 0.8f, 0.0f);
+    //Top
     glPushMatrix();
-    glTranslatef(0.0f, 0.2f, 0.92f);
-    glScalef(1.6f, 1.4f, 0.08f);
+    glTranslatef(-0.75f, 0.6f, 1.0f);
+    glScalef(0.5f, 0.2f, 0.1f);
+    drawCube1(1.0f);
+    glPopMatrix();
+    //Middle
+    glPushMatrix();
+    glTranslatef(-0.75f, 0.3f, 1.0f);
+    glScalef(0.5f, 0.2f, 0.1f);
+    drawCube1(1.0f);
+    glPopMatrix();
+    //Bottom
+    glPushMatrix();
+    glTranslatef(-0.75f, 0.0f, 1.0f);
+    glScalef(0.5f, 0.2f, 0.1f);
     drawCube1(1.0f);
     glPopMatrix();
 
-    // Yellow chest vents (left)
-    glColor3f(1.0f, 0.85f, 0.0f);
+    // Right Vent
+    //Top 
     glPushMatrix();
-    glTranslatef(-0.7f, 0.4f, 0.96f);
-    glScalef(0.35f, 0.7f, 0.04f);
+    glTranslatef(0.75f, 0.6f, 1.0f);
+    glScalef(0.5f, 0.2f, 0.1f);
+    drawCube1(1.0f);
+    glPopMatrix();
+    //Middle
+    glPushMatrix();
+    glTranslatef(0.75f, 0.3f, 1.0f);
+    glScalef(0.5f, 0.2f, 0.1f);
+    drawCube1(1.0f);
+    glPopMatrix();
+    //Bottom
+    glPushMatrix();
+    glTranslatef(0.75f, 0.0f, 1.0f);
+    glScalef(0.5f, 0.2f, 0.1f);
     drawCube1(1.0f);
     glPopMatrix();
 
+    //lower
+    glColor3f(0.8f, 0.1f, 0.1f);
     glPushMatrix();
-    glTranslatef(-0.7f, -0.3f, 0.96f);
-    glScalef(0.35f, 0.5f, 0.04f);
+    glTranslatef(0.0f, -0.5f, 0.0f);
+    glScalef(2.1f, 0.2f, 1.55f);
     drawCube1(1.0f);
     glPopMatrix();
 
-    // Yellow chest vents (right)
+    //white center block
+    glColor3f(0.95f, 0.95f, 0.95f);
     glPushMatrix();
-    glTranslatef(0.7f, 0.4f, 0.96f);
-    glScalef(0.35f, 0.7f, 0.04f);
+    glTranslatef(0.0f, 0.2f, 1.0f);
+    glScalef(0.8f, 1.0f, 0.1f);
     drawCube1(1.0f);
     glPopMatrix();
 
-    glPushMatrix();
-    glTranslatef(0.7f, -0.3f, 0.96f);
-    glScalef(0.35f, 0.5f, 0.04f);
-    drawCube1(1.0f);
-    glPopMatrix();
+    //backpack
+    //glColor3f(0.2f, 0.2f, 0.23f);
+    //glPushMatrix();
+    //glTranslatef(0.0f, 0.2f, -1.35f);
+    //glScalef(1.5f, 1.6f, 0.5f);
+    //drawCube1(1.0f);
+    //glPopMatrix();
 
-    // Red triangle markers (left)
-    glColor3f(0.9f, 0.1f, 0.1f);
-    glPushMatrix();
-    glTranslatef(-1.0f, 0.1f, 0.93f);
-    glRotatef(90.0f, 0.0f, 0.0f, 1.0f);
-    glScalef(0.25f, 0.25f, 0.06f);
-    drawPyramid1(1.0f);
-    glPopMatrix();
-
-    // Red triangle markers (right)
-    glPushMatrix();
-    glTranslatef(1.0f, 0.1f, 0.93f);
-    glRotatef(-90.0f, 0.0f, 0.0f, 1.0f);
-    glScalef(0.25f, 0.25f, 0.06f);
-    drawPyramid1(1.0f);
-    glPopMatrix();
-
-    // Upper chest plates
-    glColor3f(0.9f, 0.9f, 0.9f);
-    glPushMatrix();
-    glTranslatef(0.0f, 0.95f, 0.7f);
-    glScalef(2.4f, 0.3f, 1.2f);
-    drawCube1(1.0f);
-    glPopMatrix();
-
-    // Shoulder mount points
-    glColor3f(0.7f, 0.7f, 0.7f);
-    // Left mount
-    glPushMatrix();
-    glTranslatef(-1.5f, 0.8f, 0.0f);
-    glScalef(0.4f, 0.7f, 0.9f);
-    drawCube1(1.0f);
-    glPopMatrix();
-
-    // Right mount
-    glPushMatrix();
-    glTranslatef(1.5f, 0.8f, 0.0f);
-    glScalef(0.4f, 0.7f, 0.9f);
-    drawCube1(1.0f);
-    glPopMatrix();
-
-    // Back detail panels
-    glColor3f(0.3f, 0.3f, 0.35f);
-    glPushMatrix();
-    glTranslatef(0.0f, 0.3f, -0.92f);
-    glScalef(2.2f, 1.6f, 0.08f);
-    drawCube1(1.0f);
-    glPopMatrix();
-
-    // Back vents
-    glColor3f(0.2f, 0.2f, 0.25f);
-    glPushMatrix();
-    glTranslatef(-0.5f, 0.5f, -0.96f);
-    glScalef(0.4f, 0.8f, 0.04f);
-    drawCube1(1.0f);
-    glPopMatrix();
-
-    glPushMatrix();
-    glTranslatef(0.5f, 0.5f, -0.96f);
-    glScalef(0.4f, 0.8f, 0.04f);
-    drawCube1(1.0f);
     glPopMatrix();
 }
 
-void drawDetailedAbdomen() {
+void drawLowerBody() {
+    glPushMatrix();
+    glScalef(1.2f, 1.2f, 1.2f);
+
     // Main abdomen core (white)
     glColor3f(0.95f, 0.95f, 0.95f);
+    glTranslatef(0.0f, 0.5f, 0.0f);
     glPushMatrix();
-    glScalef(2.2f, 1.4f, 1.6f);
-    drawCube1(1.0f);
-    glPopMatrix();
-
-    // Red central block
-    glColor3f(0.9f, 0.1f, 0.1f);
-    glPushMatrix();
-    glTranslatef(0.0f, 0.0f, 0.0f);
-    glScalef(1.6f, 1.0f, 1.4f);
-    drawCube1(1.0f);
-    glPopMatrix();
-
-    // White detail strips
-    glColor3f(0.95f, 0.95f, 0.95f);
-    glPushMatrix();
-    glTranslatef(0.0f, 0.3f, 0.82f);
-    glScalef(1.4f, 0.2f, 0.08f);
-    drawCube1(1.0f);
-    glPopMatrix();
-
-    glPushMatrix();
-    glTranslatef(0.0f, -0.3f, 0.82f);
-    glScalef(1.4f, 0.2f, 0.08f);
-    drawCube1(1.0f);
-    glPopMatrix();
-
-    // Yellow abdomen vents
-    glColor3f(1.0f, 0.85f, 0.0f);
-    glPushMatrix();
-    glTranslatef(-0.6f, 0.0f, 0.86f);
-    glScalef(0.3f, 0.5f, 0.04f);
-    drawCube1(1.0f);
-    glPopMatrix();
-
-    glPushMatrix();
-    glTranslatef(0.6f, 0.0f, 0.86f);
-    glScalef(0.3f, 0.5f, 0.04f);
-    drawCube1(1.0f);
-    glPopMatrix();
-
-    // Side hip connections
-    glColor3f(0.85f, 0.85f, 0.85f);
-    glPushMatrix();
-    glTranslatef(-1.15f, -0.2f, 0.0f);
-    glScalef(0.5f, 0.9f, 1.4f);
-    drawCube1(1.0f);
-    glPopMatrix();
-
-    glPushMatrix();
-    glTranslatef(1.15f, -0.2f, 0.0f);
-    glScalef(0.5f, 0.9f, 1.4f);
-    drawCube1(1.0f);
-    glPopMatrix();
-
-    // Hip joint spheres
-    glColor3f(0.6f, 0.6f, 0.6f);
-    glPushMatrix();
-    glTranslatef(-0.9f, -0.7f, 0.0f);
-    gluSphere(gluObject, 0.35f, 16, 16);
-    glPopMatrix();
-
-    glPushMatrix();
-    glTranslatef(0.9f, -0.7f, 0.0f);
-    gluSphere(gluObject, 0.35f, 16, 16);
-    glPopMatrix();
-}
-
-void drawDetailedWaist() {
-    // Main waist block
-    glColor3f(0.95f, 0.95f, 0.95f);
-    glPushMatrix();
-    glScalef(2.0f, 0.9f, 1.5f);
-    drawCube1(1.0f);
-    glPopMatrix();
-
-    // Belt detail (red)
-    glColor3f(0.9f, 0.1f, 0.1f);
-    glPushMatrix();
-    glTranslatef(0.0f, 0.0f, 0.0f);
-    glScalef(2.1f, 0.3f, 1.55f);
-    drawCube1(1.0f);
-    glPopMatrix();
-
-    // Front groin armor
-    glColor3f(0.85f, 0.85f, 0.85f);
-    glPushMatrix();
-    glTranslatef(0.0f, -0.5f, 0.5f);
-    glScalef(1.4f, 0.2f, 0.3f);
-    drawCube1(1.0f);
-    glPopMatrix();
-}
-
-void drawSkirtArmor() {
-    // Front center skirt (blue)
-    glColor3f(0.1f, 0.3f, 0.9f);
-    glPushMatrix();
-    glTranslatef(0.0f, -0.8f, 0.65f);
-    glRotatef(-20.0f, 1.0f, 0.0f, 0.0f);
-    glScalef(1.4f, 1.2f, 0.12f);
-    drawCube1(1.0f);
-    glPopMatrix();
-
-    // Yellow detail on front skirt
-    glColor3f(1.0f, 0.85f, 0.0f);
-    glPushMatrix();
-    glTranslatef(0.0f, -1.1f, 0.8f);
-    glRotatef(-20.0f, 1.0f, 0.0f, 0.0f);
-    glScalef(0.8f, 0.3f, 0.1f);
-    drawCube1(1.0f);
-    glPopMatrix();
-
-    // Left front skirt (white)
-    glColor3f(0.95f, 0.95f, 0.95f);
-    glPushMatrix();
-    glTranslatef(-0.8f, -0.8f, 0.5f);
-    glRotatef(-15.0f, 1.0f, 0.0f, 0.0f);
-    glRotatef(-5.0f, 0.0f, 1.0f, 0.0f);
-    glScalef(0.6f, 1.2f, 0.12f);
-    drawCube1(1.0f);
-    glPopMatrix();
-
-    // Right front skirt (white)
-    glPushMatrix();
-    glTranslatef(0.8f, -0.8f, 0.5f);
-    glRotatef(-15.0f, 1.0f, 0.0f, 0.0f);
-    glRotatef(5.0f, 0.0f, 1.0f, 0.0f);
-    glScalef(0.6f, 1.2f, 0.12f);
-    drawCube1(1.0f);
-    glPopMatrix();
-
-    // Left side skirt
-    glPushMatrix();
-    glTranslatef(-1.1f, -0.8f, 0.0f);
-    glRotatef(-10.0f, 0.0f, 0.0f, 1.0f);
-    glScalef(0.7f, 1.3f, 1.2f);
-    drawCube1(1.0f);
-    glPopMatrix();
-
-    // Right side skirt
-    glPushMatrix();
-    glTranslatef(1.1f, -0.8f, 0.0f);
-    glRotatef(10.0f, 0.0f, 0.0f, 1.0f);
-    glScalef(0.7f, 1.3f, 1.2f);
-    drawCube1(1.0f);
-    glPopMatrix();
-
-    // Back left skirt
-    glPushMatrix();
-    glTranslatef(-0.6f, -0.8f, -0.6f);
-    glRotatef(15.0f, 1.0f, 0.0f, 0.0f);
-    glScalef(0.7f, 1.2f, 0.12f);
-    drawCube1(1.0f);
-    glPopMatrix();
-
-    // Back right skirt
-    glPushMatrix();
-    glTranslatef(0.6f, -0.8f, -0.6f);
-    glRotatef(15.0f, 1.0f, 0.0f, 0.0f);
-    glScalef(0.7f, 1.2f, 0.12f);
-    drawCube1(1.0f);
-    glPopMatrix();
-}
-
-// Enhanced upper body with more details
-void drawDetailedUpperBody() {
-    // Main chest frame (white)
-    glColor3f(0.95f, 0.95f, 0.95f);
-    glPushMatrix();
-    glScalef(2.8f, 2.2f, 1.8f);
-    drawCube1(1.0f);
-    glPopMatrix();
-
-    // Central blue chest panel
-    glColor3f(0.1f, 0.3f, 0.9f);
-    glPushMatrix();
-    glTranslatef(0.0f, 0.2f, 0.92f);
-    glScalef(1.6f, 1.4f, 0.08f);
-    drawCube1(1.0f);
-    glPopMatrix();
-
-    // Additional chest details
-    glColor3f(0.8f, 0.8f, 0.8f);
-    glPushMatrix();
-    glTranslatef(0.0f, 0.5f, 0.9f);
-    glScalef(1.2f, 0.3f, 0.1f);
-    drawCube1(1.0f);
-    glPopMatrix();
-
-    // Shoulder armor details
-    glColor3f(0.7f, 0.7f, 0.7f);
-    // Left shoulder detail
-    glPushMatrix();
-    glTranslatef(-1.8f, 0.8f, 0.0f);
-    glScalef(0.6f, 0.4f, 0.8f);
-    drawCube1(1.0f);
-    glPopMatrix();
-
-    // Right shoulder detail
-    glPushMatrix();
-    glTranslatef(1.8f, 0.8f, 0.0f);
-    glScalef(0.6f, 0.4f, 0.8f);
-    drawCube1(1.0f);
-    glPopMatrix();
-
-    // Chest vents (enhanced)
-    glColor3f(1.0f, 0.85f, 0.0f);
-    // Left vents
-    for (int i = 0; i < 3; i++) {
-        glPushMatrix();
-        glTranslatef(-0.8f, 0.6f - i * 0.3f, 0.96f);
-        glScalef(0.3f, 0.2f, 0.04f);
-        drawCube1(1.0f);
-        glPopMatrix();
-    }
-
-    // Right vents
-    for (int i = 0; i < 3; i++) {
-        glPushMatrix();
-        glTranslatef(0.8f, 0.6f - i * 0.3f, 0.96f);
-        glScalef(0.3f, 0.2f, 0.04f);
-        drawCube1(1.0f);
-        glPopMatrix();
-    }
-
-    // Back armor details
-    glColor3f(0.4f, 0.4f, 0.45f);
-    glPushMatrix();
-    glTranslatef(0.0f, 0.3f, -0.92f);
-    glScalef(2.2f, 1.6f, 0.08f);
-    drawCube1(1.0f);
-    glPopMatrix();
-
-    // Back thrusters
-    glColor3f(0.2f, 0.2f, 0.25f);
-    glPushMatrix();
-    glTranslatef(-0.7f, 0.0f, -0.96f);
-    glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
-    gluCylinder(gluObject, 0.15f, 0.1f, 0.5f, 8, 1);
-    glPopMatrix();
-
-    glPushMatrix();
-    glTranslatef(0.7f, 0.0f, -0.96f);
-    glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
-    gluCylinder(gluObject, 0.15f, 0.1f, 0.5f, 8, 1);
-    glPopMatrix();
-}
-
-// Enhanced lower body with more details
-void drawDetailedLowerBody() {
-    // Main abdomen core (white)
-    glColor3f(0.95f, 0.95f, 0.95f);
-    glPushMatrix();
-    glScalef(2.2f, 1.4f, 1.6f);
-    drawCube1(1.0f);
-    glPopMatrix();
-
-    // Red central block
-    glColor3f(0.9f, 0.1f, 0.1f);
-    glPushMatrix();
-    glTranslatef(0.0f, 0.0f, 0.0f);
-    glScalef(1.6f, 1.0f, 1.4f);
+    glScalef(2.2f, 0.8f, 1.7f);
     drawCube1(1.0f);
     glPopMatrix();
 
@@ -1017,7 +745,6 @@ void drawDetailedLowerBody() {
     gluSphere(gluObject, 0.35f, 16, 16);
     glPopMatrix();
 
-    // Skirt armor (enhanced)
     // Front center skirt (blue)
     glColor3f(0.1f, 0.3f, 0.9f);
     glPushMatrix();
@@ -1054,7 +781,6 @@ void drawDetailedLowerBody() {
     drawCube1(1.0f);
     glPopMatrix();
 
-    // Back skirts
     // Back left skirt
     glPushMatrix();
     glTranslatef(-0.6f, -1.6f, -0.6f);
@@ -1083,6 +809,8 @@ void drawDetailedLowerBody() {
     glTranslatef(1.3f, -1.2f, 0.0f);
     glScalef(0.4f, 0.6f, 0.8f);
     drawCube1(1.0f);
+    glPopMatrix();
+
     glPopMatrix();
 }
 
@@ -1344,28 +1072,20 @@ void Display(HWND hWnd)
     drawGundamHead();
     glPopMatrix();
 
-    // Antenna
-    glColor3f(1.0f, 0.9f, 0.0f);
-    glPushMatrix();
-    glTranslatef(0.0f, 0.45f, 0.0f); // On top
-    glScalef(1.5f, 0.4f, 0.1f);
-    drawPyramid();
     glPopMatrix();
 
-    glPopMatrix();
-
-    // Upper body (chest)
+    //Upper body
     glPushMatrix();
     glTranslatef(0.0f, 2.0f, 0.0f);
     glScalef(0.5f, 0.5f, 0.5f);
-    drawDetailedUpperBody();
+    drawUpperBody();
     glPopMatrix();
 
-    // Lower body (abdomen, waist, skirt)
+    //Lower body 
     glPushMatrix();
-    glTranslatef(0.0f, 0.5f, 0.0f);
+    glTranslatef(0.0f, 1.1f, 0.0f);
     glScalef(0.5f, 0.5f, 0.5f);
-    drawDetailedLowerBody();
+    drawLowerBody();
     glPopMatrix();
 
     // Left Arm
@@ -2077,8 +1797,8 @@ void drawRightArm() {
         { 0.0f,  0.8f,  0.35f}   // Top left 2
     };
 
-	Vec3 back[7] = {
-		{ -0.1f,  0.0f,  0.35f},  // Bottom left 1
+    Vec3 back[7] = {
+        { -0.1f,  0.0f,  0.35f},  // Bottom left 1
         { 0.1f,  -0.1f,  0.35f},  // Bottom left 2
         { 0.8f,  0.1f,  0.35f},  // Bottom Right 
         { 0.9f,  0.7f,  0.35f},   // Top Right 1
@@ -2216,7 +1936,7 @@ void drawRightArm() {
         int next = (i + 1) % 7;
 
         // Skip the edge between vertex 3 and 4 (Top Right 1 to Top Right 2)
-        if ( i == 2) {
+        if (i == 2) {
             continue; // Skip this quad to leave it open
         }
 
@@ -2248,28 +1968,28 @@ void drawRightArm() {
     // Internal connecting cylinder
     glColor3fv(darkGrey);
     glPushMatrix();
-		glRotatef(90, 0.0f, 1.0f, 0.0f);
-        glTranslatef(0.0f, 0.4f, 0.5f);
-		glColor3fv(darkGrey);
-		glPushMatrix();
-		glRotatef(90, 0.0f, 0.0f, 1.0f);
-		drawCenteredCylinder(0.32f, 0.5f, 20);
-		glPopMatrix();
+    glRotatef(90, 0.0f, 1.0f, 0.0f);
+    glTranslatef(0.0f, 0.4f, 0.5f);
+    glColor3fv(darkGrey);
+    glPushMatrix();
+    glRotatef(90, 0.0f, 0.0f, 1.0f);
+    drawCenteredCylinder(0.32f, 0.5f, 20);
+    glPopMatrix();
 
-		// Decorative rings on flat faces
-		glColor3fv(white);
-		glPushMatrix();
-		glRotatef(90, 0.0f, 0.0f, 1.0f);
-		glTranslatef(0.00f, 0.0f, 0.0f);
-		//gluDisk(gluObject, 0.12f, 0.30f, 20, 1);
-		drawCenteredCylinder(0.22f, 0.6f, 20);
-		glPopMatrix();
+    // Decorative rings on flat faces
+    glColor3fv(white);
+    glPushMatrix();
+    glRotatef(90, 0.0f, 0.0f, 1.0f);
+    glTranslatef(0.00f, 0.0f, 0.0f);
+    //gluDisk(gluObject, 0.12f, 0.30f, 20, 1);
+    drawCenteredCylinder(0.22f, 0.6f, 20);
+    glPopMatrix();
 
-		glPushMatrix();
-		glTranslatef(-0.26f, 0.0f, 0.0f);
-		glRotatef(-90, 0.0f, 1.0f, 0.0f);
-		gluDisk(gluObject, 0.22f, 0.30f, 20, 1);
-		glPopMatrix();
+    glPushMatrix();
+    glTranslatef(-0.26f, 0.0f, 0.0f);
+    glRotatef(-90, 0.0f, 1.0f, 0.0f);
+    gluDisk(gluObject, 0.22f, 0.30f, 20, 1);
+    glPopMatrix();
     glPopMatrix();
 
     glPopMatrix(); // End shoulder armor
