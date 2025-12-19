@@ -12,7 +12,7 @@ struct Vec3 {
 
 // Forward declarations for functions used in main.cpp
 void updateProjection(int width, int height);
-void drawRightArm();
+void drawLeftHand();
 void drawDetailedLeftLeg();
 void drawDetailedRightLeg();
 void drawSword();
@@ -206,8 +206,7 @@ void drawPyramid() {
     glEnd();
 }
 
-void drawCenteredCube(float w, float h, float d, float r = 1.0f, float g = 1.0f, float b = 1.0f) {
-    glColor3f(r, g, b);
+void drawCenteredCube(float w, float h, float d) {
     float hw = w / 2.0f;
     float hh = h / 2.0f;
     float hd = d / 2.0f;
@@ -224,7 +223,6 @@ void drawCenteredCube(float w, float h, float d, float r = 1.0f, float g = 1.0f,
     glEnd();
 
     // Back
-    glColor3f(r * 0.8f, g * 0.8f, b * 0.8f);
     glBegin(GL_QUADS);
     glNormal3f(0, 0, -1);
     glVertex3f(-hw, -hh, -hd);
@@ -234,7 +232,6 @@ void drawCenteredCube(float w, float h, float d, float r = 1.0f, float g = 1.0f,
     glEnd();
 
     // Left
-    glColor3f(r * 0.9f, g * 0.9f, b * 0.9f);
     glBegin(GL_QUADS);
     glNormal3f(-1, 0, 0);
     glVertex3f(-hw, -hh, -hd);
@@ -244,7 +241,6 @@ void drawCenteredCube(float w, float h, float d, float r = 1.0f, float g = 1.0f,
     glEnd();
 
     // Right
-    glColor3f(r * 0.9f, g * 0.9f, b * 0.9f);
     glBegin(GL_QUADS);
     glNormal3f(1, 0, 0);
     glVertex3f(hw, -hh, -hd);
@@ -254,7 +250,6 @@ void drawCenteredCube(float w, float h, float d, float r = 1.0f, float g = 1.0f,
     glEnd();
 
     // Top
-    glColor3f(r * 1.1f, g * 1.1f, b * 1.1f);
     glBegin(GL_QUADS);
     glNormal3f(0, 1, 0);
     glVertex3f(-hw, hh, -hd);
@@ -264,7 +259,6 @@ void drawCenteredCube(float w, float h, float d, float r = 1.0f, float g = 1.0f,
     glEnd();
 
     // Bottom
-    glColor3f(r * 0.7f, g * 0.7f, b * 0.7f);
     glBegin(GL_QUADS);
     glNormal3f(0, -1, 0);
     glVertex3f(-hw, -hh, -hd);
@@ -419,7 +413,78 @@ void drawChamferedCube(float width, float height, float depth, float chamfer) {
     glEnd();
 }
 
-// Example usage:
-// drawChamferedCube(1.0f, 1.0f, 1.0f, 0.1f);  // 1x1x1 cube with 0.1 chamfer
+// Draw a tapered cube (top and bottom are rectangles which can differ in size).
+// Centered at origin, Y is up.
+// Parameters:
+//   topW, topD    : width (X) and depth (Z) of the top face
+//   bottomW, bottomD: width (X) and depth (Z) of the bottom face
+//   height        : total height (distance between top and bottom)
+void drawTaperedCube(float topW, float topD, float bottomW, float bottomD, float height)
+{
+    float halfH = height * 0.5f;
+
+    // top face (y = +halfH), ordered CCW when looking from above
+    float top[4][3] = {
+        { -topW * 0.5f,  halfH, -topD * 0.5f }, // 0: top-left (near -Z)
+        {  topW * 0.5f,  halfH, -topD * 0.5f }, // 1: top-right
+        {  topW * 0.5f,  halfH,  topD * 0.5f }, // 2: bottom-right (far +Z)
+        { -topW * 0.5f,  halfH,  topD * 0.5f }  // 3: bottom-left
+    };
+
+    // bottom face (y = -halfH), ordered CCW when looking from below (so normal points down)
+    float bottom[4][3] = {
+        { -bottomW * 0.5f, -halfH, -bottomD * 0.5f }, // 0
+        {  bottomW * 0.5f, -halfH, -bottomD * 0.5f }, // 1
+        {  bottomW * 0.5f, -halfH,  bottomD * 0.5f }, // 2
+        { -bottomW * 0.5f, -halfH,  bottomD * 0.5f }  // 3
+    };
+
+    // Top face
+    glBegin(GL_POLYGON);
+    glNormal3f(0.0f, 1.0f, 0.0f);
+    for (int i = 0; i < 4; ++i) glVertex3f(top[i][0], top[i][1], top[i][2]);
+    glEnd();
+
+    // Bottom face (reverse order so normal points down)
+    glBegin(GL_POLYGON);
+    glNormal3f(0.0f, -1.0f, 0.0f);
+    for (int i = 3; i >= 0; --i) glVertex3f(bottom[i][0], bottom[i][1], bottom[i][2]);
+    glEnd();
+
+    // Helper lambdas (or local functions) for vector math
+    auto sub = [](const float a[3], const float b[3], float out[3]) {
+        out[0] = a[0] - b[0]; out[1] = a[1] - b[1]; out[2] = a[2] - b[2];
+        };
+    auto cross = [](const float a[3], const float b[3], float out[3]) {
+        out[0] = a[1] * b[2] - a[2] * b[1];
+        out[1] = a[2] * b[0] - a[0] * b[2];
+        out[2] = a[0] * b[1] - a[1] * b[0];
+        };
+    auto normalize = [](float v[3]) {
+        float len = sqrtf(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+        if (len > 1e-6f) { v[0] /= len; v[1] /= len; v[2] /= len; }
+        };
+
+    // Sides (4 quads). Each quad connects top[i] -> top[next] -> bottom[next] -> bottom[i]
+    glBegin(GL_QUADS);
+    for (int i = 0; i < 4; ++i) {
+        int next = (i + 1) % 4;
+
+        // compute normal: cross( top[next] - top[i], bottom[i] - top[i] )
+        float a[3], b[3], n[3];
+        sub(top[next], top[i], a);
+        sub(bottom[i], top[i], b);
+        cross(a, b, n);
+        normalize(n);
+
+        glNormal3f(n[0], n[1], n[2]);
+
+        glVertex3f(top[i][0], top[i][1], top[i][2]);
+        glVertex3f(top[next][0], top[next][1], top[next][2]);
+        glVertex3f(bottom[next][0], bottom[next][1], bottom[next][2]);
+        glVertex3f(bottom[i][0], bottom[i][1], bottom[i][2]);
+    }
+    glEnd();
+}
 
 

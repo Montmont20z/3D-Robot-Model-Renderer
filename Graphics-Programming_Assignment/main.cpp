@@ -88,7 +88,7 @@ float zNear = 0.1f, zFar = 20.0f;
 
 void updateProjection(int width, int height);
 
-void drawRightArm();
+void drawLeftHand();
 void drawLeftLeg();
 void drawRightLeg();
 
@@ -375,23 +375,23 @@ void Display(HWND hWnd)
     gluSphere(gluObject, 0.3f, 10, 10);
     glPopMatrix();
 
-    //Right Arm
+    //Left Hand
     glPushMatrix();
     glTranslatef(2.0f, 2.0f, 2.0f);
-    drawRightArm();
+    drawLeftHand();
     glPopMatrix();
 
     ////Left Leg 
-    //glPushMatrix();
-    //glTranslatef(-0.6f, 0.1f, 0.0f);
-    //drawLeftLeg();
-    //glPopMatrix();
+    glPushMatrix();
+    glTranslatef(-0.6f, 0.1f, 0.0f);
+    drawLeftLeg();
+    glPopMatrix();
 
     ////Right Leg
-    //glPushMatrix();
-    //glTranslatef(0.6f, 0.1f, 0.0f);
-    //drawRightLeg();
-    //glPopMatrix();
+    glPushMatrix();
+    glTranslatef(0.6f, 0.1f, 0.0f);
+    drawRightLeg();
+    glPopMatrix();
 
     glPopMatrix();
 
@@ -1672,7 +1672,7 @@ void drawShield() {
 
 
 
-void drawRightArm() {
+void drawLeftHand() {
     float white[3] = { 0.95f, 0.95f, 0.95f };
     float darkGrey[3] = { 0.25f, 0.25f, 0.25f };
     float red[3] = { 0.8f, 0.1f, 0.1f };
@@ -1896,9 +1896,9 @@ void drawRightArm() {
     // PART 2: SHOULDER CONNECTOR
     // =================================================================
     glPushMatrix();
-    glTranslatef(0.0f, 0.2f, 0.0f);
+    glTranslatef(0.0f, 0.3f, 0.0f);
     glColor3fv(white);
-    drawCenteredCube(0.50f, 0.25f, 0.50f);
+    drawCenteredCube(0.50f, 0.45f, 0.50f);
     glPopMatrix();
 
     // =================================================================
@@ -1920,33 +1920,30 @@ void drawRightArm() {
     drawChamferedCube(0.5, 0.8, 0.59, 0.1);
 
     // cylinder
-
     glColor3fv(white);
-    glPushMatrix();
-    glRotatef(90, 0.0f, 0.0f, 1.0f);
-    drawCenteredCylinder(0.28f, 0.7f, 20);
-    glPopMatrix();
+    glPushMatrix(); // start cylinder
+		glTranslatef(0, -0.1f, 0);
+		glRotatef(90, 0.0f, 0.0f, 1.0f);
+		drawCenteredCylinder(0.28f, 0.7f, 20);
+		glRotatef(-90, 0.0f, 0.0f, 1.0f); // rotate back
 
-    // Decorative rings on flat faces
-    glColor3f(0.0f, 0.0f, 0.0f);
-    glPushMatrix();
-    glTranslatef(0.36f, 0.0f, 0.0f);
-    glRotatef(90, 0.0f, 1.0f, 0.0f);
-    gluDisk(gluObject, 0.12f, 0.20f, 20, 1);
-    glPopMatrix();
+		// Decorative rings on flat faces (outter)
+		glColor3f(0.0f, 0.0f, 0.0f);
+		glPushMatrix();
+		glTranslatef(0.36f, 0.0f, 0.0f);
+		glRotatef(90, 0.0f, 1.0f, 0.0f);
+		gluDisk(gluObject, 0.12f, 0.20f, 20, 1);
+		gluDisk(gluObject, 0.0f, 0.07f, 20, 1);
+		glPopMatrix();
 
-    glPushMatrix();
-    glTranslatef(-0.36f, 0.0f, 0.0f);
-    glRotatef(-90, 0.0f, 1.0f, 0.0f);
-    gluDisk(gluObject, 0.12f, 0.20f, 20, 1);
-    glPopMatrix();
-
-	glPushMatrix();
-    glTranslatef(0.36f, 0.0f, 0.0f);
-    glRotatef(-90, 0.0f, 1.0f, 0.0f);
-    gluDisk(gluObject, 0.0f, 0.07f, 20, 1);
-    glPopMatrix();
-
+		// Decorative rings on flat faces (inner)
+		glPushMatrix();
+		glTranslatef(-0.36f, 0.0f, 0.0f);
+		glRotatef(-90, 0.0f, 1.0f, 0.0f);
+		gluDisk(gluObject, 0.12f, 0.20f, 20, 1);
+		gluDisk(gluObject, 0.0f, 0.07f, 20, 1);
+		glPopMatrix();
+	glPopMatrix(); // End Cylinder
 
     glPopMatrix(); // End elbow
 
@@ -1956,60 +1953,48 @@ void drawRightArm() {
     glPushMatrix();
     glTranslatef(0.0f, -1.5f, 0.0f);
     glColor3fv(white);
-    //drawCenteredCube(0.38f, 0.9f, 0.38f);
     drawChamferedCube(0.6f, 0.9f, 0.6f, 0.05f);
     glPopMatrix();
 
     // Forearm cuff detail
     glPushMatrix();
-    glTranslatef(0.0f, -2.05f, 0.0f);
-    glColor3fv(darkGrey);
-    glBegin(GL_QUADS);
-    //glVertex3f();
-
-    glEnd();
+    glTranslatef(0.0f, -2.10f, 0.0f);
+    glColor3fv(white);
+    drawTaperedCube(0.55f, 0.55f, 0.4f, 0.4f, 0.3f);
     glPopMatrix();
 
     // =================================================================
-    // PART 6: WRIST JOINT (Small connector)
-    // =================================================================
-    //glPushMatrix();
-    //glTranslatef(0.0f, -2.25f, 0.0f);
-    //glColor3fv(darkGrey);
-    //drawCenteredCube(0.32f, 0.15f, 0.32f);
-    //glPopMatrix();
-
-    // =================================================================
-    // PART 7: HAND (Palm + Fingers)
+    // PART 6: HAND (Palm + Fingers)
     // =================================================================
     glPushMatrix();
-    glTranslatef(0.0f, -2.55f, 0.0f);
+    glTranslatef(0.0f, -2.4f, 0.0f);
 
-    // Palm base
+    // Palm
     glColor3fv(darkGrey);
-    drawCenteredCube(0.35f, 0.35f, 0.38f);
+    drawChamferedCube(0.4f, 0.4f, 0.4f, 0.05f);
 
     // Finger mass (clenched fist)
     glPushMatrix();
-    glTranslatef(0.0f, -0.35f, 0.0f);
-    drawCenteredCube(0.32f, 0.4f, 0.35f);
+    glTranslatef(0.0f, -0.45f, 0.0f);
+    drawCenteredCube(0.32f, 0.5f, 0.35f);
 
     // Finger grooves (vertical lines suggesting fingers)
-    glColor3f(0.15f, 0.15f, 0.15f);
+    //glColor3f(0.15f, 0.15f, 0.15f);
     for (int i = -1; i <= 1; i++) {
         glPushMatrix();
         glTranslatef(i * 0.08f, 0.0f, 0.18f);
-        drawCenteredCube(0.015f, 0.38f, 0.02f);
+        glColor3f(0.1f, 0.1f, 0.1f);
+        drawCenteredCube(0.015f, 0.48f, 0.05f);
         glPopMatrix();
     }
     glPopMatrix();
 
     // Thumb
     glPushMatrix();
-    glTranslatef(0.25f, -0.15f, 0.1f);
+    glTranslatef(-0.25f, -0.15f, 0.1f);
     glRotatef(-25, 0.0f, 0.0f, 1.0f);
     glColor3fv(darkGrey);
-    drawCenteredCube(0.12f, 0.3f, 0.18f);
+    drawCenteredCube(0.12f, 0.4f, 0.18f);
     glPopMatrix();
 
     glPopMatrix(); // End hand
