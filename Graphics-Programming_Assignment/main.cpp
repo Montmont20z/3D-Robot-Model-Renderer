@@ -16,9 +16,6 @@ const double PI = 3.14159265358979323846f;
 
 #define WINDOW_TITLE "OpenGL Window"
 
-struct Vec3 {
-    float x, y, z;
-};
 
 float rotateX = 0.0f, rotateY = 0.0f, rotateZ = 0.0f;
 float positionX = 0.0f, positionY = 0.0f, positionZ = 0.0f;
@@ -82,7 +79,6 @@ void computeNormal(Vec3 a, Vec3 b, Vec3 c) {
 }
 
 
-GLUquadric* gluObject = nullptr;
 
 enum ProjectMode { ORTHO = 0, PERSPECTIVE = 1, FRUSTUM = 2 };
 ProjectMode projMode = ORTHO;
@@ -291,126 +287,236 @@ void initLighting() {
     glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
 }
 //--------------------------------------------------------------------
-void drawCube() {
-    glBegin(GL_QUADS);
-    // Front (Z+)
-    glNormal3f(0.0f, 0.0f, 1.0f);
-    glVertex3f(-0.5f, -0.5f, 0.5f); glVertex3f(0.5f, -0.5f, 0.5f);
-    glVertex3f(0.5f, 0.5f, 0.5f);   glVertex3f(-0.5f, 0.5f, 0.5f);
-    // Back (Z-)
-    glNormal3f(0.0f, 0.0f, -1.0f);
-    glVertex3f(-0.5f, -0.5f, -0.5f); glVertex3f(-0.5f, 0.5f, -0.5f);
-    glVertex3f(0.5f, 0.5f, -0.5f);   glVertex3f(0.5f, -0.5f, -0.5f);
-    // Top (Y+)
-    glNormal3f(0.0f, 1.0f, 0.0f);
-    glVertex3f(-0.5f, 0.5f, -0.5f); glVertex3f(-0.5f, 0.5f, 0.5f);
-    glVertex3f(0.5f, 0.5f, 0.5f);   glVertex3f(0.5f, 0.5f, -0.5f);
-    // Bottom (Y-)
-    glNormal3f(0.0f, -1.0f, 0.0f);
-    glVertex3f(-0.5f, -0.5f, -0.5f); glVertex3f(0.5f, -0.5f, -0.5f);
-    glVertex3f(0.5f, -0.5f, 0.5f);   glVertex3f(-0.5f, -0.5f, 0.5f);
-    // Right (X+)
-    glNormal3f(1.0f, 0.0f, 0.0f);
-    glVertex3f(0.5f, -0.5f, -0.5f); glVertex3f(0.5f, 0.5f, -0.5f);
-    glVertex3f(0.5f, 0.5f, 0.5f);   glVertex3f(0.5f, -0.5f, 0.5f);
-    // Left (X-)
-    glNormal3f(-1.0f, 0.0f, 0.0f);
-    glVertex3f(-0.5f, -0.5f, -0.5f); glVertex3f(-0.5f, -0.5f, 0.5f);
-    glVertex3f(-0.5f, 0.5f, 0.5f);   glVertex3f(-0.5f, 0.5f, -0.5f);
-    glEnd();
+
+void Display(HWND hWnd)
+{
+    glEnable(GL_DEPTH_TEST);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClearColor(0.3f, 0.3f, 0.3f, 1.0f); // gray
+
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    // compute eye positon from spherical coords (yaw, pitch in degree)
+    // ---------- compute yaw, pitch, distance into camera eye position ----------
+    float yawR = camYaw * DEG2RAD; // yaw in radian
+    float pitchR = camPitch * DEG2RAD; // pitch in radian
+    float cp = cosf(pitchR);
+    float sx = sinf(yawR);
+    float cx = cosf(yawR);
+    float sy = sinf(pitchR);
+
+    // eye relative to target
+    float eyeX = camTargetX + camDistance * cp * sx;
+    float eyeY = camTargetY + camDistance * sy;
+    float eyeZ = camTargetZ + camDistance * cp * cx;
+    // ----------------------------------------------------------------------------
+
+    // gluLookAt(eyeX, eyeY, eyeZ, lookX, lookY, lookZ, upX, upY, upZ); up usually is (0,1,0)
+    gluLookAt(eyeX, eyeY, eyeZ,
+        camTargetX, camTargetY, camTargetZ,
+        0.0f, 1.0f, 0.0f);
+
+    // shape Rotation and Translation
+    //glTranslatef(positionX, positionY, -4.0f + positionZ);
+    //glRotatef(rotateY, 0.0f, 1.0f, 0.0f); // y axis
+    //glRotatef(rotateX, 1.0f, 0.0f, 0.0f); // x axis
+    //glRotatef(rotateZ, 0.0f, 0.0f, 1.0f); // z axis
+
+    glPushMatrix();
+    glTranslatef(1.0f, 1.0f, 1.0f);
+    //drawSword();
+    glTranslatef(1.0f, 1.0f, 1.0f);
+    drawShield();
+    glPopMatrix();
+
+    glPushMatrix();
+    glScalef(0.5f, 0.5f, 0.5f);
+
+    glPushMatrix();
+    glTranslatef(0.0f, 3.2f, 0.0f);
+
+    // Head 
+    glPushMatrix();
+    glScalef(0.8f, 0.8f, 0.8f);
+    drawGundamHead();
+    glPopMatrix();
+
+    glPopMatrix();
+
+    //Upper body
+    glPushMatrix();
+    glTranslatef(0.0f, 2.0f, 0.0f);
+    glScalef(0.5f, 0.5f, 0.5f);
+    drawUpperBody();
+    glPopMatrix();
+
+    //Lower body 
+    glPushMatrix();
+    glTranslatef(0.0f, 1.1f, 0.0f);
+    glScalef(0.5f, 0.5f, 0.5f);
+    drawLowerBody();
+    glPopMatrix();
+
+    //Left Arm
+    glPushMatrix();
+    glTranslatef(-1.1f, 2.4f, 0.0f);
+    glColor3f(0.6f, 0.6f, 0.6f);     // Grey Shoulder
+    gluSphere(gluObject, 0.45f, 20, 20);
+
+    glColor3f(1.0f, 1.0f, 1.0f);     // White Arm
+    glPushMatrix();
+    glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+    gluCylinder(gluObject, 0.3f, 0.25f, 1.5f, 16, 2);
+    glPopMatrix();
+
+    glColor3f(0.2f, 0.2f, 0.2f);     // Dark Hand
+    glTranslatef(0.0f, -1.6f, 0.0f);
+    gluSphere(gluObject, 0.3f, 10, 10);
+    glPopMatrix();
+
+    //Right Arm
+    glPushMatrix();
+    glTranslatef(2.0f, 2.0f, 2.0f);
+    drawRightArm();
+    glPopMatrix();
+
+    ////Left Leg 
+    //glPushMatrix();
+    //glTranslatef(-0.6f, 0.1f, 0.0f);
+    //drawLeftLeg();
+    //glPopMatrix();
+
+    ////Right Leg
+    //glPushMatrix();
+    //glTranslatef(0.6f, 0.1f, 0.0f);
+    //drawRightLeg();
+    //glPopMatrix();
+
+    glPopMatrix();
+
 }
 
-void drawCube1(float size) {
-    float halfSize = size / 2.0f;
-    glBegin(GL_QUADS);
-    // Front face
-    glNormal3f(0.0, 0.0, 1.0);
-    glVertex3f(-halfSize, -halfSize, halfSize);
-    glVertex3f(halfSize, -halfSize, halfSize);
-    glVertex3f(halfSize, halfSize, halfSize);
-    glVertex3f(-halfSize, halfSize, halfSize);
-    // Back face
-    glNormal3f(0.0, 0.0, -1.0);
-    glVertex3f(-halfSize, -halfSize, -halfSize);
-    glVertex3f(-halfSize, halfSize, -halfSize);
-    glVertex3f(halfSize, halfSize, -halfSize);
-    glVertex3f(halfSize, -halfSize, -halfSize);
-    // Top face
-    glNormal3f(0.0, 1.0, 0.0);
-    glVertex3f(-halfSize, halfSize, -halfSize);
-    glVertex3f(-halfSize, halfSize, halfSize);
-    glVertex3f(halfSize, halfSize, halfSize);
-    glVertex3f(halfSize, halfSize, -halfSize);
-    // Bottom face
-    glNormal3f(0.0, -1.0, 0.0);
-    glVertex3f(-halfSize, -halfSize, -halfSize);
-    glVertex3f(halfSize, -halfSize, -halfSize);
-    glVertex3f(halfSize, -halfSize, halfSize);
-    glVertex3f(-halfSize, -halfSize, halfSize);
-    // Right face
-    glNormal3f(1.0, 0.0, 0.0);
-    glVertex3f(halfSize, -halfSize, -halfSize);
-    glVertex3f(halfSize, halfSize, -halfSize);
-    glVertex3f(halfSize, halfSize, halfSize);
-    glVertex3f(halfSize, -halfSize, halfSize);
-    // Left face
-    glNormal3f(-1.0, 0.0, 0.0);
-    glVertex3f(-halfSize, -halfSize, -halfSize);
-    glVertex3f(-halfSize, -halfSize, halfSize);
-    glVertex3f(-halfSize, halfSize, halfSize);
-    glVertex3f(-halfSize, halfSize, -halfSize);
-    glEnd();
+int main(HINSTANCE hInst, HINSTANCE, LPSTR, int nCmdShow)
+{
+    WNDCLASSEX wc;
+    ZeroMemory(&wc, sizeof(WNDCLASSEX));
+
+    wc.cbSize = sizeof(WNDCLASSEX);
+    wc.hInstance = GetModuleHandle(NULL);
+    wc.lpfnWndProc = WindowProcedure;
+    wc.lpszClassName = WINDOW_TITLE;
+    wc.style = CS_HREDRAW | CS_VREDRAW;
+
+    if (!RegisterClassEx(&wc)) return false;
+
+    HWND hWnd = CreateWindow(WINDOW_TITLE, WINDOW_TITLE, WS_OVERLAPPEDWINDOW,
+        CW_USEDEFAULT, CW_USEDEFAULT, WINDOW_WIDTH, WINDOW_HEIGHT,
+        NULL, NULL, wc.hInstance, NULL);
+
+    //--------------------------------
+    //	Initialize window for OpenGL
+    //--------------------------------
+
+    HDC hdc = GetDC(hWnd);
+
+    //	initialize pixel format for the window
+    initPixelFormat(hdc);
+
+    //	get an openGL context
+    HGLRC hglrc = wglCreateContext(hdc);
+
+    //	make context current
+    if (!wglMakeCurrent(hdc, hglrc)) return false;
+
+    // now it's safe to create GLU objects
+    gluObject = gluNewQuadric();
+
+    //--------------------------------
+    //	End initialization
+    //--------------------------------
+
+    ShowWindow(hWnd, nCmdShow);
+
+    MSG msg;
+    ZeroMemory(&msg, sizeof(msg));
+
+    // set initial projection (will be updated in WM_SIZE too)
+    updateProjection(WINDOW_WIDTH, WINDOW_HEIGHT);
+
+    glMatrixMode(GL_MODELVIEW);
+    initLighting();
+
+
+    while (true)
+    {
+        if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+        {
+            if (msg.message == WM_QUIT) break;
+
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+        }
+
+        Display(hWnd);
+
+        SwapBuffers(hdc);
+    }
+
+    if (gluObject) gluDeleteQuadric(gluObject);
+    wglMakeCurrent(NULL, NULL);
+    wglDeleteContext(hglrc);
+
+    UnregisterClass(WINDOW_TITLE, wc.hInstance);
+
+    return true;
+}
+//--------------------------------------------------------------------
+void updateProjection(int width, int height)
+{
+    if (height == 0) height = 1;
+    float aspect = (float)width / (float)height;
+
+
+    glViewport(0, 0, width, height);
+
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+
+
+    switch (projMode)
+    {
+    case ORTHO:
+        // keep the original small-world units but adapt to aspect
+        glOrtho(-1.0 * aspect, 3.0 * aspect, -1.0f, 3.0f, -10.0f, 10.0f);
+        break;
+
+
+    case PERSPECTIVE:
+        // gluPerspective(fovy, aspect, zNear, zFar)
+        gluPerspective(fovy, aspect, zNear, zFar);
+        break;
+
+
+    case FRUSTUM:
+    {
+        // derive left/right/top/bottom from fovy and aspect for a symmetric frustum
+        float top = zNear * tanf((fovy * (float)PI / 180.0f) * 0.5f);
+        float bottom = -top;
+        float right = top * aspect;
+        float left = -right;
+        // glFrustum(left, right, bottom, top, zNear, zFar)
+        glFrustum(left, right, bottom, top, zNear, zFar);
+    }
+    break;
+    }
+
+
+    glMatrixMode(GL_MODELVIEW);
 }
 
-void drawPyramid() {
-    glBegin(GL_TRIANGLES);
-    // Front
-    glVertex3f(0.0f, 0.5f, 0.0f); glVertex3f(-0.5f, -0.5f, 0.5f); glVertex3f(0.5f, -0.5f, 0.5f);
-    // Right
-    glVertex3f(0.0f, 0.5f, 0.0f); glVertex3f(0.5f, -0.5f, 0.5f); glVertex3f(0.5f, -0.5f, -0.5f);
-    // Back
-    glVertex3f(0.0f, 0.5f, 0.0f); glVertex3f(0.5f, -0.5f, -0.5f); glVertex3f(-0.5f, -0.5f, -0.5f);
-    // Left
-    glVertex3f(0.0f, 0.5f, 0.0f); glVertex3f(-0.5f, -0.5f, -0.5f); glVertex3f(-0.5f, -0.5f, 0.5f);
-    glEnd();
-}
 
-void drawPyramid1(float size) {
-    float s = size / 2.0f;
-    float h = size / 2.0f;
-
-    glBegin(GL_TRIANGLES);
-    // Front face
-    glNormal3f(0, 0.707, 0.707);
-    glVertex3f(0, h, 0);
-    glVertex3f(-s, -h, s);
-    glVertex3f(s, -h, s);
-    // Right face
-    glNormal3f(0.707, 0.707, 0);
-    glVertex3f(0, h, 0);
-    glVertex3f(s, -h, s);
-    glVertex3f(s, -h, -s);
-    // Back face
-    glNormal3f(0, 0.707, -0.707);
-    glVertex3f(0, h, 0);
-    glVertex3f(s, -h, -s);
-    glVertex3f(-s, -h, -s);
-    // Left face
-    glNormal3f(-0.707, 0.707, 0);
-    glVertex3f(0, h, 0);
-    glVertex3f(-s, -h, -s);
-    glVertex3f(-s, -h, s);
-    glEnd();
-
-    // Base
-    glBegin(GL_QUADS);
-    glNormal3f(0, -1, 0);
-    glVertex3f(-s, -h, s);
-    glVertex3f(s, -h, s);
-    glVertex3f(s, -h, -s);
-    glVertex3f(-s, -h, -s);
-    glEnd();
-}
 
 void drawGundamHead() {
     // Draw neck first 
@@ -1316,235 +1422,6 @@ void drawRightLeg() {
     glPopMatrix(); // End knee rotation
 }
 
-void Display(HWND hWnd)
-{
-    glEnable(GL_DEPTH_TEST);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glClearColor(0.3f, 0.3f, 0.3f, 1.0f); // gray
-
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-
-    // compute eye positon from spherical coords (yaw, pitch in degree)
-    // ---------- compute yaw, pitch, distance into camera eye position ----------
-    float yawR = camYaw * DEG2RAD; // yaw in radian
-    float pitchR = camPitch * DEG2RAD; // pitch in radian
-    float cp = cosf(pitchR);
-    float sx = sinf(yawR);
-    float cx = cosf(yawR);
-    float sy = sinf(pitchR);
-
-    // eye relative to target
-    float eyeX = camTargetX + camDistance * cp * sx;
-    float eyeY = camTargetY + camDistance * sy;
-    float eyeZ = camTargetZ + camDistance * cp * cx;
-    // ----------------------------------------------------------------------------
-
-    // gluLookAt(eyeX, eyeY, eyeZ, lookX, lookY, lookZ, upX, upY, upZ); up usually is (0,1,0)
-    gluLookAt(eyeX, eyeY, eyeZ,
-        camTargetX, camTargetY, camTargetZ,
-        0.0f, 1.0f, 0.0f);
-
-    // shape Rotation and Translation
-    //glTranslatef(positionX, positionY, -4.0f + positionZ);
-    //glRotatef(rotateY, 0.0f, 1.0f, 0.0f); // y axis
-    //glRotatef(rotateX, 1.0f, 0.0f, 0.0f); // x axis
-    //glRotatef(rotateZ, 0.0f, 0.0f, 1.0f); // z axis
-
-    glPushMatrix();
-    glTranslatef(1.0f, 1.0f, 1.0f);
-    //drawSword();
-    glTranslatef(1.0f, 1.0f, 1.0f);
-    drawShield();
-    glPopMatrix();
-
-    glPushMatrix();
-    glScalef(0.5f, 0.5f, 0.5f);
-
-    glPushMatrix();
-    glTranslatef(0.0f, 3.2f, 0.0f);
-
-    // Head 
-    glPushMatrix();
-    glScalef(0.8f, 0.8f, 0.8f);
-    drawGundamHead();
-    glPopMatrix();
-
-    glPopMatrix();
-
-    //Upper body
-    glPushMatrix();
-    glTranslatef(0.0f, 2.0f, 0.0f);
-    glScalef(0.5f, 0.5f, 0.5f);
-    drawUpperBody();
-    glPopMatrix();
-
-    //Lower body 
-    glPushMatrix();
-    glTranslatef(0.0f, 1.1f, 0.0f);
-    glScalef(0.5f, 0.5f, 0.5f);
-    drawLowerBody();
-    glPopMatrix();
-
-    //Left Arm
-    glPushMatrix();
-    glTranslatef(-1.1f, 2.4f, 0.0f);
-    glColor3f(0.6f, 0.6f, 0.6f);     // Grey Shoulder
-    gluSphere(gluObject, 0.45f, 20, 20);
-
-    glColor3f(1.0f, 1.0f, 1.0f);     // White Arm
-    glPushMatrix();
-    glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
-    gluCylinder(gluObject, 0.3f, 0.25f, 1.5f, 16, 2);
-    glPopMatrix();
-
-    glColor3f(0.2f, 0.2f, 0.2f);     // Dark Hand
-    glTranslatef(0.0f, -1.6f, 0.0f);
-    gluSphere(gluObject, 0.3f, 10, 10);
-    glPopMatrix();
-
-    //Right Arm
-    glPushMatrix();
-    glTranslatef(2.0f, 2.0f, 2.0f);
-    drawRightArm();
-    glPopMatrix();
-
-    ////Left Leg 
-    //glPushMatrix();
-    //glTranslatef(-0.6f, 0.1f, 0.0f);
-    //drawLeftLeg();
-    //glPopMatrix();
-
-    ////Right Leg
-    //glPushMatrix();
-    //glTranslatef(0.6f, 0.1f, 0.0f);
-    //drawRightLeg();
-    //glPopMatrix();
-
-    glPopMatrix();
-
-}
-
-//--------------------------------------------------------------------
-
-int main(HINSTANCE hInst, HINSTANCE, LPSTR, int nCmdShow)
-{
-    WNDCLASSEX wc;
-    ZeroMemory(&wc, sizeof(WNDCLASSEX));
-
-    wc.cbSize = sizeof(WNDCLASSEX);
-    wc.hInstance = GetModuleHandle(NULL);
-    wc.lpfnWndProc = WindowProcedure;
-    wc.lpszClassName = WINDOW_TITLE;
-    wc.style = CS_HREDRAW | CS_VREDRAW;
-
-    if (!RegisterClassEx(&wc)) return false;
-
-    HWND hWnd = CreateWindow(WINDOW_TITLE, WINDOW_TITLE, WS_OVERLAPPEDWINDOW,
-        CW_USEDEFAULT, CW_USEDEFAULT, WINDOW_WIDTH, WINDOW_HEIGHT,
-        NULL, NULL, wc.hInstance, NULL);
-
-    //--------------------------------
-    //	Initialize window for OpenGL
-    //--------------------------------
-
-    HDC hdc = GetDC(hWnd);
-
-    //	initialize pixel format for the window
-    initPixelFormat(hdc);
-
-    //	get an openGL context
-    HGLRC hglrc = wglCreateContext(hdc);
-
-    //	make context current
-    if (!wglMakeCurrent(hdc, hglrc)) return false;
-
-    // now it's safe to create GLU objects
-    gluObject = gluNewQuadric();
-
-    //--------------------------------
-    //	End initialization
-    //--------------------------------
-
-    ShowWindow(hWnd, nCmdShow);
-
-    MSG msg;
-    ZeroMemory(&msg, sizeof(msg));
-
-    // set initial projection (will be updated in WM_SIZE too)
-    updateProjection(WINDOW_WIDTH, WINDOW_HEIGHT);
-
-    glMatrixMode(GL_MODELVIEW);
-    initLighting();
-
-
-    while (true)
-    {
-        if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
-        {
-            if (msg.message == WM_QUIT) break;
-
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
-        }
-
-        Display(hWnd);
-
-        SwapBuffers(hdc);
-    }
-
-    if (gluObject) gluDeleteQuadric(gluObject);
-    wglMakeCurrent(NULL, NULL);
-    wglDeleteContext(hglrc);
-
-    UnregisterClass(WINDOW_TITLE, wc.hInstance);
-
-    return true;
-}
-//--------------------------------------------------------------------
-void updateProjection(int width, int height)
-{
-    if (height == 0) height = 1;
-    float aspect = (float)width / (float)height;
-
-
-    glViewport(0, 0, width, height);
-
-
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-
-
-    switch (projMode)
-    {
-    case ORTHO:
-        // keep the original small-world units but adapt to aspect
-        glOrtho(-1.0 * aspect, 3.0 * aspect, -1.0f, 3.0f, -10.0f, 10.0f);
-        break;
-
-
-    case PERSPECTIVE:
-        // gluPerspective(fovy, aspect, zNear, zFar)
-        gluPerspective(fovy, aspect, zNear, zFar);
-        break;
-
-
-    case FRUSTUM:
-    {
-        // derive left/right/top/bottom from fovy and aspect for a symmetric frustum
-        float top = zNear * tanf((fovy * (float)PI / 180.0f) * 0.5f);
-        float bottom = -top;
-        float right = top * aspect;
-        float left = -right;
-        // glFrustum(left, right, bottom, top, zNear, zFar)
-        glFrustum(left, right, bottom, top, zNear, zFar);
-    }
-    break;
-    }
-
-
-    glMatrixMode(GL_MODELVIEW);
-}
 
 // Polygon Function
 void drawSword() {
@@ -1793,281 +1670,7 @@ void drawShield() {
     glEnd();
 }
 
-void drawCube(float x, float y, float z, float w, float h, float d, float r = 1.0f, float g = 1.0f, float b = 1.0f) {
-    glColor3f(r, g, b);
-    glPushMatrix();
-    glTranslatef(x, y, z);
 
-    // Front
-    glBegin(GL_QUADS);
-    glVertex3f(0, 0, 0);
-    glVertex3f(w, 0, 0);
-    glVertex3f(w, h, 0);
-    glVertex3f(0, h, 0);
-    glEnd();
-
-    // Back
-    glColor3f(r * 0.8f, g * 0.8f, b * 0.8f);
-    glBegin(GL_QUADS);
-    glVertex3f(0, 0, d);
-    glVertex3f(0, h, d);
-    glVertex3f(w, h, d);
-    glVertex3f(w, 0, d);
-    glEnd();
-
-    // Left
-    glColor3f(r * 0.9f, g * 0.9f, b * 0.9f);
-    glBegin(GL_QUADS);
-    glVertex3f(0, 0, 0);
-    glVertex3f(0, h, 0);
-    glVertex3f(0, h, d);
-    glVertex3f(0, 0, d);
-    glEnd();
-
-    // Right
-    glColor3f(r * 0.9f, g * 0.9f, b * 0.9f);
-    glBegin(GL_QUADS);
-    glVertex3f(w, 0, 0);
-    glVertex3f(w, 0, d);
-    glVertex3f(w, h, d);
-    glVertex3f(w, h, 0);
-    glEnd();
-
-    // Top
-    glColor3f(r * 1.1f, g * 1.1f, b * 1.1f);
-    glBegin(GL_QUADS);
-    glVertex3f(0, h, 0);
-    glVertex3f(w, h, 0);
-    glVertex3f(w, h, d);
-    glVertex3f(0, h, d);
-    glEnd();
-
-    // Bottom
-    glColor3f(r * 0.7f, g * 0.7f, b * 0.7f);
-    glBegin(GL_QUADS);
-    glVertex3f(0, 0, 0);
-    glVertex3f(0, 0, d);
-    glVertex3f(w, 0, d);
-    glVertex3f(w, 0, 0);
-    glEnd();
-
-    glPopMatrix();
-};
-
-// Draw a cube with chamfered edges (octagon-like cross-section)
-// width, height, depth are full dimensions
-// chamfer is the size of the beveled edge (e.g., 0.05)
-void drawChamferedCube(float width, float height, float depth, float chamfer) {
-    float hw = width / 2.0f;   // half width
-    float hh = height / 2.0f;  // half height
-    float hd = depth / 2.0f;   // half depth
-
-    // Define the 26 vertices of a chamfered cube
-    // Each corner becomes 3 vertices, each edge becomes 2 vertices
-
-    // Top face (y = hh)
-    Vec3 topVerts[8] = {
-        // Front edge
-        {-hw + chamfer, hh, hd},           // 0
-        {hw - chamfer, hh, hd},            // 1
-        // Right edge
-        {hw, hh, hd - chamfer},            // 2
-        {hw, hh, -hd + chamfer},           // 3
-        // Back edge
-        {hw - chamfer, hh, -hd},           // 4
-        {-hw + chamfer, hh, -hd},          // 5
-        // Left edge
-        {-hw, hh, -hd + chamfer},          // 6
-        {-hw, hh, hd - chamfer}            // 7
-    };
-
-    // Bottom face (y = -hh)
-    Vec3 bottomVerts[8] = {
-        // Front edge
-        {-hw + chamfer, -hh, hd},          // 8
-        {hw - chamfer, -hh, hd},           // 9
-        // Right edge
-        {hw, -hh, hd - chamfer},           // 10
-        {hw, -hh, -hd + chamfer},          // 11
-        // Back edge
-        {hw - chamfer, -hh, -hd},          // 12
-        {-hw + chamfer, -hh, -hd},         // 13
-        // Left edge
-        {-hw, -hh, -hd + chamfer},         // 14
-        {-hw, -hh, hd - chamfer}           // 15
-    };
-
-    // Draw top face (octagon)
-    glBegin(GL_POLYGON);
-    glNormal3f(0.0f, 1.0f, 0.0f);
-    for (int i = 0; i < 8; i++) {
-        glVertex3f(topVerts[i].x, topVerts[i].y, topVerts[i].z);
-    }
-    glEnd();
-
-    // Draw bottom face (octagon)
-    glBegin(GL_POLYGON);
-    glNormal3f(0.0f, -1.0f, 0.0f);
-    for (int i = 7; i >= 0; i--) {
-        glVertex3f(bottomVerts[i].x, bottomVerts[i].y, bottomVerts[i].z);
-    }
-    glEnd();
-
-    // Draw 8 main side faces (large rectangles)
-    glBegin(GL_QUADS);
-
-    // Front face
-    glNormal3f(0.0f, 0.0f, 1.0f);
-    glVertex3f(topVerts[0].x, topVerts[0].y, topVerts[0].z);
-    glVertex3f(topVerts[1].x, topVerts[1].y, topVerts[1].z);
-    glVertex3f(bottomVerts[1].x, bottomVerts[1].y, bottomVerts[1].z);
-    glVertex3f(bottomVerts[0].x, bottomVerts[0].y, bottomVerts[0].z);
-
-    // Right face
-    glNormal3f(1.0f, 0.0f, 0.0f);
-    glVertex3f(topVerts[2].x, topVerts[2].y, topVerts[2].z);
-    glVertex3f(topVerts[3].x, topVerts[3].y, topVerts[3].z);
-    glVertex3f(bottomVerts[3].x, bottomVerts[3].y, bottomVerts[3].z);
-    glVertex3f(bottomVerts[2].x, bottomVerts[2].y, bottomVerts[2].z);
-
-    // Back face
-    glNormal3f(0.0f, 0.0f, -1.0f);
-    glVertex3f(topVerts[4].x, topVerts[4].y, topVerts[4].z);
-    glVertex3f(topVerts[5].x, topVerts[5].y, topVerts[5].z);
-    glVertex3f(bottomVerts[5].x, bottomVerts[5].y, bottomVerts[5].z);
-    glVertex3f(bottomVerts[4].x, bottomVerts[4].y, bottomVerts[4].z);
-
-    // Left face
-    glNormal3f(-1.0f, 0.0f, 0.0f);
-    glVertex3f(topVerts[6].x, topVerts[6].y, topVerts[6].z);
-    glVertex3f(topVerts[7].x, topVerts[7].y, topVerts[7].z);
-    glVertex3f(bottomVerts[7].x, bottomVerts[7].y, bottomVerts[7].z);
-    glVertex3f(bottomVerts[6].x, bottomVerts[6].y, bottomVerts[6].z);
-
-    glEnd();
-
-    // Draw 8 small chamfer faces (corners)
-    glBegin(GL_QUADS);
-
-    // Front-right chamfer
-    glNormal3f(0.707f, 0.0f, 0.707f);
-    glVertex3f(topVerts[1].x, topVerts[1].y, topVerts[1].z);
-    glVertex3f(topVerts[2].x, topVerts[2].y, topVerts[2].z);
-    glVertex3f(bottomVerts[2].x, bottomVerts[2].y, bottomVerts[2].z);
-    glVertex3f(bottomVerts[1].x, bottomVerts[1].y, bottomVerts[1].z);
-
-    // Back-right chamfer
-    glNormal3f(0.707f, 0.0f, -0.707f);
-    glVertex3f(topVerts[3].x, topVerts[3].y, topVerts[3].z);
-    glVertex3f(topVerts[4].x, topVerts[4].y, topVerts[4].z);
-    glVertex3f(bottomVerts[4].x, bottomVerts[4].y, bottomVerts[4].z);
-    glVertex3f(bottomVerts[3].x, bottomVerts[3].y, bottomVerts[3].z);
-
-    // Back-left chamfer
-    glNormal3f(-0.707f, 0.0f, -0.707f);
-    glVertex3f(topVerts[5].x, topVerts[5].y, topVerts[5].z);
-    glVertex3f(topVerts[6].x, topVerts[6].y, topVerts[6].z);
-    glVertex3f(bottomVerts[6].x, bottomVerts[6].y, bottomVerts[6].z);
-    glVertex3f(bottomVerts[5].x, bottomVerts[5].y, bottomVerts[5].z);
-
-    // Front-left chamfer
-    glNormal3f(-0.707f, 0.0f, 0.707f);
-    glVertex3f(topVerts[7].x, topVerts[7].y, topVerts[7].z);
-    glVertex3f(topVerts[0].x, topVerts[0].y, topVerts[0].z);
-    glVertex3f(bottomVerts[0].x, bottomVerts[0].y, bottomVerts[0].z);
-    glVertex3f(bottomVerts[7].x, bottomVerts[7].y, bottomVerts[7].z);
-
-    glEnd();
-}
-
-// Example usage:
-// drawChamferedCube(1.0f, 1.0f, 1.0f, 0.1f);  // 1x1x1 cube with 0.1 chamfer
-
-void drawCenteredCube(float w, float h, float d, float r = 1.0f, float g = 1.0f, float b = 1.0f) {
-    glColor3f(r, g, b);
-    float hw = w / 2.0f;
-    float hh = h / 2.0f;
-    float hd = d / 2.0f;
-
-    glPushMatrix();
-
-    // Front
-    glBegin(GL_QUADS);
-    glNormal3f(0, 0, 1);
-    glVertex3f(-hw, -hh, hd);
-    glVertex3f(hw, -hh, hd);
-    glVertex3f(hw, hh, hd);
-    glVertex3f(-hw, hh, hd);
-    glEnd();
-
-    // Back
-    glColor3f(r * 0.8f, g * 0.8f, b * 0.8f);
-    glBegin(GL_QUADS);
-    glNormal3f(0, 0, -1);
-    glVertex3f(-hw, -hh, -hd);
-    glVertex3f(-hw, hh, -hd);
-    glVertex3f(hw, hh, -hd);
-    glVertex3f(hw, -hh, -hd);
-    glEnd();
-
-    // Left
-    glColor3f(r * 0.9f, g * 0.9f, b * 0.9f);
-    glBegin(GL_QUADS);
-    glNormal3f(-1, 0, 0);
-    glVertex3f(-hw, -hh, -hd);
-    glVertex3f(-hw, -hh, hd);
-    glVertex3f(-hw, hh, hd);
-    glVertex3f(-hw, hh, -hd);
-    glEnd();
-
-    // Right
-    glColor3f(r * 0.9f, g * 0.9f, b * 0.9f);
-    glBegin(GL_QUADS);
-    glNormal3f(1, 0, 0);
-    glVertex3f(hw, -hh, -hd);
-    glVertex3f(hw, hh, -hd);
-    glVertex3f(hw, hh, hd);
-    glVertex3f(hw, -hh, hd);
-    glEnd();
-
-    // Top
-    glColor3f(r * 1.1f, g * 1.1f, b * 1.1f);
-    glBegin(GL_QUADS);
-    glNormal3f(0, 1, 0);
-    glVertex3f(-hw, hh, -hd);
-    glVertex3f(-hw, hh, hd);
-    glVertex3f(hw, hh, hd);
-    glVertex3f(hw, hh, -hd);
-    glEnd();
-
-    // Bottom
-    glColor3f(r * 0.7f, g * 0.7f, b * 0.7f);
-    glBegin(GL_QUADS);
-    glNormal3f(0, -1, 0);
-    glVertex3f(-hw, -hh, -hd);
-    glVertex3f(hw, -hh, -hd);
-    glVertex3f(hw, -hh, hd);
-    glVertex3f(-hw, -hh, hd);
-    glEnd();
-
-    glPopMatrix();
-}
-
-void drawCenteredCylinder(float radius, float height, int segments) {
-    glPushMatrix();
-    glTranslatef(0.0f, -height / 2.0f, 0.0f);
-    glRotatef(-90, 1.0f, 0.0f, 0.0f);
-    gluCylinder(gluObject, radius, radius, height, segments, 1);
-
-    glPushMatrix();
-    glTranslatef(0.0f, 0.0f, height);
-    gluDisk(gluObject, 0.0f, radius, segments, 1);
-    glPopMatrix();
-
-    glRotatef(180, 1.0f, 0.0f, 0.0f);
-    gluDisk(gluObject, 0.0f, radius, segments, 1);
-    glPopMatrix();
-}
 
 void drawRightArm() {
     float white[3] = { 0.95f, 0.95f, 0.95f };
@@ -2268,7 +1871,7 @@ void drawRightArm() {
     glColor3fv(darkGrey);
     glPushMatrix();
     glRotatef(90, 0.0f, 0.0f, 1.0f);
-    drawCenteredCylinder(0.32f, 0.5f, 20);
+    drawCenteredCylinder(0.32f, 0.4f, 20);
     glPopMatrix();
 
     // Decorative rings on flat faces
@@ -2308,19 +1911,24 @@ void drawRightArm() {
     glPopMatrix();
 
     // =================================================================
-    // PART 4: ELBOW JOINT (Cylinder pointing left-right)
+    // PART 4: ELBOW JOINT (Cylinder pointing left-right & small cubiod)
     // =================================================================
     glPushMatrix();
     glTranslatef(0.0f, -0.75f, 0.0f);
-
+    // cuboid
     glColor3fv(darkGrey);
+    drawChamferedCube(0.5, 0.8, 0.59, 0.1);
+
+    // cylinder
+
+    glColor3fv(white);
     glPushMatrix();
     glRotatef(90, 0.0f, 0.0f, 1.0f);
     drawCenteredCylinder(0.28f, 0.7f, 20);
     glPopMatrix();
 
     // Decorative rings on flat faces
-    glColor3f(0.5f, 0.5f, 0.5f);
+    glColor3f(0.0f, 0.0f, 0.0f);
     glPushMatrix();
     glTranslatef(0.36f, 0.0f, 0.0f);
     glRotatef(90, 0.0f, 1.0f, 0.0f);
@@ -2332,6 +1940,13 @@ void drawRightArm() {
     glRotatef(-90, 0.0f, 1.0f, 0.0f);
     gluDisk(gluObject, 0.12f, 0.20f, 20, 1);
     glPopMatrix();
+
+	glPushMatrix();
+    glTranslatef(0.36f, 0.0f, 0.0f);
+    glRotatef(-90, 0.0f, 1.0f, 0.0f);
+    gluDisk(gluObject, 0.0f, 0.07f, 20, 1);
+    glPopMatrix();
+
 
     glPopMatrix(); // End elbow
 
@@ -2349,17 +1964,20 @@ void drawRightArm() {
     glPushMatrix();
     glTranslatef(0.0f, -2.05f, 0.0f);
     glColor3fv(darkGrey);
-    drawCenteredCube(0.42f, 0.12f, 0.42f);
+    glBegin(GL_QUADS);
+    //glVertex3f();
+
+    glEnd();
     glPopMatrix();
 
     // =================================================================
     // PART 6: WRIST JOINT (Small connector)
     // =================================================================
-    glPushMatrix();
-    glTranslatef(0.0f, -2.25f, 0.0f);
-    glColor3fv(darkGrey);
-    drawCenteredCube(0.32f, 0.15f, 0.32f);
-    glPopMatrix();
+    //glPushMatrix();
+    //glTranslatef(0.0f, -2.25f, 0.0f);
+    //glColor3fv(darkGrey);
+    //drawCenteredCube(0.32f, 0.15f, 0.32f);
+    //glPopMatrix();
 
     // =================================================================
     // PART 7: HAND (Palm + Fingers)
