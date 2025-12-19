@@ -1591,14 +1591,16 @@ void drawShield() {
 
     // 5. The Convex Yellow Star / Cross
     glColor3f(1.0f, 0.9f, 0.0f);
+    glPushMatrix(); // Start Star
+    glTranslatef(0, -0.2f, 0);
 
     float zBase = 0.0f;  // Surface of shield
     float zPeak = 0.12f; // How much it sticks out (Convex height)
 
     // --- Vertical Cross Geometry ---
-    float vx_w = 0.1f;    // Width
+    float vx_w = 0.05f;    // Width
     float vy_top = 0.5f;  // Top Y
-    float vy_bot = -0.4f; // Bottom Y
+    float vy_bot = -1.0f; // Bottom Y
 
     glBegin(GL_TRIANGLES);
     // Vertical Ridge (Left Slope)
@@ -1637,7 +1639,7 @@ void drawShield() {
     // --- Horizontal Cross Geometry ---
     float hx_left = -0.35f;
     float hx_right = 0.35f;
-    float hy_w = 0.1f; // Half-height of horizontal arm
+    float hy_w = 0.05f; // Half-height of horizontal arm
     float hy_c = 0.05f; // Center Y offset (cross is slightly higher up)
 
     glBegin(GL_TRIANGLES);
@@ -1673,6 +1675,8 @@ void drawShield() {
     glVertex3f(hx_right, hy_c - hy_w, zBase);
     glVertex3f(hx_right, hy_c + hy_w, zBase);
     glEnd();
+
+    glPopMatrix(); // End Star
 
 
     // 6. Back Handle
