@@ -201,19 +201,24 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
             if (isShiftPressed) leftShoulderYawAngle -= 5.0f;
             else leftShoulderYawAngle += 5.0f;
             break;
-        case 'T': leftShoulderPitchAngle += 5.0f; break;
-        case 'G': leftShoulderPitchAngle -= 5.0f; break;
-        case 'Y': leftElbowAngle += 5.0f; break;
-        case 'H': leftElbowAngle -= 5.0f; break;
-        case 'U': leftWristAngle += 5.0f; break;
-        case 'J': leftWristAngle -= 5.0f; break;
-        case 'I': leftFingersCurlAngle += 5.0f; break;
-        case 'K': leftFingersCurlAngle -= 5.0f;  break;
+        case 'T': 
+            if (isShiftPressed) leftShoulderPitchAngle -= 5.0f;
+            else leftShoulderPitchAngle += 5.0f;
+            break;
+        case 'Y': 
+            if (isShiftPressed) leftElbowAngle -= 5.0f;
+            else leftElbowAngle += 5.0f;
+            break;
+        case 'U': 
+            if (isShiftPressed) leftWristAngle -= 5.0f;
+            else leftWristAngle += 5.0f;
+            break;
+        case 'I':
+            if (isShiftPressed) leftFingersCurlAngle -= 5.0f;
+            else leftFingersCurlAngle += 5.0f;
+            break;
         case 'B': // press 'B' to trigger Block animation
             startBlock();
-            break;
-
-        case 'F':
             break;
 
         case 'A': headRotation += 5.0f; break;
