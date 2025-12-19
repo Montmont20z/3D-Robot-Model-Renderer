@@ -33,6 +33,7 @@ float leftKneeAngle = 0.0f;
 float rightHipAngle = 0.0f;
 float rightKneeAngle = 0.0f;
 float headRotation = 0.0f;
+float bodyRotation = 0.0f;
 
 // ------------------- camera state -----------------------
 float camTargetX = 0.0f, camTargetY = 0.0f, camTargetZ = 0.0f;
@@ -203,7 +204,11 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
         case '2': rightShoulderAngle -= 5.0f; break;
         case '3': rightElbowAngle += 5.0f; break;
         case '4': rightElbowAngle -= 5.0f; break;
-            // add more ...
+            // add more ... 
+        case 'A': headRotation += 5.0f; break;   
+        case 'D': headRotation -= 5.0f; break; 
+        case 'W': bodyRotation += 5.0f; break;
+        case 'S': bodyRotation -= 5.0f; break;
 
 
 
@@ -408,35 +413,40 @@ void drawPyramid1(float size) {
 }
 
 void drawGundamHead() {
+    // Draw neck first 
     glColor3f(0.95f, 0.95f, 0.95f);
-    //Centre box
+    glPushMatrix();
+    glTranslatef(0.0f, -0.8f, 0.0f);
+    glScalef(0.6f, 0.6f, 0.6f);
+    drawCube1(1.0f);
+    glPopMatrix();
+
+    glPushMatrix();
+    glRotatef(headRotation, 0.0f, 1.0f, 0.0f);  // Rotate around Y axis
+
+    // Centre box
+    glColor3f(0.95f, 0.95f, 0.95f);
     glPushMatrix();
     glTranslatef(0.0f, 0.2f, 0.0f);
     glScalef(1.8f, 1.6f, 1.2f);
     drawCube1(1.0f);
     glPopMatrix();
 
-    //Base armor
+    // Base armor
     glPushMatrix();
     glTranslatef(0.0f, 1.0f, 0.0f);
     glScalef(1.2f, 0.1f, 0.8f);
     drawCube1(1.0f);
     glPopMatrix();
 
-    //rear armor
+    // Rear armor
     glPushMatrix();
     glTranslatef(0.0f, 0.2f, -0.75f);
     glScalef(1.6f, 1.4f, 0.3f);
     drawCube1(1.0f);
     glPopMatrix();
-    //neck
-    glPushMatrix();
-    glColor3f(0.95f, 0.95f, 0.95f);
-    glTranslatef(0.0f, -0.8f, 0.0f);
-    glScalef(0.6f, 0.6f, 0.6f);
-    drawCube1(1.0f);
-    glPopMatrix();
-    //face plate
+
+    // Face plate
     glPushMatrix();
     glColor3f(1.0f, 0.85f, 0.85f);
     glTranslatef(0.0f, 0.0f, 0.65f);
@@ -444,49 +454,49 @@ void drawGundamHead() {
     drawCube1(1.0f);
     glPopMatrix();
 
-    //Left Eye
+    // Left Eye
     glPushMatrix();
-    //eyesocket 
+    // eyesocket 
     glColor3f(0.7f, 0.7f, 0.7f);
     glTranslatef(-0.5f, 0.2f, 0.78f);
     glScalef(0.6f, 0.5f, 0.15f);
     drawCube1(1.0f);
-    //eye 
+    // eye 
     glColor3f(0.05f, 0.05f, 0.05f);
     glTranslatef(0.0f, 0.0f, 0.8f);
     glScalef(0.8f, 0.8f, 0.5f);
     drawCube1(1.0f);
-    //eyeball
+    // eyeball
     glColor3f(0.3f, 0.3f, 0.3f);
     glTranslatef(0.0f, 0.0f, 0.8f);
     glScalef(0.5f, 0.5f, 0.2f);
     drawCube1(1.0f);
     glPopMatrix();
 
-    //Right Eye 
+    // Right Eye 
     glPushMatrix();
-    //eyesocket
+    // eyesocket
     glColor3f(0.7f, 0.7f, 0.7f);
     glTranslatef(0.5f, 0.2f, 0.78f);
     glScalef(0.6f, 0.5f, 0.15f);
     drawCube1(1.0f);
-    //eye
+    // eye
     glColor3f(0.05f, 0.05f, 0.05f);
     glTranslatef(0.0f, 0.0f, 0.8f);
     glScalef(0.8f, 0.8f, 0.5f);
     drawCube1(1.0f);
-    //eyeball
+    // eyeball
     glColor3f(0.3f, 0.3f, 0.3f);
     glTranslatef(0.0f, 0.0f, 0.8f);
     glScalef(0.5f, 0.5f, 0.2f);
     drawCube1(1.0f);
     glPopMatrix();
 
-    //mouth
+    // Mouth
     glLineWidth(3.0f);
     glBegin(GL_LINES);
     glColor3f(0.2f, 0.2f, 0.2f);
-    //teeth
+    // teeth
     glVertex3f(-0.5f, -0.2f, 0.78f);
     glVertex3f(-0.5f, -0.4f, 0.78f);
     glVertex3f(0.5f, -0.2f, 0.78f);
@@ -511,14 +521,14 @@ void drawGundamHead() {
     glEnd();
 
     glColor3f(0.95f, 0.95f, 0.95f);
-    //base between blade
+    // base between blade
     glPushMatrix();
     glTranslatef(0.0f, 1.3f, 0.0f);
     glScalef(0.2f, 0.5f, 0.3f);
     drawCube1(1.0f);
     glPopMatrix();
 
-    //Left Blade
+    // Left Blade
     glPushMatrix();
     glTranslatef(-0.30f, 1.65f, 0.0f);
     glRotatef(-20.0f, 0.0f, 1.0f, 0.0f);
@@ -534,9 +544,9 @@ void drawGundamHead() {
     drawPyramid1(1.0f);
     glPopMatrix();
 
-    //Side Armor 
+    // Side Armor 
     glColor3f(0.8f, 0.8f, 0.8f);
-    //Left Armor
+    // Left Armor
     glPushMatrix();
     glTranslatef(-1.1f, 0.2f, 0.0f);
     glScalef(0.2f, 0.8f, 1.2f);
@@ -551,7 +561,7 @@ void drawGundamHead() {
     drawCube1(1.0f);
     glPopMatrix();
 
-    //Right Armor
+    // Right Armor
     glPushMatrix();
     glTranslatef(1.1f, 0.2f, 0.0f);
     glScalef(0.2f, 0.8f, 1.2f);
@@ -566,18 +576,21 @@ void drawGundamHead() {
     drawCube1(1.0f);
     glPopMatrix();
 
-    //Rear Sensor 
+    // Rear Sensor 
     glColor3f(0.2f, 0.2f, 0.2f);
     glPushMatrix();
     glTranslatef(0.0f, 0.3f, -0.9f);
     glScalef(0.8f, 0.5f, 0.1f);
     drawCube1(1.0f);
     glPopMatrix();
+
+    glPopMatrix(); // End head rotation matrix
 }
 
 void drawUpperBody()
 {
     glPushMatrix();
+    glRotatef(bodyRotation, 0.0f, 1.0f, 0.0f);
     glScalef(1.2f, 1.2f, 1.2f);
     //main
     glColor3f(0.0f, 0.35f, 0.7f);
@@ -666,21 +679,29 @@ void drawUpperBody()
     glPopMatrix();
 
     //backpack
-    //glColor3f(0.2f, 0.2f, 0.23f);
-    //glPushMatrix();
-    //glTranslatef(0.0f, 0.2f, -1.35f);
-    //glScalef(1.5f, 1.6f, 0.5f);
-    //drawCube1(1.0f);
-    //glPopMatrix();
+    glColor3f(0.0f, 1.0f, 0.0f);  
+    glPushMatrix();
+    glTranslatef(0.5f, -1.0f, -1.2f);  
+    glRotatef(-90.0f, 1.0f, 0.0f, 0.0f); 
+    gluCylinder(gluObject, 0.3f, 0.3f, 2.0f, 16, 1); 
+    glPopMatrix();
+
+    glColor3f(0.0f, 1.0f, 0.0f);
+    glPushMatrix();
+    glTranslatef(-0.5f, -1.0f, -1.2f);
+    glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+    gluCylinder(gluObject, 0.3f, 0.3f, 2.0f, 16, 1);
+    glPopMatrix();
 
     glPopMatrix();
 }
 
 void drawLowerBody() {
     glPushMatrix();
+    glRotatef(bodyRotation, 0.0f, 1.0f, 0.0f);
     glScalef(1.2f, 1.2f, 1.2f);
 
-    // Main abdomen core (white)
+    // Main abdomen core
     glColor3f(0.95f, 0.95f, 0.95f);
     glTranslatef(0.0f, 0.5f, 0.0f);
     glPushMatrix();
@@ -1388,17 +1409,17 @@ void Display(HWND hWnd)
     drawRightArm();
     glPopMatrix();
 
-    //Left Leg 
-    glPushMatrix();
-    glTranslatef(-0.6f, 0.1f, 0.0f);
-    drawLeftLeg();
-    glPopMatrix();
+    ////Left Leg 
+    //glPushMatrix();
+    //glTranslatef(-0.6f, 0.1f, 0.0f);
+    //drawLeftLeg();
+    //glPopMatrix();
 
-    //Right Leg
-    glPushMatrix();
-    glTranslatef(0.6f, 0.1f, 0.0f);
-    drawRightLeg();
-    glPopMatrix();
+    ////Right Leg
+    //glPushMatrix();
+    //glTranslatef(0.6f, 0.1f, 0.0f);
+    //drawRightLeg();
+    //glPopMatrix();
 
     glPopMatrix();
 
