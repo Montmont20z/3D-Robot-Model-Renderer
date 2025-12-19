@@ -92,8 +92,8 @@ float zNear = 0.1f, zFar = 20.0f;
 void updateProjection(int width, int height);
 
 void drawRightArm();
-void drawDetailedLeftLeg();
-void drawDetailedRightLeg();
+void drawLeftLeg();
+void drawRightLeg();
 
 void drawSword();
 void drawShield();
@@ -195,9 +195,6 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
         if (camDistance > CAM_MAX_DIST) camDistance = CAM_MAX_DIST;
     }
     break;
-
-
-
     case WM_KEYDOWN:
         switch (wParam)
         {
@@ -233,15 +230,12 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
             break;
         }
         break;
-
     default:
         return DefWindowProc(hWnd, msg, wParam, lParam);
     }
-
     return 0;
 }
 //--------------------------------------------------------------------
-
 bool initPixelFormat(HDC hdc)
 {
     PIXELFORMATDESCRIPTOR pfd;
@@ -292,7 +286,6 @@ void initLighting() {
     glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
 }
 //--------------------------------------------------------------------
-
 void drawCube() {
     glBegin(GL_QUADS);
     // Front (Z+)
@@ -814,24 +807,26 @@ void drawLowerBody() {
     glPopMatrix();
 }
 
-// Detailed left leg with multiple segments
-void drawDetailedLeftLeg() {
-    // Hip joint
+void drawLeftLeg() {
+    // Apply hip rotation for movement
+    glRotatef(leftHipAngle, 1.0f, 0.0f, 0.0f);
+
+    // Hip joint (keeping sphere only here as it's the main joint)
     glColor3f(0.6f, 0.6f, 0.6f);
     glPushMatrix();
     glTranslatef(0.0f, 0.0f, 0.0f);
     gluSphere(gluObject, 0.35f, 16, 16);
     glPopMatrix();
 
-    // Upper thigh
+    // Upper thigh - using cube instead of cylinder
     glColor3f(0.95f, 0.95f, 0.95f);
     glPushMatrix();
     glTranslatef(0.0f, -0.5f, 0.0f);
-    glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
-    gluCylinder(gluObject, 0.4f, 0.35f, 1.0f, 16, 4);
+    glScalef(0.8f, 1.0f, 0.8f);
+    drawCube1(1.0f);
     glPopMatrix();
 
-    // Thigh armor
+    // Thigh armor with additional details
     glColor3f(0.8f, 0.8f, 0.8f);
     glPushMatrix();
     glTranslatef(0.0f, -0.8f, 0.0f);
@@ -839,101 +834,243 @@ void drawDetailedLeftLeg() {
     drawCube1(1.0f);
     glPopMatrix();
 
-    // Knee joint
-    glColor3f(0.7f, 0.7f, 0.7f);
+    // Thigh armor details
+    glColor3f(0.1f, 0.3f, 0.9f);
     glPushMatrix();
-    glTranslatef(0.0f, -1.5f, 0.0f);
-    gluSphere(gluObject, 0.4f, 16, 16);
+    glTranslatef(0.0f, -0.8f, 0.4f);
+    glScalef(0.7f, 0.4f, 0.1f);
+    drawCube1(1.0f);
     glPopMatrix();
 
-    // Knee armor
-    glColor3f(0.9f, 0.1f, 0.1f);
+    // Thigh armor vent
+    glColor3f(0.7f, 0.7f, 0.7f);
+    glPushMatrix();
+    glTranslatef(0.0f, -0.8f, 0.42f);
+    for (int i = -1; i <= 1; i++) {
+        glPushMatrix();
+        glTranslatef(i * 0.15f, 0.0f, 0.0f);
+        glScalef(0.05f, 0.2f, 0.05f);
+        drawCube1(1.0f);
+        glPopMatrix();
+    }
+    glPopMatrix();
+
+    // Knee joint with rotation for movement
     glPushMatrix();
     glTranslatef(0.0f, -1.5f, 0.0f);
+    glRotatef(leftKneeAngle, 1.0f, 0.0f, 0.0f);
+
+    // Knee joint (keeping sphere only here)
+    glColor3f(0.7f, 0.7f, 0.7f);
+    gluSphere(gluObject, 0.4f, 16, 16);
+
+    // Knee joint detail using cube instead of disk
+    glColor3f(0.5f, 0.5f, 0.5f);
+    glPushMatrix();
+    glTranslatef(0.0f, 0.0f, 0.4f);
+    glScalef(0.8f, 0.8f, 0.1f);
+    drawCube1(1.0f);
+    glPopMatrix();
+
+    // Knee armor with more detail
+    glColor3f(0.9f, 0.1f, 0.1f);
+    glPushMatrix();
     glScalef(0.8f, 0.3f, 0.6f);
     drawCube1(1.0f);
     glPopMatrix();
 
-    // Lower shin
-    glColor3f(0.95f, 0.95f, 0.95f);
+    // Knee armor detail
+    glColor3f(0.7f, 0.0f, 0.0f);
     glPushMatrix();
-    glTranslatef(0.0f, -2.0f, 0.0f);
-    glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
-    gluCylinder(gluObject, 0.35f, 0.3f, 1.0f, 16, 4);
+    glTranslatef(0.0f, 0.0f, 0.35f);
+    glScalef(0.6f, 0.2f, 0.1f);
+    drawCube1(1.0f);
     glPopMatrix();
 
-    // Shin armor
+    // Lower shin - using cube instead of cylinder
+    glColor3f(0.95f, 0.95f, 0.95f);
+    glPushMatrix();
+    glTranslatef(0.0f, -0.5f, 0.0f);
+    glScalef(0.7f, 1.0f, 0.7f);
+    drawCube1(1.0f);
+    glPopMatrix();
+
+    // Shin armor with additional details
     glColor3f(0.85f, 0.85f, 0.85f);
     glPushMatrix();
-    glTranslatef(0.0f, -2.3f, 0.0f);
+    glTranslatef(0.0f, -0.8f, 0.0f);
     glScalef(0.8f, 0.6f, 0.6f);
     drawCube1(1.0f);
     glPopMatrix();
 
-    // Ankle joint
-    glColor3f(0.6f, 0.6f, 0.6f);
+    // Shin armor detail
+    glColor3f(0.1f, 0.3f, 0.9f);
     glPushMatrix();
-    glTranslatef(0.0f, -3.0f, 0.0f);
-    gluSphere(gluObject, 0.3f, 16, 16);
+    glTranslatef(0.0f, -0.8f, 0.35f);
+    glScalef(0.6f, 0.4f, 0.1f);
+    drawCube1(1.0f);
     glPopMatrix();
 
-    // Foot base
+    // Shin armor vent
+    glColor3f(0.7f, 0.7f, 0.7f);
+    glPushMatrix();
+    glTranslatef(0.0f, -0.8f, 0.37f);
+    for (int i = -1; i <= 1; i++) {
+        glPushMatrix();
+        glTranslatef(i * 0.15f, 0.0f, 0.0f);
+        glScalef(0.05f, 0.2f, 0.05f);
+        drawCube1(1.0f);
+        glPopMatrix();
+    }
+    glPopMatrix();
+
+    // Ankle joint - using cube instead of sphere
+    glColor3f(0.6f, 0.6f, 0.6f);
+    glPushMatrix();
+    glTranslatef(0.0f, -1.5f, 0.0f);
+    glScalef(0.6f, 0.6f, 0.6f);
+    drawCube1(1.0f);
+    glPopMatrix();
+
+    // Ankle joint detail using cube
+    glColor3f(0.4f, 0.4f, 0.4f);
+    glPushMatrix();
+    glTranslatef(0.0f, -1.5f, 0.3f);
+    glScalef(0.5f, 0.5f, 0.1f);
+    drawCube1(1.0f);
+    glPopMatrix();
+
+    // Foot base with more detail
     glColor3f(0.8f, 0.0f, 0.0f);
     glPushMatrix();
-    glTranslatef(0.0f, -3.2f, 0.2f);
+    glTranslatef(0.0f, -1.7f, 0.2f);
     glScalef(0.7f, 0.3f, 1.2f);
     drawCube1(1.0f);
     glPopMatrix();
 
-    // Toe armor
-    glColor3f(0.9f, 0.0f, 0.0f);
+    // Foot detail
+    glColor3f(0.6f, 0.0f, 0.0f);
     glPushMatrix();
-    glTranslatef(0.0f, -3.4f, 0.7f);
-    glScalef(0.6f, 0.2f, 0.4f);
-    drawCube1(1.0f);
-    glPopMatrix();
-
-    // Heel armor
-    glColor3f(0.7f, 0.0f, 0.0f);
-    glPushMatrix();
-    glTranslatef(0.0f, -3.4f, -0.3f);
+    glTranslatef(0.0f, -1.7f, 0.7f);
     glScalef(0.5f, 0.2f, 0.3f);
     drawCube1(1.0f);
     glPopMatrix();
 
-    // Side ankle armor
+    // Toe armor with more detail
+    glColor3f(0.9f, 0.0f, 0.0f);
+    glPushMatrix();
+    glTranslatef(0.0f, -1.9f, 0.7f);
+    glScalef(0.6f, 0.2f, 0.4f);
+    drawCube1(1.0f);
+    glPopMatrix();
+
+    // Toe detail
+    glColor3f(0.7f, 0.0f, 0.0f);
+    glPushMatrix();
+    glTranslatef(0.0f, -1.9f, 0.9f);
+    glScalef(0.4f, 0.1f, 0.2f);
+    drawCube1(1.0f);
+    glPopMatrix();
+
+    // Toe joints - using small cubes instead of spheres
+    glColor3f(0.5f, 0.5f, 0.5f);
+    glPushMatrix();
+    glTranslatef(0.0f, -1.9f, 0.9f);
+    for (int i = -1; i <= 1; i++) {
+        glPushMatrix();
+        glTranslatef(i * 0.12f, 0.0f, 0.0f);
+        glScalef(0.1f, 0.1f, 0.1f);
+        drawCube1(1.0f);
+        glPopMatrix();
+    }
+    glPopMatrix();
+
+    // Heel armor with more detail
+    glColor3f(0.7f, 0.0f, 0.0f);
+    glPushMatrix();
+    glTranslatef(0.0f, -1.9f, -0.3f);
+    glScalef(0.5f, 0.2f, 0.3f);
+    drawCube1(1.0f);
+    glPopMatrix();
+
+    // Heel detail
+    glColor3f(0.5f, 0.0f, 0.0f);
+    glPushMatrix();
+    glTranslatef(0.0f, -1.9f, -0.5f);
+    glScalef(0.3f, 0.1f, 0.2f);
+    drawCube1(1.0f);
+    glPopMatrix();
+
+    // Side ankle armor with more detail
     glColor3f(0.85f, 0.85f, 0.85f);
     glPushMatrix();
-    glTranslatef(-0.5f, -3.1f, 0.0f);
+    glTranslatef(-0.5f, -1.6f, 0.0f);
     glScalef(0.2f, 0.4f, 0.5f);
     drawCube1(1.0f);
     glPopMatrix();
 
+    // Left ankle armor detail
+    glColor3f(0.1f, 0.3f, 0.9f);
     glPushMatrix();
-    glTranslatef(0.5f, -3.1f, 0.0f);
+    glTranslatef(-0.6f, -1.6f, 0.0f);
+    glScalef(0.1f, 0.3f, 0.4f);
+    drawCube1(1.0f);
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(0.5f, -1.6f, 0.0f);
     glScalef(0.2f, 0.4f, 0.5f);
     drawCube1(1.0f);
     glPopMatrix();
+
+    // Right ankle armor detail
+    glColor3f(0.1f, 0.3f, 0.9f);
+    glPushMatrix();
+    glTranslatef(0.6f, -1.6f, 0.0f);
+    glScalef(0.1f, 0.3f, 0.4f);
+    drawCube1(1.0f);
+    glPopMatrix();
+
+    // Ankle thruster detail - using cone/pyramid instead of cylinder
+    glColor3f(0.7f, 0.7f, 0.7f);
+    glPushMatrix();
+    glTranslatef(0.0f, -1.6f, -0.6f);
+    glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+    glScalef(0.15f, 0.15f, 0.3f);
+    drawPyramid1(1.0f);
+    glPopMatrix();
+
+    // Ankle thruster nozzle - using cube instead of disk
+    glColor3f(0.3f, 0.3f, 0.3f);
+    glPushMatrix();
+    glTranslatef(0.0f, -1.6f, -0.9f);
+    glScalef(0.2f, 0.2f, 0.05f);
+    drawCube1(1.0f);
+    glPopMatrix();
+
+    glPopMatrix(); // End knee rotation
 }
 
-// Detailed right leg with multiple segments
-void drawDetailedRightLeg() {
-    // Hip joint
+void drawRightLeg() {
+    // Apply hip rotation for movement
+    glRotatef(leftHipAngle, 1.0f, 0.0f, 0.0f);
+
+    // Hip joint (keeping sphere only here as it's the main joint)
     glColor3f(0.6f, 0.6f, 0.6f);
     glPushMatrix();
     glTranslatef(0.0f, 0.0f, 0.0f);
     gluSphere(gluObject, 0.35f, 16, 16);
     glPopMatrix();
 
-    // Upper thigh
+    // Upper thigh - using cube instead of cylinder
     glColor3f(0.95f, 0.95f, 0.95f);
     glPushMatrix();
     glTranslatef(0.0f, -0.5f, 0.0f);
-    glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
-    gluCylinder(gluObject, 0.4f, 0.35f, 1.0f, 16, 4);
+    glScalef(0.8f, 1.0f, 0.8f);
+    drawCube1(1.0f);
     glPopMatrix();
 
-    // Thigh armor
+    // Thigh armor with additional details
     glColor3f(0.8f, 0.8f, 0.8f);
     glPushMatrix();
     glTranslatef(0.0f, -0.8f, 0.0f);
@@ -941,81 +1078,221 @@ void drawDetailedRightLeg() {
     drawCube1(1.0f);
     glPopMatrix();
 
-    // Knee joint
-    glColor3f(0.7f, 0.7f, 0.7f);
+    // Thigh armor details
+    glColor3f(0.1f, 0.3f, 0.9f);
     glPushMatrix();
-    glTranslatef(0.0f, -1.5f, 0.0f);
-    gluSphere(gluObject, 0.4f, 16, 16);
+    glTranslatef(0.0f, -0.8f, 0.4f);
+    glScalef(0.7f, 0.4f, 0.1f);
+    drawCube1(1.0f);
     glPopMatrix();
 
-    // Knee armor
-    glColor3f(0.9f, 0.1f, 0.1f);
+    // Thigh armor vent
+    glColor3f(0.7f, 0.7f, 0.7f);
+    glPushMatrix();
+    glTranslatef(0.0f, -0.8f, 0.42f);
+    for (int i = -1; i <= 1; i++) {
+        glPushMatrix();
+        glTranslatef(i * 0.15f, 0.0f, 0.0f);
+        glScalef(0.05f, 0.2f, 0.05f);
+        drawCube1(1.0f);
+        glPopMatrix();
+    }
+    glPopMatrix();
+
+    // Knee joint with rotation for movement
     glPushMatrix();
     glTranslatef(0.0f, -1.5f, 0.0f);
+    glRotatef(leftKneeAngle, 1.0f, 0.0f, 0.0f);
+
+    // Knee joint (keeping sphere only here)
+    glColor3f(0.7f, 0.7f, 0.7f);
+    gluSphere(gluObject, 0.4f, 16, 16);
+
+    // Knee joint detail using cube instead of disk
+    glColor3f(0.5f, 0.5f, 0.5f);
+    glPushMatrix();
+    glTranslatef(0.0f, 0.0f, 0.4f);
+    glScalef(0.8f, 0.8f, 0.1f);
+    drawCube1(1.0f);
+    glPopMatrix();
+
+    // Knee armor with more detail
+    glColor3f(0.9f, 0.1f, 0.1f);
+    glPushMatrix();
     glScalef(0.8f, 0.3f, 0.6f);
     drawCube1(1.0f);
     glPopMatrix();
 
-    // Lower shin
-    glColor3f(0.95f, 0.95f, 0.95f);
+    // Knee armor detail
+    glColor3f(0.7f, 0.0f, 0.0f);
     glPushMatrix();
-    glTranslatef(0.0f, -2.0f, 0.0f);
-    glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
-    gluCylinder(gluObject, 0.35f, 0.3f, 1.0f, 16, 4);
+    glTranslatef(0.0f, 0.0f, 0.35f);
+    glScalef(0.6f, 0.2f, 0.1f);
+    drawCube1(1.0f);
     glPopMatrix();
 
-    // Shin armor
+    // Lower shin - using cube instead of cylinder
+    glColor3f(0.95f, 0.95f, 0.95f);
+    glPushMatrix();
+    glTranslatef(0.0f, -0.5f, 0.0f);
+    glScalef(0.7f, 1.0f, 0.7f);
+    drawCube1(1.0f);
+    glPopMatrix();
+
+    // Shin armor with additional details
     glColor3f(0.85f, 0.85f, 0.85f);
     glPushMatrix();
-    glTranslatef(0.0f, -2.3f, 0.0f);
+    glTranslatef(0.0f, -0.8f, 0.0f);
     glScalef(0.8f, 0.6f, 0.6f);
     drawCube1(1.0f);
     glPopMatrix();
 
-    // Ankle joint
-    glColor3f(0.6f, 0.6f, 0.6f);
+    // Shin armor detail
+    glColor3f(0.1f, 0.3f, 0.9f);
     glPushMatrix();
-    glTranslatef(0.0f, -3.0f, 0.0f);
-    gluSphere(gluObject, 0.3f, 16, 16);
+    glTranslatef(0.0f, -0.8f, 0.35f);
+    glScalef(0.6f, 0.4f, 0.1f);
+    drawCube1(1.0f);
     glPopMatrix();
 
-    // Foot base
+    // Shin armor vent
+    glColor3f(0.7f, 0.7f, 0.7f);
+    glPushMatrix();
+    glTranslatef(0.0f, -0.8f, 0.37f);
+    for (int i = -1; i <= 1; i++) {
+        glPushMatrix();
+        glTranslatef(i * 0.15f, 0.0f, 0.0f);
+        glScalef(0.05f, 0.2f, 0.05f);
+        drawCube1(1.0f);
+        glPopMatrix();
+    }
+    glPopMatrix();
+
+    // Ankle joint - using cube instead of sphere
+    glColor3f(0.6f, 0.6f, 0.6f);
+    glPushMatrix();
+    glTranslatef(0.0f, -1.5f, 0.0f);
+    glScalef(0.6f, 0.6f, 0.6f);
+    drawCube1(1.0f);
+    glPopMatrix();
+
+    // Ankle joint detail using cube
+    glColor3f(0.4f, 0.4f, 0.4f);
+    glPushMatrix();
+    glTranslatef(0.0f, -1.5f, 0.3f);
+    glScalef(0.5f, 0.5f, 0.1f);
+    drawCube1(1.0f);
+    glPopMatrix();
+
+    // Foot base with more detail
     glColor3f(0.8f, 0.0f, 0.0f);
     glPushMatrix();
-    glTranslatef(0.0f, -3.2f, 0.2f);
+    glTranslatef(0.0f, -1.7f, 0.2f);
     glScalef(0.7f, 0.3f, 1.2f);
     drawCube1(1.0f);
     glPopMatrix();
 
-    // Toe armor
-    glColor3f(0.9f, 0.0f, 0.0f);
+    // Foot detail
+    glColor3f(0.6f, 0.0f, 0.0f);
     glPushMatrix();
-    glTranslatef(0.0f, -3.4f, 0.7f);
-    glScalef(0.6f, 0.2f, 0.4f);
-    drawCube1(1.0f);
-    glPopMatrix();
-
-    // Heel armor
-    glColor3f(0.7f, 0.0f, 0.0f);
-    glPushMatrix();
-    glTranslatef(0.0f, -3.4f, -0.3f);
+    glTranslatef(0.0f, -1.7f, 0.7f);
     glScalef(0.5f, 0.2f, 0.3f);
     drawCube1(1.0f);
     glPopMatrix();
 
-    // Side ankle armor
+    // Toe armor with more detail
+    glColor3f(0.9f, 0.0f, 0.0f);
+    glPushMatrix();
+    glTranslatef(0.0f, -1.9f, 0.7f);
+    glScalef(0.6f, 0.2f, 0.4f);
+    drawCube1(1.0f);
+    glPopMatrix();
+
+    // Toe detail
+    glColor3f(0.7f, 0.0f, 0.0f);
+    glPushMatrix();
+    glTranslatef(0.0f, -1.9f, 0.9f);
+    glScalef(0.4f, 0.1f, 0.2f);
+    drawCube1(1.0f);
+    glPopMatrix();
+
+    // Toe joints - using small cubes instead of spheres
+    glColor3f(0.5f, 0.5f, 0.5f);
+    glPushMatrix();
+    glTranslatef(0.0f, -1.9f, 0.9f);
+    for (int i = -1; i <= 1; i++) {
+        glPushMatrix();
+        glTranslatef(i * 0.12f, 0.0f, 0.0f);
+        glScalef(0.1f, 0.1f, 0.1f);
+        drawCube1(1.0f);
+        glPopMatrix();
+    }
+    glPopMatrix();
+
+    // Heel armor with more detail
+    glColor3f(0.7f, 0.0f, 0.0f);
+    glPushMatrix();
+    glTranslatef(0.0f, -1.9f, -0.3f);
+    glScalef(0.5f, 0.2f, 0.3f);
+    drawCube1(1.0f);
+    glPopMatrix();
+
+    // Heel detail
+    glColor3f(0.5f, 0.0f, 0.0f);
+    glPushMatrix();
+    glTranslatef(0.0f, -1.9f, -0.5f);
+    glScalef(0.3f, 0.1f, 0.2f);
+    drawCube1(1.0f);
+    glPopMatrix();
+
+    // Side ankle armor with more detail
     glColor3f(0.85f, 0.85f, 0.85f);
     glPushMatrix();
-    glTranslatef(-0.5f, -3.1f, 0.0f);
+    glTranslatef(-0.5f, -1.6f, 0.0f);
     glScalef(0.2f, 0.4f, 0.5f);
     drawCube1(1.0f);
     glPopMatrix();
 
+    // Left ankle armor detail
+    glColor3f(0.1f, 0.3f, 0.9f);
     glPushMatrix();
-    glTranslatef(0.5f, -3.1f, 0.0f);
+    glTranslatef(-0.6f, -1.6f, 0.0f);
+    glScalef(0.1f, 0.3f, 0.4f);
+    drawCube1(1.0f);
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(0.5f, -1.6f, 0.0f);
     glScalef(0.2f, 0.4f, 0.5f);
     drawCube1(1.0f);
     glPopMatrix();
+
+    // Right ankle armor detail
+    glColor3f(0.1f, 0.3f, 0.9f);
+    glPushMatrix();
+    glTranslatef(0.6f, -1.6f, 0.0f);
+    glScalef(0.1f, 0.3f, 0.4f);
+    drawCube1(1.0f);
+    glPopMatrix();
+
+    // Ankle thruster detail - using cone/pyramid instead of cylinder
+    glColor3f(0.7f, 0.7f, 0.7f);
+    glPushMatrix();
+    glTranslatef(0.0f, -1.6f, -0.6f);
+    glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+    glScalef(0.15f, 0.15f, 0.3f);
+    drawPyramid1(1.0f);
+    glPopMatrix();
+
+    // Ankle thruster nozzle - using cube instead of disk
+    glColor3f(0.3f, 0.3f, 0.3f);
+    glPushMatrix();
+    glTranslatef(0.0f, -1.6f, -0.9f);
+    glScalef(0.2f, 0.2f, 0.05f);
+    drawCube1(1.0f);
+    glPopMatrix();
+
+    glPopMatrix(); // End knee rotation
 }
 
 void Display(HWND hWnd)
@@ -1088,7 +1365,7 @@ void Display(HWND hWnd)
     drawLowerBody();
     glPopMatrix();
 
-    // Left Arm
+    //Left Arm
     glPushMatrix();
     glTranslatef(-1.1f, 2.4f, 0.0f);
     glColor3f(0.6f, 0.6f, 0.6f);     // Grey Shoulder
@@ -1105,24 +1382,23 @@ void Display(HWND hWnd)
     gluSphere(gluObject, 0.3f, 10, 10);
     glPopMatrix();
 
-    // Right Arm
-
+    //Right Arm
     glPushMatrix();
     glTranslatef(2.0f, 2.0f, 2.0f);
     drawRightArm();
     glPopMatrix();
 
-    // Left Leg (detailed)
-    //glPushMatrix();
-    //glTranslatef(-0.4f, 0.6f, 0.0f);
-    //drawDetailedLeftLeg();
-    //glPopMatrix();
+    //Left Leg 
+    glPushMatrix();
+    glTranslatef(-0.6f, 0.1f, 0.0f);
+    drawLeftLeg();
+    glPopMatrix();
 
-    //// Right Leg (detailed)
-    //glPushMatrix();
-    //glTranslatef(0.4f, 0.6f, 0.0f);
-    //drawDetailedRightLeg();
-    //glPopMatrix();
+    //Right Leg
+    glPushMatrix();
+    glTranslatef(0.6f, 0.1f, 0.0f);
+    drawRightLeg();
+    glPopMatrix();
 
     glPopMatrix();
 
@@ -1248,7 +1524,6 @@ void updateProjection(int width, int height)
 
     glMatrixMode(GL_MODELVIEW);
 }
-
 
 // Polygon Function
 void drawSword() {
@@ -1686,7 +1961,6 @@ void drawChamferedCube(float width, float height, float depth, float chamfer) {
 
 // Example usage:
 // drawChamferedCube(1.0f, 1.0f, 1.0f, 0.1f);  // 1x1x1 cube with 0.1 chamfer
-
 
 void drawCenteredCube(float w, float h, float d, float r = 1.0f, float g = 1.0f, float b = 1.0f) {
     glColor3f(r, g, b);
