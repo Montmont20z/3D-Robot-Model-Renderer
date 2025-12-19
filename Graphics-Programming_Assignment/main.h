@@ -13,6 +13,11 @@ float leftWristAngle = 0.0f;
 float leftFingersCurlAngle = 0.0f;
 float leftShoulderPitchAngle = 0.0f;
 float leftShoulderYawAngle = 0.0f;
+float rightElbowAngle = 0.0f;
+float rightWristAngle = 0.0f;
+float rightFingersCurlAngle = 0.0f;
+float rightShoulderPitchAngle = 0.0f;
+float rightShoulderYawAngle = 0.0f;
 
 //  === end hand ===
 
@@ -496,7 +501,7 @@ void drawTaperedCube(float topW, float topD, float bottomW, float bottomD, float
 
 
 // ======================================================= Animation =================================================================
-// ---------------- Simple Block animation (minimal, no keyframes) ----------------
+// ---------------- Simple Block animation----------------
 
 enum BlockState {
     BLOCK_IDLE = 0,
@@ -527,9 +532,9 @@ static const float BLOCK_WRIST_TARGET = -38.0f;
 static const float BLOCK_FINGERS_TARGET = 8.0f;
 
 // Durations (seconds)
-static const double DURATION_RAISING = 0.18;
-static const double DURATION_HOLD = 0.55;
-static const double DURATION_LOWERING = 0.22;
+static const double DURATION_RAISING = 0.58;
+static const double DURATION_HOLD = 1.55;
+static const double DURATION_LOWERING = 0.52;
 static const double DURATION_RECOVER = 0.15;
 
 // High-resolution timer (seconds since epoch). Small overhead, good precision.
