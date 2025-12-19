@@ -1,13 +1,20 @@
-// main.h
-// Header file for main.cpp
-
 #pragma once
-
+#include <chrono>
 
 GLUquadric* gluObject = nullptr;
 struct Vec3 {
     float x, y, z;
 };
+
+// Robot variable
+// === hand ===
+float leftElbowAngle = 0.0f;
+float leftWristAngle = 0.0f;
+float leftFingersCurlAngle = 0.0f;
+float leftShoulderPitchAngle = 0.0f;
+float leftShoulderYawAngle = 0.0f;
+
+//  === end hand ===
 
 
 // Forward declarations for functions used in main.cpp
@@ -488,3 +495,144 @@ void drawTaperedCube(float topW, float topD, float bottomW, float bottomD, float
 }
 
 
+// ======================================================= Animation =================================================================
+// ---------------- Simple Block animation (minimal, no keyframes) ----------------
+
+enum BlockState {
+    BLOCK_IDLE = 0,
+    BLOCK_RAISING,
+    BLOCK_HOLDING,
+    BLOCK_LOWERING,
+    BLOCK_RECOVERING
+};
+
+struct BlockAnim {
+    BlockState state;
+    double stateStartTime;
+    // snapshot of idle pose (to lerp from/to)
+    float idle_shoulderYaw;
+    float idle_shoulderPitch;
+    float idle_elbow;
+    float idle_wrist;
+    float idle_fingers;
+};
+
+static BlockAnim blockAnim = { BLOCK_IDLE, 0.0, 0,0,0,0,0 };
+
+// Hard-coded targets (tweak as needed)
+static const float BLOCK_SHOULDER_YAW_TARGET = -68.0f;
+static const float BLOCK_SHOULDER_PITCH_TARGET = -25.0f;
+static const float BLOCK_ELBOW_TARGET = -30.0f;
+static const float BLOCK_WRIST_TARGET = -38.0f;
+static const float BLOCK_FINGERS_TARGET = 8.0f;
+
+// Durations (seconds)
+static const double DURATION_RAISING = 0.18;
+static const double DURATION_HOLD = 0.55;
+static const double DURATION_LOWERING = 0.22;
+static const double DURATION_RECOVER = 0.15;
+
+// High-resolution timer (seconds since epoch). Small overhead, good precision.
+static double now_seconds()
+{
+    using namespace std::chrono;
+    return duration<double>(high_resolution_clock::now().time_since_epoch()).count();
+}
+
+// small smooth easing
+static float smoothstep_ease(float t) {
+    if (t <= 0.0f) return 0.0f;
+    if (t >= 1.0f) return 1.0f;
+    return t * t * (3.0f - 2.0f * t);
+}
+static float lerp(float a, float b, float t) { return a + (b - a) * t; }
+
+// Start the Block animation (callable from keypress)
+void startBlock()
+{
+    // snapshot current pose as idle
+    blockAnim.idle_shoulderYaw = leftShoulderYawAngle;
+    blockAnim.idle_shoulderPitch = leftShoulderPitchAngle;
+    blockAnim.idle_elbow = leftElbowAngle;
+    blockAnim.idle_wrist = leftWristAngle;
+    blockAnim.idle_fingers = leftFingersCurlAngle;
+
+    blockAnim.state = BLOCK_RAISING;
+    blockAnim.stateStartTime = now_seconds();
+}
+
+// Update per-frame: call every frame (I add a call in Display())
+void updateBlockAnim(double now)
+{
+    switch (blockAnim.state) {
+    case BLOCK_IDLE:
+        return;
+    case BLOCK_RAISING: {
+        double t = (now - blockAnim.stateStartTime) / DURATION_RAISING;
+        if (t >= 1.0) t = 1.0;
+        float e = smoothstep_ease((float)t);
+
+        leftShoulderYawAngle = lerp(blockAnim.idle_shoulderYaw, BLOCK_SHOULDER_YAW_TARGET, e);
+        leftShoulderPitchAngle = lerp(blockAnim.idle_shoulderPitch, BLOCK_SHOULDER_PITCH_TARGET, e);
+        leftElbowAngle = lerp(blockAnim.idle_elbow, BLOCK_ELBOW_TARGET, e);
+        leftWristAngle = lerp(blockAnim.idle_wrist, BLOCK_WRIST_TARGET, e);
+        leftFingersCurlAngle = lerp(blockAnim.idle_fingers, BLOCK_FINGERS_TARGET, e);
+
+        if (t >= 1.0) {
+            blockAnim.state = BLOCK_HOLDING;
+            blockAnim.stateStartTime = now;
+        }
+        return;
+    }
+    case BLOCK_HOLDING: {
+        double elapsed = now - blockAnim.stateStartTime;
+        leftShoulderYawAngle = BLOCK_SHOULDER_YAW_TARGET;
+        leftShoulderPitchAngle = BLOCK_SHOULDER_PITCH_TARGET;
+        leftElbowAngle = BLOCK_ELBOW_TARGET;
+        leftWristAngle = BLOCK_WRIST_TARGET;
+        leftFingersCurlAngle = BLOCK_FINGERS_TARGET;
+
+        if (elapsed >= DURATION_HOLD) {
+            blockAnim.state = BLOCK_LOWERING;
+            blockAnim.stateStartTime = now;
+        }
+        return;
+    }
+    case BLOCK_LOWERING: {
+        double t = (now - blockAnim.stateStartTime) / DURATION_LOWERING;
+        if (t >= 1.0) t = 1.0;
+        float e = smoothstep_ease((float)t);
+
+        leftShoulderYawAngle = lerp(BLOCK_SHOULDER_YAW_TARGET, blockAnim.idle_shoulderYaw, e);
+        leftShoulderPitchAngle = lerp(BLOCK_SHOULDER_PITCH_TARGET, blockAnim.idle_shoulderPitch, e);
+        leftElbowAngle = lerp(BLOCK_ELBOW_TARGET, blockAnim.idle_elbow, e);
+        leftWristAngle = lerp(BLOCK_WRIST_TARGET, blockAnim.idle_wrist, e);
+        leftFingersCurlAngle = lerp(BLOCK_FINGERS_TARGET, blockAnim.idle_fingers, e);
+
+        if (t >= 1.0) {
+            blockAnim.state = BLOCK_RECOVERING;
+            blockAnim.stateStartTime = now;
+        }
+        return;
+    }
+    case BLOCK_RECOVERING: {
+        double t = (now - blockAnim.stateStartTime) / DURATION_RECOVER;
+        if (t >= 1.0) t = 1.0;
+        float e = smoothstep_ease((float)t);
+
+        // set final to idle snapshot to avoid numeric drift
+        leftShoulderYawAngle = blockAnim.idle_shoulderYaw;
+        leftShoulderPitchAngle = blockAnim.idle_shoulderPitch;
+        leftElbowAngle = blockAnim.idle_elbow;
+        leftWristAngle = blockAnim.idle_wrist;
+        leftFingersCurlAngle = blockAnim.idle_fingers;
+
+        if (t >= 1.0) {
+            blockAnim.state = BLOCK_IDLE;
+        }
+        return;
+    }
+    }
+}
+
+// ======================================================= End Animation =================================================================

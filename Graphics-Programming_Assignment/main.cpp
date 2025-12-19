@@ -22,11 +22,11 @@ float positionX = 0.0f, positionY = 0.0f, positionZ = 0.0f;
 
 // Robot variable
 // === hand ===
-float leftElbowAngle = 0.0f;
-float leftWristAngle = 0.0f;
-float leftFingersCurlAngle = 0.0f;
-float leftShoulderPitchAngle = 0.0f;
-float leftShoulderYawAngle = 0.0f;
+//float leftElbowAngle = 0.0f;
+//float leftWristAngle = 0.0f;
+//float leftFingersCurlAngle = 0.0f;
+//float leftShoulderPitchAngle = 0.0f;
+//float leftShoulderYawAngle = 0.0f;
 
 //  === end hand ===
 
@@ -201,6 +201,9 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
         case 'J': leftWristAngle -= 5.0f; break;
         case 'I': leftFingersCurlAngle += 5.0f; break;
         case 'K': leftFingersCurlAngle -= 5.0f;  break;
+        case 'B': // press 'B' to trigger Block animation
+            startBlock();
+            break;
 
 
         case 'A': headRotation += 5.0f; break;   
@@ -292,6 +295,9 @@ void initLighting() {
 
 void Display(HWND hWnd)
 {
+    // update animations (frame-timed)
+    updateBlockAnim(now_seconds());
+
     glEnable(GL_DEPTH_TEST);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glClearColor(0.3f, 0.3f, 0.3f, 1.0f); // gray
@@ -329,7 +335,7 @@ void Display(HWND hWnd)
     glTranslatef(1.0f, 1.0f, 1.0f);
     //drawSword();
     glTranslatef(1.0f, 1.0f, 1.0f);
-    drawShield();
+    //drawShield();
     glPopMatrix();
 
     glPushMatrix();
@@ -1485,6 +1491,7 @@ void drawShield() {
     }
 
     // --- DRAWING ---
+    glScalef(2.2f, 1.6f, 1.0f);
 
     // 1. Red Face
     glColor3f(0.8f, 0.05f, 0.05f);
@@ -2002,6 +2009,7 @@ void drawShield() {
 //    glPopMatrix(); // End hand
 //}
 
+
 // Hierarchical left hand with joint parameters (degrees).
 // Parameters:
 //  shoulderYawDeg  - rotation around Y at shoulder pivot (turn entire arm left/right)
@@ -2022,14 +2030,6 @@ void drawLeftHand()
     // ---------------------------
     // STATIC SHOULDER ARMOR (attached to torso, NOT affected by arm joint rotations)
     // ---------------------------
-    glPushMatrix();
-    glTranslatef(-0.4f, 0.4f, 0.0f);
-    // (copy of your original shoulder armor code, unchanged)
-    // shoulder trapezoidal front/back, sides, internal cylinder, etc.
-    // ... (for brevity you can re-use the exact shoulder code from your file here)
-    // I'll call the original shoulder code by extracting it into a helper:
-    // drawShoulderArmor();  <-- replace with original shoulder block
-    glPopMatrix();
 
     // ---------------------------
     // ARM HIERARCHY (rooted at the shoulder pivot)
@@ -2038,10 +2038,228 @@ void drawLeftHand()
     glPushMatrix();
     // Move origin to shoulder pivot (same location as the shoulder armor)
     glTranslatef(-0.4f, 0.4f, 0.0f);
+  
 
     // Whole-arm rotations (shoulder-level)
     glRotatef(leftShoulderYawAngle, 0.0f, 1.0f, 0.0f);    // yaw around Y
     glRotatef(leftShoulderPitchAngle, 1.0f, 0.0f, 0.0f);  // pitch around X
+
+	// =================================================================
+    // PART 1: SHOULDER ARMOR (Shield-like trapezoidal shape)
+    // =================================================================
+    glPushMatrix();
+    glTranslatef(-0.4f, 0.4f, 0.0f);
+
+
+	  // shoulder trapezoidal (front)
+    // 7 vertex
+    Vec3 front[7] = {
+        { 0.0f,  0.1f,  0.35f},  // Bottom left 1
+        { 0.1f,  0.0f,  0.35f},  // Bottom left 2
+        { 0.7f,  0.2f,  0.35f},  // Bottom Right 
+        { 0.8f,  0.7f,  0.35f},   // Top Right 1
+        { 0.6f,  0.9f,  0.35f},  // Top right 2
+        { 0.1f,  0.9f,  0.35f},   // Top left 1
+        { 0.0f,  0.8f,  0.35f}   // Top left 2
+    };
+
+    Vec3 back[7] = {
+        { -0.1f,  0.0f,  0.35f},  // Bottom left 1
+        { 0.1f,  -0.1f,  0.35f},  // Bottom left 2
+        { 0.8f,  0.1f,  0.35f},  // Bottom Right 
+        { 0.9f,  0.7f,  0.35f},   // Top Right 1
+        { 0.7f,  1.0f,  0.35f},  // Top right 2
+        { 0.1f,  1.0f,  0.35f},   // Top left 1
+        { -0.1f,  0.8f,  0.35f}   // Top left 2
+    };
+
+    float backExtrude = 0.10f;
+
+    for (int i = 0; i < 7; i++) {
+        //back[i].x = front[i].x * scaleBack;
+        //back[i].y = front[i].y * scaleBack;
+        back[i].z = back[i].z - backExtrude;
+    }
+
+    // draw Front face
+    glColor3fv(white);
+    glBegin(GL_POLYGON);
+    glNormal3f(0.0f, 0.0f, 1.0f);
+    for (int i = 0; i < 7; i++) glVertex3f(front[i].x, front[i].y, front[i].z);
+    glEnd();
+
+    // draw Back face
+    glBegin(GL_POLYGON);
+    glNormal3f(0.0f, 0.0f, -1.0f);
+    for (int i = 6; i >= 0; i--) glVertex3f(back[i].x, back[i].y, back[i].z);
+    glEnd();
+
+    // Sloped sides connect front and back edges
+    glColor3fv(white);
+    glBegin(GL_QUADS);
+    for (int i = 0; i < 7; i++) {
+        int next = (i + 1) % 7;
+
+        // Calculate approximate normal for this side face
+        Vec3 v1 = { back[i].x - front[i].x, back[i].y - front[i].y, back[i].z - front[i].z };
+        Vec3 v2 = { front[next].x - front[i].x, front[next].y - front[i].y, front[next].z - front[i].z };
+
+        // Cross product for normal
+        float nx = v1.y * v2.z - v1.z * v2.y;
+        float ny = v1.z * v2.x - v1.x * v2.z;
+        float nz = v1.x * v2.y - v1.y * v2.x;
+
+        // Normalize
+        float len = sqrt(nx * nx + ny * ny + nz * nz);
+        if (len > 0.001f) {
+            nx /= len; ny /= len; nz /= len;
+        }
+
+        glNormal3f(nx, ny, nz);
+        glVertex3f(front[i].x, front[i].y, front[i].z);
+        glVertex3f(front[next].x, front[next].y, front[next].z);
+        glVertex3f(back[next].x, back[next].y, back[next].z);
+        glVertex3f(back[i].x, back[i].y, back[i].z);
+    }
+    glEnd();
+
+    // shoulder trapezoidal (back)
+    // 7 vertex
+    Vec3 front2[7] = {
+        { 0.0f,  0.1f,  -0.35f},  // Bottom left 1
+        { 0.1f,  0.0f,  -0.35f},  // Bottom left 2
+        { 0.7f,  0.2f,  -0.35f},  // Bottom Right 
+        { 0.8f,  0.7f,  -0.35f},   // Top Right 1
+        { 0.6f,  0.9f,  -0.35f},  // Top right 2
+        { 0.1f,  0.9f,  -0.35f},   // Top left 1
+        { 0.0f,  0.8f,  -0.35f}   // Top left 2
+    };
+
+    Vec3 back2[7] = {
+        { -0.1f,  0.0f,  -0.35f},  // Bottom left 1
+        { 0.1f,  -0.1f,  -0.35f},  // Bottom left 2
+        { 0.8f,  0.1f,  -0.35f},  // Bottom Right 
+        { 0.9f,  0.7f,  -0.35f},   // Top Right 1
+        { 0.7f,  1.0f,  -0.35f},  // Top right 2
+        { 0.1f,  1.0f,  -0.35f},   // Top left 1
+        { -0.1f,  0.8f,  -0.35f}   // Top left 2
+    };
+
+    //float backExtrude = 0.05f;
+
+    for (int i = 0; i < 7; i++) {
+        back2[i].z = back2[i].z + backExtrude;
+    }
+
+    // draw Front face
+    glColor3fv(white);
+    glBegin(GL_POLYGON);
+    glNormal3f(0.0f, 0.0f, -1.0f);
+    for (int i = 0; i < 7; i++) glVertex3f(front2[i].x, front2[i].y, front2[i].z);
+    glEnd();
+
+    // draw Back face
+    glBegin(GL_POLYGON);
+    glNormal3f(0.0f, 0.0f, 1.0f);
+    for (int i = 6; i >= 0; i--) glVertex3f(back2[i].x, back2[i].y, back2[i].z);
+    glEnd();
+
+    // Sloped sides connect front and back edges
+    glColor3fv(white);
+    glBegin(GL_QUADS);
+    for (int i = 0; i < 7; i++) {
+        int next = (i + 1) % 7;
+
+        // Calculate approximate normal for this side face
+        Vec3 v1 = { back2[i].x - front2[i].x, back2[i].y - front2[i].y, back2[i].z - front2[i].z };
+        Vec3 v2 = { front2[next].x - front2[i].x, front2[next].y - front2[i].y, front2[next].z - front2[i].z };
+
+        // Cross product for normal
+        float nx = v1.y * v2.z - v1.z * v2.y;
+        float ny = v1.z * v2.x - v1.x * v2.z;
+        float nz = v1.x * v2.y - v1.y * v2.x;
+
+        // Normalize
+        float len = sqrt(nx * nx + ny * ny + nz * nz);
+        if (len > 0.001f) {
+            nx /= len; ny /= len; nz /= len;
+        }
+
+        glNormal3f(-nx, -ny, -nz);
+        glVertex3f(front2[i].x, front2[i].y, front2[i].z);
+        glVertex3f(front2[next].x, front2[next].y, front2[next].z);
+        glVertex3f(back2[next].x, back2[next].y, back2[next].z);
+        glVertex3f(back2[i].x, back2[i].y, back2[i].z);
+    }
+    glEnd();
+
+    // ==================== connecting both back faces ===========================
+    glColor3fv(white);
+    glBegin(GL_QUADS);
+
+    // Connect each edge between back and back2 arrays
+    for (int i = 0; i < 7; i++) {
+        int next = (i + 1) % 7;
+
+        // Skip the edge between vertex 3 and 4 (Top Right 1 to Top Right 2)
+        if (i == 2) {
+            continue; // Skip this quad to leave it open
+        }
+
+        // Calculate normal for this connecting face
+        Vec3 v1 = { back2[i].x - back[i].x, back2[i].y - back[i].y, back2[i].z - back[i].z };
+        Vec3 v2 = { back[next].x - back[i].x, back[next].y - back[i].y, back[next].z - back[i].z };
+
+        // Cross product for normal
+        float nx = v1.y * v2.z - v1.z * v2.y;
+        float ny = v1.z * v2.x - v1.x * v2.z;
+        float nz = v1.x * v2.y - v1.y * v2.x;
+
+        // Normalize
+        float len = sqrt(nx * nx + ny * ny + nz * nz);
+        if (len > 0.001f) {
+            nx /= len; ny /= len; nz /= len;
+        }
+
+        glNormal3f(nx, ny, nz);
+        glVertex3f(back[i].x, back[i].y, back[i].z);           // Current vertex on front shoulder back
+        glVertex3f(back[next].x, back[next].y, back[next].z);   // Next vertex on front shoulder back
+        glVertex3f(back2[next].x, back2[next].y, back2[next].z); // Next vertex on back shoulder back
+        glVertex3f(back2[i].x, back2[i].y, back2[i].z);         // Current vertex on back shoulder back
+    }
+
+    glEnd();
+
+
+    // Internal connecting cylinder
+    glColor3fv(darkGrey);
+    glPushMatrix();
+    glRotatef(90, 0.0f, 1.0f, 0.0f);
+    glTranslatef(0.0f, 0.4f, 0.5f);
+    glColor3fv(darkGrey);
+    glPushMatrix();
+    glRotatef(90, 0.0f, 0.0f, 1.0f);
+    drawCenteredCylinder(0.32f, 0.4f, 20);
+    glPopMatrix();
+
+    // Decorative rings on flat faces
+    glColor3fv(white);
+    glPushMatrix();
+    glRotatef(90, 0.0f, 0.0f, 1.0f);
+    glTranslatef(0.00f, 0.0f, 0.0f);
+    //gluDisk(gluObject, 0.12f, 0.30f, 20, 1);
+    drawCenteredCylinder(0.22f, 0.6f, 20);
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(-0.26f, 0.0f, 0.0f);
+    glRotatef(-90, 0.0f, 1.0f, 0.0f);
+    gluDisk(gluObject, 0.22f, 0.30f, 20, 1);
+    glPopMatrix();
+    glPopMatrix();
+
+    glPopMatrix(); // End shoulder armor
+
 
     // ---------------------------
     // Shoulder connector (local offset preserved)
@@ -2066,6 +2284,17 @@ void drawLeftHand()
     // original elbow translation from connector: (0.0f, -0.75f, 0.0f)
     // ---------------------------
     glPushMatrix();
+
+    // ====================== Draw Shield ===
+    glPushMatrix();
+    glRotatef(90, 0, 1, 0);
+    glTranslatef(0, -0.5f, 0.8f);
+    drawShield();
+    glPopMatrix();
+    // ====================== End Shield ===
+
+
+
     // move to elbow pivot
     glTranslatef(0.0f, -0.75f, 0.0f);
 
@@ -2084,7 +2313,7 @@ void drawLeftHand()
     drawCenteredCylinder(0.28f, 0.7f, 20);
     glRotatef(-90, 0.0f, 0.0f, 1.0f);
 
-    // decorative rings (unchanged)
+    // decorative rings
     glColor3f(0.0f, 0.0f, 0.0f);
     glPushMatrix();
     glTranslatef(0.36f, 0.0f, 0.0f);
@@ -2131,6 +2360,7 @@ void drawLeftHand()
 
     // ---------- palm-only group ----------
     glPushMatrix();
+    // shield 
 
     glColor3fv(darkGrey);
     drawChamferedCube(0.4f, 0.4f, 0.4f, 0.05f);
