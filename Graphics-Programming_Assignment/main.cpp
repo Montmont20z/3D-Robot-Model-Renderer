@@ -362,7 +362,7 @@ void Display(HWND hWnd)
 
     // Head 
     glPushMatrix();
-    glScalef(0.8f, 0.8f, 0.8f);
+    glScalef(0.65f, 0.65f, 0.65f);
     drawGundamHead();
     glPopMatrix();
 
@@ -377,50 +377,32 @@ void Display(HWND hWnd)
 
     //Lower body 
     glPushMatrix();
-    glTranslatef(0.0f, 1.1f, 0.0f);
-    glScalef(0.5f, 0.5f, 0.5f);
+    glTranslatef(0.0f, 0.32f, 0.0f);
+    glScalef(0.55f, 0.55f, 0.55f);
     drawLowerBody();
     glPopMatrix();
 
-    //Left Arm
-    //glPushMatrix();
-    //glTranslatef(-1.1f, 2.4f, 0.0f);
-    //glColor3f(0.6f, 0.6f, 0.6f);     // Grey Shoulder
-    //gluSphere(gluObject, 0.45f, 20, 20);
-
-    //glColor3f(1.0f, 1.0f, 1.0f);     // White Arm
-    //glPushMatrix();
-    //glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
-    //gluCylinder(gluObject, 0.3f, 0.25f, 1.5f, 16, 2);
-    //glPopMatrix();
-
-    //glColor3f(0.2f, 0.2f, 0.2f);     // Dark Hand
-    //glTranslatef(0.0f, -1.6f, 0.0f);
-    //gluSphere(gluObject, 0.3f, 10, 10);
-    //glPopMatrix();
-
-    //Left Hand
+    //right Hand
     glPushMatrix();
-    glTranslatef(2.0f, 1.0f, 0.0f);
+    glTranslatef(2.2f, 1.0f, 0.0f);
     drawLeftHand();
     glPopMatrix();
 
-    // Right Hand
+    //left Hand
     glPushMatrix();
-    glTranslatef(-2.0f, 1.0f, 0.0f);
+    glTranslatef(-2.2f, 1.0f, 0.0f);
     drawRightHand();
     glPopMatrix();
 
-
-    ////Left Leg 
+    //Left Leg 
     glPushMatrix();
-    glTranslatef(-0.9f, 0.1f, 0.0f);
+    glTranslatef(-0.9f, -0.9f, 0.0f);
     drawLeftLeg();
     glPopMatrix();
 
     //Right Leg
     glPushMatrix();
-    glTranslatef(0.3f, 0.1f, 0.0f);
+    glTranslatef(0.3f, -0.9f, 0.0f);
     drawRightLeg();
     glPopMatrix();
 
@@ -727,107 +709,101 @@ void drawGundamHead() {
 void drawUpperBody()
 {
     glPushMatrix();
-    glRotatef(bodyRotation, 0.0f, 1.0f, 0.0f);
-    glScalef(1.2f, 1.2f, 1.2f);
-    //main
+      glRotatef(bodyRotation, 0.0f, 1.0f, 0.0f);
+    glScalef(2.2f, 2.2f, 2.2f);
+
     glColor3f(0.0f, 0.35f, 0.7f);
     glPushMatrix();
-    glScalef(2.2f, 1.4f, 1.7f);
-    glTranslatef(0.0f, 0.2f, 0.0f);
+    glScalef(2.4f, 1.3f, 1.0f);
     drawCube1(1.0f);
     glPopMatrix();
 
-    glColor3f(0.0f, 0.0f, 0.0f);
-    glPushMatrix();
-    glTranslatef(0.0f, 0.3f, 0.85f);
-    glBegin(GL_TRIANGLE_STRIP);
-    glVertex3f(-1.1f, 0.6f, 0.1f);
-    glVertex3f(-0.9f, -0.7f, 0.1f);
-    glVertex3f(0.0f, 0.7f, 0.2f);
-    glVertex3f(0.0f, -0.9f, 0.2f);
-    glVertex3f(1.1f, 0.6f, 0.1f);
-    glVertex3f(0.9f, -0.7f, 0.1f);
+    glBegin(GL_QUADS);
+    glColor3f(0.0f, 0.3f, 0.65f);
+
+    // --- 前突面板 (驾驶舱正面) ---
+    glNormal3f(0.0f, 0.0f, 1.0f);
+    glVertex3f(-0.55f, 0.65f, 0.9f);
+    glVertex3f(0.55f, 0.65f, 0.9f);
+    glVertex3f(0.55f, -0.65f, 0.9f);
+    glVertex3f(-0.55f, -0.65f, 0.9f);
+
+    // --- 左侧护甲 ---
+    glNormal3f(-0.8f, 0.0f, 0.6f);
+    glVertex3f(-0.55f, 0.65f, 0.9f);
+    glVertex3f(-1.2f, 0.65f, 0.5f); 
+    glVertex3f(-1.2f, -0.65f, 0.5f); 
+    glVertex3f(-0.55f, -0.65f, 0.9f);
+
+    // --- 右侧护甲 ---
+    glNormal3f(0.8f, 0.0f, 0.6f);
+    glVertex3f(0.55f, 0.65f, 0.9f);
+    glVertex3f(0.55f, -0.65f, 0.9f);
+    glVertex3f(1.2f, -0.65f, 0.5f); 
+    glVertex3f(1.2f, 0.65f, 0.5f); 
+
+    // --- 顶部封盖 ---
+    glNormal3f(0.0f, 1.0f, 0.0f);
+    glVertex3f(-0.55f, 0.65f, 0.9f);
+    glVertex3f(0.55f, 0.65f, 0.9f);
+    glVertex3f(1.2f, 0.65f, 0.5f);
+    glVertex3f(-1.2f, 0.65f, 0.5f);
+
+    // --- 底部封盖 ---
+    glNormal3f(0.0f, -1.0f, 0.0f);
+    glVertex3f(-0.55f, -0.65f, 0.9f);
+    glVertex3f(-1.2f, -0.65f, 0.5f);
+    glVertex3f(1.2f, -0.65f, 0.5f);
+    glVertex3f(0.55f, -0.65f, 0.9f);
     glEnd();
-    glPopMatrix();
 
-    // White Hatch 
-    glColor3f(0.95f, 0.95f, 0.95f);
-    glPushMatrix();
-    glTranslatef(0.0f, 0.2f, 1.05f);
-    glScalef(0.6f, 0.8f, 0.05f);
-    drawCube1(1.0f);
-    glPopMatrix();
-
-    //yellow vent
-    glColor3f(1.0f, 0.8f, 0.0f);
-    //Top
-    glPushMatrix();
-    glTranslatef(-0.75f, 0.6f, 1.0f);
-    glScalef(0.5f, 0.2f, 0.1f);
-    drawCube1(1.0f);
-    glPopMatrix();
-    //Middle
-    glPushMatrix();
-    glTranslatef(-0.75f, 0.3f, 1.0f);
-    glScalef(0.5f, 0.2f, 0.1f);
-    drawCube1(1.0f);
-    glPopMatrix();
-    //Bottom
-    glPushMatrix();
-    glTranslatef(-0.75f, 0.0f, 1.0f);
-    glScalef(0.5f, 0.2f, 0.1f);
-    drawCube1(1.0f);
-    glPopMatrix();
-
-    // Right Vent
-    //Top 
-    glPushMatrix();
-    glTranslatef(0.75f, 0.6f, 1.0f);
-    glScalef(0.5f, 0.2f, 0.1f);
-    drawCube1(1.0f);
-    glPopMatrix();
-    //Middle
-    glPushMatrix();
-    glTranslatef(0.75f, 0.3f, 1.0f);
-    glScalef(0.5f, 0.2f, 0.1f);
-    drawCube1(1.0f);
-    glPopMatrix();
-    //Bottom
-    glPushMatrix();
-    glTranslatef(0.75f, 0.0f, 1.0f);
-    glScalef(0.5f, 0.2f, 0.1f);
-    drawCube1(1.0f);
-    glPopMatrix();
-
-    //lower
+    // ============ 4. Red Cockpit Cover (Enhanced) ============
     glColor3f(0.8f, 0.1f, 0.1f);
     glPushMatrix();
-    glTranslatef(0.0f, -0.5f, 0.0f);
-    glScalef(2.1f, 0.2f, 1.55f);
+    glTranslatef(0.0f, -0.3f, 1.0f);
+    glScalef(0.55f, 0.65f, 0.2f);
     drawCube1(1.0f);
     glPopMatrix();
 
-    //white center block
-    glColor3f(0.95f, 0.95f, 0.95f);
+    // Add frame to cockpit
+    glColor3f(0.6f, 0.05f, 0.05f); // Darker red for frame
+    glLineWidth(4.0f);
+    glBegin(GL_LINE_LOOP);
+    glVertex3f(-0.275f, 0.025f, 1.1f);
+    glVertex3f(0.275f, 0.025f, 1.1f);
+    glVertex3f(0.275f, -0.625f, 1.1f);
+    glVertex3f(-0.275f, -0.625f, 1.1f);
+    glEnd();
+
+	// ============ 4. 黄色通风口（侧面点缀） ============
+    glColor3f(1.0f, 0.8f, 0.0f);
+    float ventY[] = { 0.35f, 0.15f, -0.05f };
+    for (int i = 0; i < 3; i++) {
+        // 左边
+        glPushMatrix();
+        glTranslatef(-0.95f, ventY[i], 0.72f);
+        glRotatef(-32, 0, 1, 0); 
+        glScalef(0.55f, 0.12f, 0.1f);
+        drawCube1(1.0f);
+        glPopMatrix();
+        // 右边
+        glPushMatrix();
+        glTranslatef(0.95f, ventY[i], 0.72f);
+        glRotatef(32, 0, 1, 0);
+        glScalef(0.55f, 0.12f, 0.1f);
+        drawCube1(1.0f);
+        glPopMatrix();
+
+
+
+  
+    }
+     //============ 5. 腹部红色分层（加厚） ============
+    glColor3f(0.8f, 0.1f, 0.1f);
     glPushMatrix();
-    glTranslatef(0.0f, 0.2f, 1.0f);
-    glScalef(0.8f, 1.0f, 0.1f);
+    glTranslatef(0.0f, -0.75f, 0.0f);
+    glScalef(2.0f, 0.2f, 1.0f); // 第一层
     drawCube1(1.0f);
-    glPopMatrix();
-
-    //backpack
-    glColor3f(0.0f, 1.0f, 0.0f);  
-    glPushMatrix();
-    glTranslatef(0.5f, -1.0f, -1.2f);  
-    glRotatef(-90.0f, 1.0f, 0.0f, 0.0f); 
-    gluCylinder(gluObject, 0.3f, 0.3f, 2.0f, 16, 1); 
-    glPopMatrix();
-
-    glColor3f(0.0f, 1.0f, 0.0f);
-    glPushMatrix();
-    glTranslatef(-0.5f, -1.0f, -1.2f);
-    glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
-    gluCylinder(gluObject, 0.3f, 0.3f, 2.0f, 16, 1);
     glPopMatrix();
 
     glPopMatrix();
@@ -836,81 +812,76 @@ void drawUpperBody()
 void drawLowerBody() {
     glPushMatrix();
     glRotatef(bodyRotation, 0.0f, 1.0f, 0.0f);
-    glScalef(1.2f, 1.2f, 1.2f);
+    glScalef(1.4f, 1.4f, 1.4f);  
 
-    // Main abdomen core
+    // Main abdomen core 
     glColor3f(0.95f, 0.95f, 0.95f);
     glTranslatef(0.0f, 0.5f, 0.0f);
     glPushMatrix();
-    glScalef(2.2f, 0.8f, 1.7f);
+    glScalef(2.6f, 0.9f, 1.55f); 
     drawCube1(1.0f);
     glPopMatrix();
 
-    // Abdomen details
-    glColor3f(0.85f, 0.85f, 0.85f);
+    // Abdomen details 
+    glColor3f(0.0f, 0.0f, 0.0f);
     glPushMatrix();
-    glTranslatef(0.0f, 0.3f, 0.82f);
-    glScalef(1.4f, 0.2f, 0.08f);
+    glTranslatef(0.0f, 0.3f, 0.85f);
+    glScalef(1.8f, 0.25f, 0.09f); 
     drawCube1(1.0f);
     glPopMatrix();
 
     glPushMatrix();
-    glTranslatef(0.0f, -0.3f, 0.82f);
-    glScalef(1.4f, 0.2f, 0.08f);
+    glTranslatef(0.0f, -0.3f, 0.85f);
+    glScalef(1.8f, 0.25f, 0.09f);  
     drawCube1(1.0f);
     glPopMatrix();
 
-    // Waist
-    glColor3f(0.95f, 0.95f, 0.95f);
+    // Waist 
+    glColor3f(1.0f, 1.0f, 0.0f);
     glPushMatrix();
-    glTranslatef(0.0f, -0.8f, 0.0f);
-    glScalef(2.0f, 0.9f, 1.5f);
+    glTranslatef(0.0f, -0.95f, 0.0f);
+    glScalef(2.4f, 1.0f, 1.6f);  
     drawCube1(1.0f);
     glPopMatrix();
 
-    // Belt detail (red)
+    // Belt detail 
     glColor3f(0.9f, 0.1f, 0.1f);
     glPushMatrix();
     glTranslatef(0.0f, -0.8f, 0.0f);
-    glScalef(2.1f, 0.3f, 1.55f);
+    glScalef(2.5f, 0.35f, 1.65f);  
     drawCube1(1.0f);
     glPopMatrix();
 
-    // Front groin armor
+    glColor3f(1.0f, 0.0f, 1.0f);
+    glPushMatrix();
+    glTranslatef(0.0f, -0.8f, 0.85f);
+    glScalef(0.5f, 0.3f, 0.1f);
+    drawCube1(1.0f);
+    glPopMatrix();
+
+    // Front groin armor 
     glColor3f(0.85f, 0.85f, 0.85f);
     glPushMatrix();
-    glTranslatef(0.0f, -1.3f, 0.5f);
-    glScalef(1.4f, 0.2f, 0.3f);
+    glTranslatef(0.0f, -1.3f, 0.55f);
+    glScalef(1.8f, 0.25f, 0.35f);  
     drawCube1(1.0f);
     glPopMatrix();
 
-    // Hip joints
-    glColor3f(0.6f, 0.6f, 0.6f);
-    glPushMatrix();
-    glTranslatef(-0.9f, -1.5f, 0.0f);
-    gluSphere(gluObject, 0.35f, 16, 16);
-    glPopMatrix();
-
-    glPushMatrix();
-    glTranslatef(0.9f, -1.5f, 0.0f);
-    gluSphere(gluObject, 0.35f, 16, 16);
-    glPopMatrix();
-
-    // Front center skirt (blue)
+    // Front center skirt 
     glColor3f(0.1f, 0.3f, 0.9f);
     glPushMatrix();
-    glTranslatef(0.0f, -1.6f, 0.65f);
+    glTranslatef(0.0f, -1.6f, 0.68f);
     glRotatef(-20.0f, 1.0f, 0.0f, 0.0f);
-    glScalef(1.4f, 1.2f, 0.12f);
+    glScalef(1.8f, 1.3f, 0.13f);  
     drawCube1(1.0f);
     glPopMatrix();
 
-    // Yellow detail on front skirt
+    // Yellow detail on front skirt 
     glColor3f(1.0f, 0.85f, 0.0f);
     glPushMatrix();
-    glTranslatef(0.0f, -1.9f, 0.8f);
+    glTranslatef(0.0f, -1.9f, 0.82f);
     glRotatef(-20.0f, 1.0f, 0.0f, 0.0f);
-    glScalef(0.8f, 0.3f, 0.1f);
+    glScalef(1.2f, 0.35f, 0.11f); 
     drawCube1(1.0f);
     glPopMatrix();
 
@@ -918,48 +889,101 @@ void drawLowerBody() {
     glColor3f(0.95f, 0.95f, 0.95f);
     // Left side skirt
     glPushMatrix();
-    glTranslatef(-1.1f, -1.6f, 0.0f);
+    glTranslatef(-1.3f, -1.6f, 0.0f);  
     glRotatef(-10.0f, 0.0f, 0.0f, 1.0f);
-    glScalef(0.7f, 1.3f, 1.2f);
+    glScalef(0.8f, 1.4f, 1.3f); 
     drawCube1(1.0f);
     glPopMatrix();
 
     // Right side skirt
     glPushMatrix();
-    glTranslatef(1.1f, -1.6f, 0.0f);
+    glTranslatef(1.3f, -1.6f, 0.0f);  
     glRotatef(10.0f, 0.0f, 0.0f, 1.0f);
-    glScalef(0.7f, 1.3f, 1.2f);
+    glScalef(0.8f, 1.4f, 1.3f);  
     drawCube1(1.0f);
     glPopMatrix();
 
-    // Back left skirt
+    // Back left skirt 
     glPushMatrix();
-    glTranslatef(-0.6f, -1.6f, -0.6f);
+    glTranslatef(-0.8f, -1.6f, -0.65f); 
     glRotatef(15.0f, 1.0f, 0.0f, 0.0f);
-    glScalef(0.7f, 1.2f, 0.12f);
+    glScalef(0.8f, 1.3f, 0.13f); 
     drawCube1(1.0f);
     glPopMatrix();
 
-    // Back right skirt
+    // Back right skirt 
     glPushMatrix();
-    glTranslatef(0.6f, -1.6f, -0.6f);
+    glTranslatef(0.8f, -1.6f, -0.65f);   
     glRotatef(15.0f, 1.0f, 0.0f, 0.0f);
-    glScalef(0.7f, 1.2f, 0.12f);
+    glScalef(0.8f, 1.3f, 0.13f);  
     drawCube1(1.0f);
     glPopMatrix();
 
     // Additional hip details
     glColor3f(0.7f, 0.7f, 0.7f);
     glPushMatrix();
-    glTranslatef(-1.3f, -1.2f, 0.0f);
+    glTranslatef(-1.5f, -1.3f, 0.0f);  
+    glScalef(0.45f, 0.7f, 0.9f);  
+    drawCube1(1.0f);
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(1.5f, -1.3f, 0.0f);  
+    glScalef(0.45f, 0.7f, 0.9f);  
+    drawCube1(1.0f);
+    glPopMatrix();
+
+    // Back thrusters
+    glColor3f(0.2f, 0.2f, 0.2f);
+    glPushMatrix();
+    glTranslatef(-0.7f, -1.0f, -0.8f);
     glScalef(0.4f, 0.6f, 0.8f);
     drawCube1(1.0f);
     glPopMatrix();
 
     glPushMatrix();
-    glTranslatef(1.3f, -1.2f, 0.0f);
+    glTranslatef(0.7f, -1.0f, -0.8f);
     glScalef(0.4f, 0.6f, 0.8f);
     drawCube1(1.0f);
+    glPopMatrix();
+
+    // Thruster details
+    glColor3f(0.1f, 0.1f, 0.8f);
+    glPushMatrix();
+    glTranslatef(-0.7f, -1.0f, -1.2f);
+    glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+    gluCylinder(gluObject, 0.15f, 0.25f, 0.4f, 8, 1);
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(0.7f, -1.0f, -1.2f);
+    glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+    gluCylinder(gluObject, 0.15f, 0.25f, 0.4f, 8, 1);
+    glPopMatrix();
+
+    // Back sensor array
+    glColor3f(0.3f, 0.3f, 0.3f);
+    glPushMatrix();
+    glTranslatef(0.0f, -0.5f, -0.9f);
+    glScalef(0.8f, 0.2f, 0.3f);
+    drawCube1(1.0f);
+    glPopMatrix();
+
+    // Sensor details
+    glColor3f(0.1f, 0.8f, 0.1f);
+    glPushMatrix();
+    glTranslatef(-0.3f, -0.5f, -1.05f);
+    gluSphere(gluObject, 0.08f, 8, 8);
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(0.0f, -0.5f, -1.05f);
+    gluSphere(gluObject, 0.08f, 8, 8);
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(0.3f, -0.5f, -1.05f);
+    gluSphere(gluObject, 0.08f, 8, 8);
     glPopMatrix();
 
     glPopMatrix();
@@ -1726,7 +1750,6 @@ void drawShield() {
     glVertex3f(hWidth, 0.1f, hDepth);
     glEnd();
 }
-
 
 // faces count
 // 105
