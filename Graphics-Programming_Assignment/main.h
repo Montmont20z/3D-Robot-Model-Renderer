@@ -333,18 +333,21 @@ void drawChamferedCube(float width, float height, float depth, float chamfer) {
 
     // Top face (y = hh)
     Vec3 topVerts[8] = {
-        // Front edge
-        {-hw + chamfer, hh, hd},           // 0
-        {hw - chamfer, hh, hd},            // 1
-        // Right edge
-        {hw, hh, hd - chamfer},            // 2
-        {hw, hh, -hd + chamfer},           // 3
-        // Back edge
-        {hw - chamfer, hh, -hd},           // 4
-        {-hw + chamfer, hh, -hd},          // 5
-        // Left edge
-        {-hw, hh, -hd + chamfer},          // 6
-        {-hw, hh, hd - chamfer}            // 7
+        // Front edge (z = hd, the front of the cube)
+		{-hw + chamfer, hh, hd},    // 0: Front-left, moved RIGHT by chamfer
+		{hw - chamfer, hh, hd},     // 1: Front-right, moved LEFT by chamfer
+
+		// Right edge (x = hw, the right side)
+		{hw, hh, hd - chamfer},     // 2: Right-front, moved BACK by chamfer
+		{hw, hh, -hd + chamfer},    // 3: Right-back, moved FORWARD by chamfer
+
+		// Back edge (z = -hd, the back of the cube)
+		{hw - chamfer, hh, -hd},    // 4: Back-right, moved LEFT by chamfer
+		{-hw + chamfer, hh, -hd},   // 5: Back-left, moved RIGHT by chamfer
+
+		// Left edge (x = -hw, the left side)
+		{-hw, hh, -hd + chamfer},   // 6: Left-back, moved FORWARD by chamfer
+		{-hw, hh, hd - chamfer}     // 7: Left-front, moved BACK by chamfer
     };
 
     // Bottom face (y = -hh)
@@ -367,8 +370,8 @@ void drawChamferedCube(float width, float height, float depth, float chamfer) {
     glBegin(GL_POLYGON);
     glNormal3f(0.0f, 1.0f, 0.0f);
     for (int i = 0; i < 8; i++) {
-        float u = (topVerts[i].x + hw) / (2.0f * hw);
-        float v = (topVerts[i].z + hd) / (2.0f * hd);
+        float u = (topVerts[i].x + hw) / (width); // range from 0 to 1
+        float v = (topVerts[i].z + hd) / (depth); // range from 0 to 1
         glTexCoord2f(u, v);
         glVertex3f(topVerts[i].x, topVerts[i].y, topVerts[i].z);
     }
@@ -378,8 +381,8 @@ void drawChamferedCube(float width, float height, float depth, float chamfer) {
     glBegin(GL_POLYGON);
     glNormal3f(0.0f, -1.0f, 0.0f);
     for (int i = 7; i >= 0; i--) {
-        float u = (bottomVerts[i].x + hw) / (2.0f * hw);
-        float v = (bottomVerts[i].z + hd) / (2.0f * hd);
+        float u = (bottomVerts[i].x + hw) / (width);
+        float v = (bottomVerts[i].z + hd) / (depth);
         glTexCoord2f(u, v);
         glVertex3f(bottomVerts[i].x, bottomVerts[i].y, bottomVerts[i].z);
     }
@@ -606,7 +609,7 @@ struct BlockAnim {
 
 static BlockAnim blockAnim = { BLOCK_IDLE, 0.0, 0,0,0,0,0 };
 
-// Hard-coded targets (tweak as needed)
+// Hard-coded targets 
 static const float BLOCK_SHOULDER_YAW_TARGET = -68.0f;
 static const float BLOCK_SHOULDER_PITCH_TARGET = -25.0f;
 static const float BLOCK_ELBOW_TARGET = -30.0f;
@@ -619,19 +622,15 @@ static const double DURATION_HOLD = 1.55;
 static const double DURATION_LOWERING = 0.52;
 static const double DURATION_RECOVER = 0.15;
 
-// High-resolution timer (seconds since epoch). Small overhead, good precision.
+// get current time in seconds since computer start
 static double now_seconds()
 {
     using namespace std::chrono;
     return duration<double>(high_resolution_clock::now().time_since_epoch()).count();
 }
 
-// small smooth easing
-static float smoothstep_ease(float t) {
-    if (t <= 0.0f) return 0.0f;
-    if (t >= 1.0f) return 1.0f;
-    return t * t * (3.0f - 2.0f * t);
-}
+// lineear interpolation
+// Start at a, move towards b by t percent
 static float lerp(float a, float b, float t) { return a + (b - a) * t; }
 
 // Start the Block animation
@@ -655,19 +654,19 @@ void updateBlockAnim(double now)
     case BLOCK_IDLE:
         return;
     case BLOCK_RAISING: {
+        // figure out the current animation completion percentage (0% to 100%)
         double t = (now - blockAnim.stateStartTime) / DURATION_RAISING;
-        if (t >= 1.0) t = 1.0;
-        float e = smoothstep_ease((float)t);
+        if (t >= 1.0) t = 1.0; // prevent from going above 100%. t = 0.0 (0%), t = 1.0 (100%)
 
-        leftShoulderYawAngle = lerp(blockAnim.idle_shoulderYaw, BLOCK_SHOULDER_YAW_TARGET, e);
-        leftShoulderPitchAngle = lerp(blockAnim.idle_shoulderPitch, BLOCK_SHOULDER_PITCH_TARGET, e);
-        leftElbowAngle = lerp(blockAnim.idle_elbow, BLOCK_ELBOW_TARGET, e);
-        leftWristAngle = lerp(blockAnim.idle_wrist, BLOCK_WRIST_TARGET, e);
-        leftFingersCurlAngle = lerp(blockAnim.idle_fingers, BLOCK_FINGERS_TARGET, e);
+        leftShoulderYawAngle = lerp(blockAnim.idle_shoulderYaw, BLOCK_SHOULDER_YAW_TARGET, t);
+        leftShoulderPitchAngle = lerp(blockAnim.idle_shoulderPitch, BLOCK_SHOULDER_PITCH_TARGET, t);
+        leftElbowAngle = lerp(blockAnim.idle_elbow, BLOCK_ELBOW_TARGET, t);
+        leftWristAngle = lerp(blockAnim.idle_wrist, BLOCK_WRIST_TARGET, t);
+        leftFingersCurlAngle = lerp(blockAnim.idle_fingers, BLOCK_FINGERS_TARGET, t);
 
         if (t >= 1.0) {
-            blockAnim.state = BLOCK_HOLDING;
-            blockAnim.stateStartTime = now;
+            blockAnim.state = BLOCK_HOLDING; // go to next animation state
+            blockAnim.stateStartTime = now; // reset start time
         }
         return;
     }
@@ -686,15 +685,15 @@ void updateBlockAnim(double now)
         return;
     }
     case BLOCK_LOWERING: {
+        // figure out the current animation completion percentage (0% to 100%)
         double t = (now - blockAnim.stateStartTime) / DURATION_LOWERING;
         if (t >= 1.0) t = 1.0;
-        float e = smoothstep_ease((float)t);
 
-        leftShoulderYawAngle = lerp(BLOCK_SHOULDER_YAW_TARGET, blockAnim.idle_shoulderYaw, e);
-        leftShoulderPitchAngle = lerp(BLOCK_SHOULDER_PITCH_TARGET, blockAnim.idle_shoulderPitch, e);
-        leftElbowAngle = lerp(BLOCK_ELBOW_TARGET, blockAnim.idle_elbow, e);
-        leftWristAngle = lerp(BLOCK_WRIST_TARGET, blockAnim.idle_wrist, e);
-        leftFingersCurlAngle = lerp(BLOCK_FINGERS_TARGET, blockAnim.idle_fingers, e);
+        leftShoulderYawAngle = lerp(BLOCK_SHOULDER_YAW_TARGET, blockAnim.idle_shoulderYaw, t);
+        leftShoulderPitchAngle = lerp(BLOCK_SHOULDER_PITCH_TARGET, blockAnim.idle_shoulderPitch, t);
+        leftElbowAngle = lerp(BLOCK_ELBOW_TARGET, blockAnim.idle_elbow, t);
+        leftWristAngle = lerp(BLOCK_WRIST_TARGET, blockAnim.idle_wrist, t);
+        leftFingersCurlAngle = lerp(BLOCK_FINGERS_TARGET, blockAnim.idle_fingers, t);
 
         if (t >= 1.0) {
             blockAnim.state = BLOCK_RECOVERING;
@@ -705,7 +704,6 @@ void updateBlockAnim(double now)
     case BLOCK_RECOVERING: {
         double t = (now - blockAnim.stateStartTime) / DURATION_RECOVER;
         if (t >= 1.0) t = 1.0;
-        float e = smoothstep_ease((float)t);
 
         // set final to idle snapshot to avoid numeric drift
         leftShoulderYawAngle = blockAnim.idle_shoulderYaw;
