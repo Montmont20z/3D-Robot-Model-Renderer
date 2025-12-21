@@ -36,7 +36,11 @@ float rightHipAngle = 0.0f;
 float rightKneeAngle = 0.0f;
 float headRotation = 0.0f;
 float bodyRotation = 0.0f;
+
+//Sword Animation
 float bladeThick = 0.0f;
+float enlargeSpeed = 0.0001f;
+bool isEnlarging = false;
 
 // ------------------- camera state -----------------------
 float camTargetX = 0.0f, camTargetY = 0.0f, camTargetZ = 0.0f;
@@ -229,8 +233,13 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 
         case 'k':
 		case 'K':
-            bladeThick = 0.3f;
-                break;
+            isEnlarging = !isEnlarging;
+            break;
+
+        case 'l':
+		case 'L': 
+            isEnlarging = false;
+			break;
 
 
         case VK_ESCAPE: PostQuitMessage(0); break;
@@ -313,6 +322,21 @@ void initLighting() {
     glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
 }
 //--------------------------------------------------------------------
+
+void UpdateSword() {
+    if (isEnlarging) {
+		bladeThick += enlargeSpeed;
+        if (bladeThick >= 0.03f) {
+            bladeThick = 0.03f;
+        }
+    }
+    else {
+        bladeThick -= enlargeSpeed;
+        if (bladeThick == 0.0f) {
+            bladeThick = 0.0f;
+        }
+    }
+}
 
 void Display(HWND hWnd)
 {
@@ -475,7 +499,7 @@ int main(HINSTANCE hInst, HINSTANCE, LPSTR, int nCmdShow)
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }
-
+		UpdateSword();
         Display(hWnd);
 
         SwapBuffers(hdc);
@@ -1545,16 +1569,16 @@ void drawSword() {
     // Blade
     glColor3f(1.0f, 0.1f, 0.9f); // light
     glPushMatrix();
-    glTranslatef(0.1f, 1.7f, 0.2f);
-	drawCenteredCylinder(0.03f, 1.9f, 6);    
+    glTranslatef(0.1f, 1.75f, 0.2f);
+	drawCenteredCylinder(bladeThick, 1.9f, 6);    
     glPopMatrix();
 
     //Blade tip
     glColor3f(1.0f, 0.1f, 0.9f); // light
     glPushMatrix();
-    glTranslatef(0.1f, 2.65f, 0.2f);
+    glTranslatef(0.1f, 2.7f, 0.2f);
 	glRotatef(-90.0, 1.0f, 0.0f, 0.0f);
-    gluCylinder(gluObject, 0.03f, 0.0f, 0.02f, 20, 20);
+    gluCylinder(gluObject, bladeThick, 0.0f, 0.02f, 20, 20);
     glPopMatrix();
 
 }
