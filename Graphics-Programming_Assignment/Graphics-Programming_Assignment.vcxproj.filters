@@ -24,4 +24,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="metal-white-1.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="metal-white-2.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="metal-white-3.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="metal.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
 </Project>

@@ -20,16 +20,7 @@ const double PI = 3.14159265358979323846f;
 float rotateX = 0.0f, rotateY = 0.0f, rotateZ = 0.0f;
 float positionX = 0.0f, positionY = 0.0f, positionZ = 0.0f;
 
-// Robot variable
-// === hand ===
-//float leftElbowAngle = 0.0f;
-//float leftWristAngle = 0.0f;
-//float leftFingersCurlAngle = 0.0f;
-//float leftShoulderPitchAngle = 0.0f;
-//float leftShoulderYawAngle = 0.0f;
-
-//  === end hand ===
-
+//  ---------------- Robot variable ----------------------
 float leftHipAngle = 0.0f;
 float leftKneeAngle = 0.0f;
 float rightHipAngle = 0.0f;
@@ -41,6 +32,12 @@ float bodyRotation = 0.0f;
 float bladeThick = 0.0f;
 float enlargeSpeed = 0.0001f;
 bool isEnlarging = false;
+
+// ----------------- Texture ------------------------------
+GLuint metalWhiteTexture1 = 0;
+GLuint metalWhiteTexture2 = 0;
+GLuint metalWhiteTexture3 = 0;
+GLuint metalTexture = 0;
 
 // ------------------- camera state -----------------------
 float camTargetX = 0.0f, camTargetY = 0.0f, camTargetZ = 0.0f;
@@ -59,17 +56,6 @@ float orbitSpeed = 0.2f; // degree /pixel
 float panSpeed = 0.005f;
 float zoomSpeed = 0.1f;
 
-// simple 3 float vector helpers
-inline void vec3_sub(const float a[3], const float b[3], float out[3]) { out[0] = a[0] - b[0]; out[1] = a[1] - b[1]; out[2] = a[2] - b[2]; }
-inline void vec3_add_mut(float a[3], const float b[3]) { a[0] += b[0]; a[1] += b[1]; a[2] += b[2]; }
-inline void vec3_scale(const float a[3], float s, float out[3]) { out[0] = a[0] * s; out[1] = a[1] * s; out[2] = a[2] * s; }
-inline float vec3_len(const float a[3]) { return sqrtf(a[0] * a[0] + a[1] * a[1] + a[2] * a[2]); }
-inline void vec3_norm(float a[3]) { float l = vec3_len(a); if (l > 1e-6f) { a[0] /= l; a[1] /= l; a[2] /= l; } }
-inline void vec3_cross(const float a[3], const float b[3], float out[3]) {
-    out[0] = a[1] * b[2] - a[2] * b[1];
-    out[1] = a[2] * b[0] - a[0] * b[2];
-    out[2] = a[0] * b[1] - a[1] * b[0];
-}
 void computeNormal(Vec3 a, Vec3 b, Vec3 c) {
     Vec3 u = { b.x - a.x, b.y - a.y, b.z - a.z };
     Vec3 v = { c.x - a.x, c.y - a.y, c.z - a.z };
@@ -252,15 +238,6 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
             projMode = ORTHO;
             updateProjection(WINDOW_WIDTH, WINDOW_HEIGHT); // call with a reasonable default - WM_SIZE will set correct viewport
             break;
-            //case 'K': case 'k':// decrease fovy
-            //    fovy -= 1.0f; if (fovy < 1.0f) fovy = 1.0f;
-            //    if (projMode == PERSPECTIVE) updateProjection(WINDOW_WIDTH, WINDOW_HEIGHT); // call with a reasonable default - WM_SIZE will set correct viewport
-            //    break;
-            //case 'L': case 'l': // increase fovy
-            //    fovy += 1.0f; if (fovy > 179.0f) fovy = 179.0f;
-            //    if (projMode == PERSPECTIVE) updateProjection(WINDOW_WIDTH, WINDOW_HEIGHT); // call with a reasonable default - WM_SIZE will set correct viewport
-            //    break;
-
         default:
             break;
         }
@@ -271,7 +248,7 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
     }
     return 0;
 }
-//--------------------------------------------------------------------
+//--------------------------- Initialization -----------------------------------------
 bool initPixelFormat(HDC hdc)
 {
     PIXELFORMATDESCRIPTOR pfd;
@@ -312,8 +289,8 @@ void initLighting() {
 
     // Light position
     GLfloat light_pos[] = { 5.0f, 5.0f, 5.0f, 1.0f };
-    GLfloat light_ambient[] = { 0.2f, 0.2f, 0.2f, 1.0f };
-    GLfloat light_diffuse[] = { 0.8f, 0.8f, 0.8f, 1.0f };
+    GLfloat light_ambient[] = { 0.1f, 0.1f, 0.1f, 1.0f };
+    GLfloat light_diffuse[] = { 1.0f, 1.0f, 1.0f, 1.0f };
     GLfloat light_specular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 
     glLightfv(GL_LIGHT0, GL_POSITION, light_pos);
@@ -321,6 +298,16 @@ void initLighting() {
     glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
     glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
 }
+
+void initTexture() {
+	metalWhiteTexture1 = LoadBMPTexture("metal-white-1.bmp");
+	metalWhiteTexture2 = LoadBMPTexture("metal-white-2.bmp");
+	metalWhiteTexture3 = LoadBMPTexture("metal-white-3.bmp");
+    metalTexture = LoadBMPTexture("metal.bmp");
+
+}
+
+
 //--------------------------------------------------------------------
 
 void UpdateSword() {
@@ -488,6 +475,7 @@ int main(HINSTANCE hInst, HINSTANCE, LPSTR, int nCmdShow)
 
     glMatrixMode(GL_MODELVIEW);
     initLighting();
+    initTexture();
 
 
     while (true)
@@ -1810,12 +1798,19 @@ void drawShield() {
 
 // faces count
 // 105
-
 void drawLeftHand()
 {
     float white[3] = { 0.95f, 0.95f, 0.95f };
     float darkGrey[3] = { 0.25f, 0.25f, 0.25f };
     float red[3] = { 0.8f, 0.1f, 0.1f };
+
+
+    // enable texture 
+	glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, metalWhiteTexture1);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE); // or GL_REPLACE
+    gluQuadricTexture(gluObject, GL_TRUE); // auto-generates texcoords for quadrics (spheres/cylinders/disks)
+    //gluQuadricDrawStyle(gluObject, GLU_FILL);
 
     // ---------------------------
     // STATIC SHOULDER ARMOR (attached to torso, NOT affected by arm joint rotations)
@@ -1875,13 +1870,19 @@ void drawLeftHand()
     glColor3fv(white);
     glBegin(GL_POLYGON);
     glNormal3f(0.0f, 0.0f, 1.0f);
-    for (int i = 0; i < 7; i++) glVertex3f(front[i].x, front[i].y, front[i].z);
+    for (int i = 0; i < 7; i++) {
+        glTexCoord2f(front[i].x,front[i].y);
+        glVertex3f(front[i].x, front[i].y, front[i].z);
+    }
     glEnd();
 
     // draw Back face
     glBegin(GL_POLYGON);
     glNormal3f(0.0f, 0.0f, -1.0f);
-    for (int i = 6; i >= 0; i--) glVertex3f(back[i].x, back[i].y, back[i].z);
+    for (int i = 6; i >= 0; i--) {
+        glTexCoord2f(back[i].x,back[i].y);
+        glVertex3f(back[i].x, back[i].y, back[i].z);
+    }
     glEnd();
 
     // Sloped sides connect front and back edges
@@ -1906,9 +1907,13 @@ void drawLeftHand()
         }
 
         glNormal3f(nx, ny, nz);
+        glTexCoord2f(front[i].x,front[i].z);
         glVertex3f(front[i].x, front[i].y, front[i].z);
+        glTexCoord2f(front[next].x,front[next].z);
         glVertex3f(front[next].x, front[next].y, front[next].z);
+        glTexCoord2f(back[next].x,back[next].z);
         glVertex3f(back[next].x, back[next].y, back[next].z);
+        glTexCoord2f(back[i].x,back[i].z);
         glVertex3f(back[i].x, back[i].y, back[i].z);
     }
     glEnd();
@@ -1945,13 +1950,19 @@ void drawLeftHand()
     glColor3fv(white);
     glBegin(GL_POLYGON);
     glNormal3f(0.0f, 0.0f, -1.0f);
-    for (int i = 0; i < 7; i++) glVertex3f(front2[i].x, front2[i].y, front2[i].z);
+    for (int i = 0; i < 7; i++) {
+        glTexCoord2f(front2[i].x,front2[i].y);
+        glVertex3f(front2[i].x, front2[i].y, front2[i].z);
+    }
     glEnd();
 
     // draw Back face
     glBegin(GL_POLYGON);
     glNormal3f(0.0f, 0.0f, 1.0f);
-    for (int i = 6; i >= 0; i--) glVertex3f(back2[i].x, back2[i].y, back2[i].z);
+    for (int i = 6; i >= 0; i--) {
+        glTexCoord2f(back2[i].x,back2[i].y);
+        glVertex3f(back2[i].x, back2[i].y, back2[i].z);
+    }
     glEnd();
 
     // Sloped sides connect front and back edges
@@ -1976,9 +1987,13 @@ void drawLeftHand()
         }
 
         glNormal3f(-nx, -ny, -nz);
+        glTexCoord2f(front2[i].x,front2[i].z);
         glVertex3f(front2[i].x, front2[i].y, front2[i].z);
+        glTexCoord2f(front2[next].x,front2[next].z);
         glVertex3f(front2[next].x, front2[next].y, front2[next].z);
+        glTexCoord2f(back2[next].x,back2[next].z);
         glVertex3f(back2[next].x, back2[next].y, back2[next].z);
+        glTexCoord2f(back2[i].x,back2[i].z);
         glVertex3f(back2[i].x, back2[i].y, back2[i].z);
     }
     glEnd();
@@ -2012,9 +2027,13 @@ void drawLeftHand()
         }
 
         glNormal3f(nx, ny, nz);
+        glTexCoord2f(back[i].x,back[i].z);
         glVertex3f(back[i].x, back[i].y, back[i].z);           // Current vertex on front shoulder back
+        glTexCoord2f(back[next].x,back[next].z);
         glVertex3f(back[next].x, back[next].y, back[next].z);   // Next vertex on front shoulder back
+        glTexCoord2f(back2[next].x,back2[next].z);
         glVertex3f(back2[next].x, back2[next].y, back2[next].z); // Next vertex on back shoulder back
+        glTexCoord2f(back2[i].x,back2[i].z);
         glVertex3f(back2[i].x, back2[i].y, back2[i].z);         // Current vertex on back shoulder back
     }
 
@@ -2037,7 +2056,6 @@ void drawLeftHand()
     glPushMatrix();
     glRotatef(90, 0.0f, 0.0f, 1.0f);
     glTranslatef(0.00f, 0.0f, 0.0f);
-    //gluDisk(gluObject, 0.12f, 0.30f, 20, 1);
     drawCenteredCylinder(0.22f, 0.6f, 20);
     glPopMatrix();
 
@@ -2202,11 +2220,17 @@ void drawRightHand()
     float darkGrey[3] = { 0.25f, 0.25f, 0.25f };
     float red[3] = { 0.8f, 0.1f, 0.1f };
 
+    // enable texture
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, metalWhiteTexture1);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE); // or GL_REPLACE
+    gluQuadricTexture(gluObject, GL_TRUE); // auto-generates texcoords for quadrics (spheres/cylinders/disks)
+
     // ---------------------------
     // ARM HIERARCHY (rooted at the shoulder pivot)
     // ---------------------------
     glPushMatrix();
-    // Move origin to shoulder pivot (mirrored from left: was -0.4f, now +0.4f)
+    // Move origin to shoulder pivot
     glTranslatef(0.4f, 0.4f, 0.0f);
 
     // Whole-arm rotations (shoulder-level) - mirrored angles
@@ -2246,20 +2270,26 @@ void drawRightHand()
         back[i].z = back[i].z - backExtrude;
     }
 
-    // draw Front face
+    // draw Front face (with texcoords)
     glColor3fv(white);
     glBegin(GL_POLYGON);
     glNormal3f(0.0f, 0.0f, 1.0f);
-    for (int i = 0; i < 7; i++) glVertex3f(front[i].x, front[i].y, front[i].z);
+    for (int i = 0; i < 7; i++) {
+        glTexCoord2f(front[i].x, front[i].y);
+        glVertex3f(front[i].x, front[i].y, front[i].z);
+    }
     glEnd();
 
-    // draw Back face
+    // draw Back face (with texcoords; reversed order)
     glBegin(GL_POLYGON);
     glNormal3f(0.0f, 0.0f, -1.0f);
-    for (int i = 6; i >= 0; i--) glVertex3f(back[i].x, back[i].y, back[i].z);
+    for (int i = 6; i >= 0; i--) {
+        glTexCoord2f(back[i].x, back[i].y);
+        glVertex3f(back[i].x, back[i].y, back[i].z);
+    }
     glEnd();
 
-    // Sloped sides connect front and back edges
+    // Sloped sides connect front and back edges (with texcoords)
     glColor3fv(white);
     glBegin(GL_QUADS);
     for (int i = 0; i < 7; i++) {
@@ -2278,9 +2308,17 @@ void drawRightHand()
         }
 
         glNormal3f(-nx, -ny, -nz);
+
+        glTexCoord2f(front[i].x, front[i].z);
         glVertex3f(front[i].x, front[i].y, front[i].z);
+
+        glTexCoord2f(front[next].x, front[next].z);
         glVertex3f(front[next].x, front[next].y, front[next].z);
+
+        glTexCoord2f(back[next].x, back[next].z);
         glVertex3f(back[next].x, back[next].y, back[next].z);
+
+        glTexCoord2f(back[i].x, back[i].z);
         glVertex3f(back[i].x, back[i].y, back[i].z);
     }
     glEnd();
@@ -2314,13 +2352,19 @@ void drawRightHand()
     glColor3fv(white);
     glBegin(GL_POLYGON);
     glNormal3f(0.0f, 0.0f, -1.0f);
-    for (int i = 0; i < 7; i++) glVertex3f(front2[i].x, front2[i].y, front2[i].z);
+    for (int i = 0; i < 7; i++) {
+        glTexCoord2f(front2[i].x, front2[i].y);
+        glVertex3f(front2[i].x, front2[i].y, front2[i].z);
+    }
     glEnd();
 
     // draw Back face
     glBegin(GL_POLYGON);
     glNormal3f(0.0f, 0.0f, 1.0f);
-    for (int i = 6; i >= 0; i--) glVertex3f(back2[i].x, back2[i].y, back2[i].z);
+    for (int i = 6; i >= 0; i--) {
+        glTexCoord2f(back2[i].x, back2[i].y);
+        glVertex3f(back2[i].x, back2[i].y, back2[i].z);
+    }
     glEnd();
 
     // Sloped sides
@@ -2342,9 +2386,17 @@ void drawRightHand()
         }
 
         glNormal3f(nx, ny, nz);
+
+        glTexCoord2f(front2[i].x, front2[i].z);
         glVertex3f(front2[i].x, front2[i].y, front2[i].z);
+
+        glTexCoord2f(front2[next].x, front2[next].z);
         glVertex3f(front2[next].x, front2[next].y, front2[next].z);
+
+        glTexCoord2f(back2[next].x, back2[next].z);
         glVertex3f(back2[next].x, back2[next].y, back2[next].z);
+
+        glTexCoord2f(back2[i].x, back2[i].z);
         glVertex3f(back2[i].x, back2[i].y, back2[i].z);
     }
     glEnd();
@@ -2372,11 +2424,20 @@ void drawRightHand()
         }
 
         glNormal3f(-nx, -ny, -nz);
+
+        glTexCoord2f(back[i].x, back[i].z);
         glVertex3f(back[i].x, back[i].y, back[i].z);
+
+        glTexCoord2f(back[next].x, back[next].z);
         glVertex3f(back[next].x, back[next].y, back[next].z);
+
+        glTexCoord2f(back2[next].x, back2[next].z);
         glVertex3f(back2[next].x, back2[next].y, back2[next].z);
+
+        glTexCoord2f(back2[i].x, back2[i].z);
         glVertex3f(back2[i].x, back2[i].y, back2[i].z);
     }
+
     glEnd();
 
     // Internal connecting cylinder

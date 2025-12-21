@@ -129,6 +129,12 @@
   <ItemGroup>
     <ClInclude Include="main.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="metal-white-1.bmp" />
+    <Image Include="metal-white-2.bmp" />
+    <Image Include="metal-white-3.bmp" />
+    <Image Include="metal.bmp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
