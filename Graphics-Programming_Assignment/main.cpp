@@ -36,6 +36,7 @@ float rightHipAngle = 0.0f;
 float rightKneeAngle = 0.0f;
 float headRotation = 0.0f;
 float bodyRotation = 0.0f;
+float bladeThick = 0.0f;
 
 // ------------------- camera state -----------------------
 float camTargetX = 0.0f, camTargetY = 0.0f, camTargetZ = 0.0f;
@@ -226,6 +227,10 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
         case 'W': bodyRotation += 5.0f; break;
         case 'S': bodyRotation -= 5.0f; break;
 
+        case 'k':
+		case 'K':
+            bladeThick = 0.3f;
+                break;
 
 
         case VK_ESCAPE: PostQuitMessage(0); break;
@@ -348,8 +353,8 @@ void Display(HWND hWnd)
     //glRotatef(rotateZ, 0.0f, 0.0f, 1.0f); // z axis
 
     glPushMatrix();
-    glTranslatef(1.0f, 1.0f, 1.0f);
-    //drawSword();
+    glTranslatef(1.0f, 0.0f, 1.0f);
+    drawSword();
     glTranslatef(1.0f, 1.0f, 1.0f);
     //drawShield();
     glPopMatrix();
@@ -1502,28 +1507,56 @@ void drawRightLeg() {
 // Polygon Function
 void drawSword() {
     // Handle
-    glColor3f(0.3f, 0.2f, 0.1f); // Brown
+    glColor3f(1.0f, 1.0f, 1.0f);  //White
     glPushMatrix();
-    glRotatef(90, 1, 0, 0);
-    gluCylinder(gluObject, 0.08f, 0.08f, 0.4f, 12, 2);
+    glTranslatef(0.1f, 0.6f, 0.2f);
+	drawCenteredCylinder(0.0325f, 0.25f, 12);
     glPopMatrix();
 
-    // Guard
-    glColor3f(0.7f, 0.7f, 0.7f); // Silver
+    // lower hilt
+    glColor3f(0.8f, 0.8f, 0.8f);  //White
     glPushMatrix();
-    glTranslatef(0, 0.4f, 0);
-    glScalef(0.5f, 0.05f, 0.1f);
-    drawCube();
+    glTranslatef(0.1f, 0.45f, 0.2f);
+    drawCenteredCylinder(0.04f, 0.05f, 8);
     glPopMatrix();
+
+    // lower stud
+    glColor3f(1.0f, 1.0f, 1.0f);  //White
+    glPushMatrix();
+    glTranslatef(0.1f, 0.405f, 0.2f);
+    drawCenteredCylinder(0.0325f, 0.04f, 12);
+    glPopMatrix();
+
+    // upper hilt
+    glColor3f(0.8f, 0.8f, 0.8f);  //White
+    glPushMatrix();
+    glTranslatef(0.1f, 0.75f, 0.2f);
+    drawCenteredCylinder(0.05f, 0.05f, 8);
+    glPopMatrix();
+
+	// upper stud
+    glColor3f(1.0f, 1.0f, 1.0f);  //White
+    glPushMatrix();
+    glTranslatef(0.1f, 0.8f, 0.2f);
+    drawCenteredCylinder(0.0325f, 0.04f, 12);
+    glPopMatrix();
+
 
     // Blade
-    glColor3f(0.9f, 0.9f, 1.0f); // Steel
+    glColor3f(1.0f, 0.1f, 0.9f); // light
     glPushMatrix();
-    glTranslatef(0, 0.45f, 0);
-    glScalef(0.08f, 1.5f, 0.15f);
-    drawPyramid(); // Use for blade tip
-    // Add rectangular blade base
+    glTranslatef(0.1f, 1.7f, 0.2f);
+	drawCenteredCylinder(0.03f, 1.9f, 6);    
     glPopMatrix();
+
+    //Blade tip
+    glColor3f(1.0f, 0.1f, 0.9f); // light
+    glPushMatrix();
+    glTranslatef(0.1f, 2.65f, 0.2f);
+	glRotatef(-90.0, 1.0f, 0.0f, 0.0f);
+    gluCylinder(gluObject, 0.03f, 0.0f, 0.02f, 20, 20);
+    glPopMatrix();
+
 }
 
 // faces count
