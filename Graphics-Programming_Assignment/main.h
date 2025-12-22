@@ -25,8 +25,6 @@ float rightShoulderYawAngle = 0.0f;
 // Forward declarations for functions used in main.cpp
 void updateProjection(int width, int height);
 void drawLeftHand();
-void drawDetailedLeftLeg();
-void drawDetailedRightLeg();
 void drawSword();
 void drawShield();
 void drawUpperBody();
@@ -34,7 +32,29 @@ void drawLowerBody();
 void drawGundamHead();
 void Display(HWND hWnd);
 
-// You may add additional shared declarations here if needed.
+// simple 3 float vector helpers
+inline void vec3_sub(const float a[3], const float b[3], float out[3]) { out[0] = a[0] - b[0]; out[1] = a[1] - b[1]; out[2] = a[2] - b[2]; }
+inline void vec3_add_mut(float a[3], const float b[3]) { a[0] += b[0]; a[1] += b[1]; a[2] += b[2]; }
+inline void vec3_scale(const float a[3], float s, float out[3]) { out[0] = a[0] * s; out[1] = a[1] * s; out[2] = a[2] * s; }
+inline float vec3_len(const float a[3]) { return sqrtf(a[0] * a[0] + a[1] * a[1] + a[2] * a[2]); }
+inline void vec3_norm(float a[3]) { float l = vec3_len(a); if (l > 1e-6f) { a[0] /= l; a[1] /= l; a[2] /= l; } }
+inline void vec3_cross(const float a[3], const float b[3], float out[3]) {
+    out[0] = a[1] * b[2] - a[2] * b[1]; // i
+    out[1] = a[2] * b[0] - a[0] * b[2]; // j
+    out[2] = a[0] * b[1] - a[1] * b[0]; // k
+}
+
+static inline void computeNormalFA(const float a[3], const float b[3], const float c[3]) {
+    float u[3], v[3], n[3];
+    // u = b - a, v = c - a
+    vec3_sub(b, a, u);
+    vec3_sub(c, a, v);
+    // n = u x v
+    vec3_cross(u, v, n);
+    // normalize and send to GL
+    vec3_norm(n);
+    glNormal3f(n[0], n[1], n[2]);
+}
 
 void drawCube() {
     glBegin(GL_QUADS);
@@ -225,62 +245,63 @@ void drawCenteredCube(float w, float h, float d) {
 
     glPushMatrix();
 
-    // Front
+    // Front (+Z)
     glBegin(GL_QUADS);
     glNormal3f(0, 0, 1);
-    glVertex3f(-hw, -hh, hd);
-    glVertex3f(hw, -hh, hd);
-    glVertex3f(hw, hh, hd);
-    glVertex3f(-hw, hh, hd);
+    glTexCoord2f(0.0f, 0.0f); glVertex3f(-hw, -hh, hd);
+    glTexCoord2f(1.0f, 0.0f); glVertex3f(hw, -hh, hd);
+    glTexCoord2f(1.0f, 1.0f); glVertex3f(hw, hh, hd);
+    glTexCoord2f(0.0f, 1.0f); glVertex3f(-hw, hh, hd);
     glEnd();
 
-    // Back
+    // Back (-Z)
     glBegin(GL_QUADS);
     glNormal3f(0, 0, -1);
-    glVertex3f(-hw, -hh, -hd);
-    glVertex3f(-hw, hh, -hd);
-    glVertex3f(hw, hh, -hd);
-    glVertex3f(hw, -hh, -hd);
+    glTexCoord2f(1.0f, 0.0f); glVertex3f(-hw, -hh, -hd);
+    glTexCoord2f(1.0f, 1.0f); glVertex3f(-hw, hh, -hd);
+    glTexCoord2f(0.0f, 1.0f); glVertex3f(hw, hh, -hd);
+    glTexCoord2f(0.0f, 0.0f); glVertex3f(hw, -hh, -hd);
     glEnd();
 
-    // Left
+    // Left (-X)
     glBegin(GL_QUADS);
     glNormal3f(-1, 0, 0);
-    glVertex3f(-hw, -hh, -hd);
-    glVertex3f(-hw, -hh, hd);
-    glVertex3f(-hw, hh, hd);
-    glVertex3f(-hw, hh, -hd);
+    glTexCoord2f(0.0f, 0.0f); glVertex3f(-hw, -hh, -hd);
+    glTexCoord2f(1.0f, 0.0f); glVertex3f(-hw, -hh, hd);
+    glTexCoord2f(1.0f, 1.0f); glVertex3f(-hw, hh, hd);
+    glTexCoord2f(0.0f, 1.0f); glVertex3f(-hw, hh, -hd);
     glEnd();
 
-    // Right
+    // Right (+X)
     glBegin(GL_QUADS);
     glNormal3f(1, 0, 0);
-    glVertex3f(hw, -hh, -hd);
-    glVertex3f(hw, hh, -hd);
-    glVertex3f(hw, hh, hd);
-    glVertex3f(hw, -hh, hd);
+    glTexCoord2f(0.0f, 0.0f); glVertex3f(hw, -hh, -hd);
+    glTexCoord2f(0.0f, 1.0f); glVertex3f(hw, hh, -hd);
+    glTexCoord2f(1.0f, 1.0f); glVertex3f(hw, hh, hd);
+    glTexCoord2f(1.0f, 0.0f); glVertex3f(hw, -hh, hd);
     glEnd();
 
-    // Top
+    // Top (+Y)
     glBegin(GL_QUADS);
     glNormal3f(0, 1, 0);
-    glVertex3f(-hw, hh, -hd);
-    glVertex3f(-hw, hh, hd);
-    glVertex3f(hw, hh, hd);
-    glVertex3f(hw, hh, -hd);
+    glTexCoord2f(0.0f, 1.0f); glVertex3f(-hw, hh, -hd);
+    glTexCoord2f(0.0f, 0.0f); glVertex3f(-hw, hh, hd);
+    glTexCoord2f(1.0f, 0.0f); glVertex3f(hw, hh, hd);
+    glTexCoord2f(1.0f, 1.0f); glVertex3f(hw, hh, -hd);
     glEnd();
 
-    // Bottom
+    // Bottom (-Y)
     glBegin(GL_QUADS);
     glNormal3f(0, -1, 0);
-    glVertex3f(-hw, -hh, -hd);
-    glVertex3f(hw, -hh, -hd);
-    glVertex3f(hw, -hh, hd);
-    glVertex3f(-hw, -hh, hd);
+    glTexCoord2f(0.0f, 1.0f); glVertex3f(-hw, -hh, -hd);
+    glTexCoord2f(1.0f, 1.0f); glVertex3f(hw, -hh, -hd);
+    glTexCoord2f(1.0f, 0.0f); glVertex3f(hw, -hh, hd);
+    glTexCoord2f(0.0f, 0.0f); glVertex3f(-hw, -hh, hd);
     glEnd();
 
     glPopMatrix();
 }
+
 
 void drawCenteredCylinder(float radius, float height, int segments) {
     glPushMatrix();
@@ -312,18 +333,21 @@ void drawChamferedCube(float width, float height, float depth, float chamfer) {
 
     // Top face (y = hh)
     Vec3 topVerts[8] = {
-        // Front edge
-        {-hw + chamfer, hh, hd},           // 0
-        {hw - chamfer, hh, hd},            // 1
-        // Right edge
-        {hw, hh, hd - chamfer},            // 2
-        {hw, hh, -hd + chamfer},           // 3
-        // Back edge
-        {hw - chamfer, hh, -hd},           // 4
-        {-hw + chamfer, hh, -hd},          // 5
-        // Left edge
-        {-hw, hh, -hd + chamfer},          // 6
-        {-hw, hh, hd - chamfer}            // 7
+        // Front edge (z = hd, the front of the cube)
+		{-hw + chamfer, hh, hd},    // 0: Front-left, moved RIGHT by chamfer
+		{hw - chamfer, hh, hd},     // 1: Front-right, moved LEFT by chamfer
+
+		// Right edge (x = hw, the right side)
+		{hw, hh, hd - chamfer},     // 2: Right-front, moved BACK by chamfer
+		{hw, hh, -hd + chamfer},    // 3: Right-back, moved FORWARD by chamfer
+
+		// Back edge (z = -hd, the back of the cube)
+		{hw - chamfer, hh, -hd},    // 4: Back-right, moved LEFT by chamfer
+		{-hw + chamfer, hh, -hd},   // 5: Back-left, moved RIGHT by chamfer
+
+		// Left edge (x = -hw, the left side)
+		{-hw, hh, -hd + chamfer},   // 6: Left-back, moved FORWARD by chamfer
+		{-hw, hh, hd - chamfer}     // 7: Left-front, moved BACK by chamfer
     };
 
     // Bottom face (y = -hh)
@@ -346,6 +370,9 @@ void drawChamferedCube(float width, float height, float depth, float chamfer) {
     glBegin(GL_POLYGON);
     glNormal3f(0.0f, 1.0f, 0.0f);
     for (int i = 0; i < 8; i++) {
+        float u = (topVerts[i].x + hw) / (width); // range from 0 to 1
+        float v = (topVerts[i].z + hd) / (depth); // range from 0 to 1
+        glTexCoord2f(u, v);
         glVertex3f(topVerts[i].x, topVerts[i].y, topVerts[i].z);
     }
     glEnd();
@@ -354,6 +381,9 @@ void drawChamferedCube(float width, float height, float depth, float chamfer) {
     glBegin(GL_POLYGON);
     glNormal3f(0.0f, -1.0f, 0.0f);
     for (int i = 7; i >= 0; i--) {
+        float u = (bottomVerts[i].x + hw) / (width);
+        float v = (bottomVerts[i].z + hd) / (depth);
+        glTexCoord2f(u, v);
         glVertex3f(bottomVerts[i].x, bottomVerts[i].y, bottomVerts[i].z);
     }
     glEnd();
@@ -363,31 +393,32 @@ void drawChamferedCube(float width, float height, float depth, float chamfer) {
 
     // Front face
     glNormal3f(0.0f, 0.0f, 1.0f);
-    glVertex3f(topVerts[0].x, topVerts[0].y, topVerts[0].z);
-    glVertex3f(topVerts[1].x, topVerts[1].y, topVerts[1].z);
-    glVertex3f(bottomVerts[1].x, bottomVerts[1].y, bottomVerts[1].z);
-    glVertex3f(bottomVerts[0].x, bottomVerts[0].y, bottomVerts[0].z);
+    glTexCoord2f(0, 1); glVertex3f(topVerts[0].x, topVerts[0].y, topVerts[0].z);
+    glTexCoord2f(1, 1); glVertex3f(topVerts[1].x, topVerts[1].y, topVerts[1].z);
+    glTexCoord2f(1, 0); glVertex3f(bottomVerts[1].x, bottomVerts[1].y, bottomVerts[1].z);
+    glTexCoord2f(0, 0); glVertex3f(bottomVerts[0].x, bottomVerts[0].y, bottomVerts[0].z);
 
     // Right face
     glNormal3f(1.0f, 0.0f, 0.0f);
-    glVertex3f(topVerts[2].x, topVerts[2].y, topVerts[2].z);
-    glVertex3f(topVerts[3].x, topVerts[3].y, topVerts[3].z);
-    glVertex3f(bottomVerts[3].x, bottomVerts[3].y, bottomVerts[3].z);
-    glVertex3f(bottomVerts[2].x, bottomVerts[2].y, bottomVerts[2].z);
+    glTexCoord2f(0, 1); glVertex3f(topVerts[2].x, topVerts[2].y, topVerts[2].z);
+    glTexCoord2f(1, 1); glVertex3f(topVerts[3].x, topVerts[3].y, topVerts[3].z);
+    glTexCoord2f(1, 0); glVertex3f(bottomVerts[3].x, bottomVerts[3].y, bottomVerts[3].z);
+    glTexCoord2f(0, 0); glVertex3f(bottomVerts[2].x, bottomVerts[2].y, bottomVerts[2].z);
 
     // Back face
     glNormal3f(0.0f, 0.0f, -1.0f);
-    glVertex3f(topVerts[4].x, topVerts[4].y, topVerts[4].z);
-    glVertex3f(topVerts[5].x, topVerts[5].y, topVerts[5].z);
-    glVertex3f(bottomVerts[5].x, bottomVerts[5].y, bottomVerts[5].z);
-    glVertex3f(bottomVerts[4].x, bottomVerts[4].y, bottomVerts[4].z);
+    glTexCoord2f(0, 1); glVertex3f(topVerts[4].x, topVerts[4].y, topVerts[4].z);
+    glTexCoord2f(1, 1); glVertex3f(topVerts[5].x, topVerts[5].y, topVerts[5].z);
+    glTexCoord2f(1, 0); glVertex3f(bottomVerts[5].x, bottomVerts[5].y, bottomVerts[5].z);
+    glTexCoord2f(0, 0); glVertex3f(bottomVerts[4].x, bottomVerts[4].y, bottomVerts[4].z);
 
     // Left face
     glNormal3f(-1.0f, 0.0f, 0.0f);
-    glVertex3f(topVerts[6].x, topVerts[6].y, topVerts[6].z);
-    glVertex3f(topVerts[7].x, topVerts[7].y, topVerts[7].z);
-    glVertex3f(bottomVerts[7].x, bottomVerts[7].y, bottomVerts[7].z);
-    glVertex3f(bottomVerts[6].x, bottomVerts[6].y, bottomVerts[6].z);
+    glTexCoord2f(0, 1); glVertex3f(topVerts[6].x, topVerts[6].y, topVerts[6].z);
+    glTexCoord2f(1, 1); glVertex3f(topVerts[7].x, topVerts[7].y, topVerts[7].z);
+    glTexCoord2f(1, 0); glVertex3f(bottomVerts[7].x, bottomVerts[7].y, bottomVerts[7].z);
+    glTexCoord2f(0, 0); glVertex3f(bottomVerts[6].x, bottomVerts[6].y, bottomVerts[6].z);
+
 
     glEnd();
 
@@ -396,54 +427,54 @@ void drawChamferedCube(float width, float height, float depth, float chamfer) {
 
     // Front-right chamfer
     glNormal3f(0.707f, 0.0f, 0.707f);
-    glVertex3f(topVerts[1].x, topVerts[1].y, topVerts[1].z);
-    glVertex3f(topVerts[2].x, topVerts[2].y, topVerts[2].z);
-    glVertex3f(bottomVerts[2].x, bottomVerts[2].y, bottomVerts[2].z);
-    glVertex3f(bottomVerts[1].x, bottomVerts[1].y, bottomVerts[1].z);
+    glTexCoord2f(0, 1); glVertex3f(topVerts[1].x, topVerts[1].y, topVerts[1].z);
+    glTexCoord2f(1, 1); glVertex3f(topVerts[2].x, topVerts[2].y, topVerts[2].z);
+    glTexCoord2f(1, 0); glVertex3f(bottomVerts[2].x, bottomVerts[2].y, bottomVerts[2].z);
+    glTexCoord2f(0, 0); glVertex3f(bottomVerts[1].x, bottomVerts[1].y, bottomVerts[1].z);
 
     // Back-right chamfer
     glNormal3f(0.707f, 0.0f, -0.707f);
-    glVertex3f(topVerts[3].x, topVerts[3].y, topVerts[3].z);
-    glVertex3f(topVerts[4].x, topVerts[4].y, topVerts[4].z);
-    glVertex3f(bottomVerts[4].x, bottomVerts[4].y, bottomVerts[4].z);
-    glVertex3f(bottomVerts[3].x, bottomVerts[3].y, bottomVerts[3].z);
+    glTexCoord2f(0, 1); glVertex3f(topVerts[3].x, topVerts[3].y, topVerts[3].z);
+    glTexCoord2f(1, 1); glVertex3f(topVerts[4].x, topVerts[4].y, topVerts[4].z);
+    glTexCoord2f(1, 0); glVertex3f(bottomVerts[4].x, bottomVerts[4].y, bottomVerts[4].z);
+    glTexCoord2f(0, 0); glVertex3f(bottomVerts[3].x, bottomVerts[3].y, bottomVerts[3].z);
 
     // Back-left chamfer
     glNormal3f(-0.707f, 0.0f, -0.707f);
-    glVertex3f(topVerts[5].x, topVerts[5].y, topVerts[5].z);
-    glVertex3f(topVerts[6].x, topVerts[6].y, topVerts[6].z);
-    glVertex3f(bottomVerts[6].x, bottomVerts[6].y, bottomVerts[6].z);
-    glVertex3f(bottomVerts[5].x, bottomVerts[5].y, bottomVerts[5].z);
+    glTexCoord2f(0, 1); glVertex3f(topVerts[5].x, topVerts[5].y, topVerts[5].z);
+    glTexCoord2f(1, 1); glVertex3f(topVerts[6].x, topVerts[6].y, topVerts[6].z);
+    glTexCoord2f(1, 0); glVertex3f(bottomVerts[6].x, bottomVerts[6].y, bottomVerts[6].z);
+    glTexCoord2f(0, 0); glVertex3f(bottomVerts[5].x, bottomVerts[5].y, bottomVerts[5].z);
 
     // Front-left chamfer
     glNormal3f(-0.707f, 0.0f, 0.707f);
-    glVertex3f(topVerts[7].x, topVerts[7].y, topVerts[7].z);
-    glVertex3f(topVerts[0].x, topVerts[0].y, topVerts[0].z);
-    glVertex3f(bottomVerts[0].x, bottomVerts[0].y, bottomVerts[0].z);
-    glVertex3f(bottomVerts[7].x, bottomVerts[7].y, bottomVerts[7].z);
+    glTexCoord2f(0, 1); glVertex3f(topVerts[7].x, topVerts[7].y, topVerts[7].z);
+    glTexCoord2f(1, 1); glVertex3f(topVerts[0].x, topVerts[0].y, topVerts[0].z);
+    glTexCoord2f(1, 0); glVertex3f(bottomVerts[0].x, bottomVerts[0].y, bottomVerts[0].z);
+    glTexCoord2f(0, 0); glVertex3f(bottomVerts[7].x, bottomVerts[7].y, bottomVerts[7].z);
 
     glEnd();
 }
 
-// Draw a tapered cube (top and bottom are rectangles which can differ in size).
-// Centered at origin, Y is up.
-// Parameters:
-//   topW, topD    : width (X) and depth (Z) of the top face
-//   bottomW, bottomD: width (X) and depth (Z) of the bottom face
-//   height        : total height (distance between top and bottom)
+
 void drawTaperedCube(float topW, float topD, float bottomW, float bottomD, float height)
 {
+    // 1) basic setup
     float halfH = height * 0.5f;
+    const float EPS = 1e-6f;
+    float tw = (fabsf(topW) > EPS) ? topW : EPS;
+    float td = (fabsf(topD) > EPS) ? topD : EPS;
+    float bw = (fabsf(bottomW) > EPS) ? bottomW : EPS;
+    float bd = (fabsf(bottomD) > EPS) ? bottomD : EPS;
 
-    // top face (y = +halfH), ordered CCW when looking from above
+    // 2) compute the 8 corner positions (top and bottom rectangles)
     float top[4][3] = {
-        { -topW * 0.5f,  halfH, -topD * 0.5f }, // 0: top-left (near -Z)
-        {  topW * 0.5f,  halfH, -topD * 0.5f }, // 1: top-right
-        {  topW * 0.5f,  halfH,  topD * 0.5f }, // 2: bottom-right (far +Z)
-        { -topW * 0.5f,  halfH,  topD * 0.5f }  // 3: bottom-left
+        { -topW * 0.5f,  halfH, -topD * 0.5f }, // 0
+        {  topW * 0.5f,  halfH, -topD * 0.5f }, // 1
+        {  topW * 0.5f,  halfH,  topD * 0.5f }, // 2
+        { -topW * 0.5f,  halfH,  topD * 0.5f }  // 3
     };
 
-    // bottom face (y = -halfH), ordered CCW when looking from below (so normal points down)
     float bottom[4][3] = {
         { -bottomW * 0.5f, -halfH, -bottomD * 0.5f }, // 0
         {  bottomW * 0.5f, -halfH, -bottomD * 0.5f }, // 1
@@ -451,64 +482,117 @@ void drawTaperedCube(float topW, float topD, float bottomW, float bottomD, float
         { -bottomW * 0.5f, -halfH,  bottomD * 0.5f }  // 3
     };
 
-    // Top face
+    // 3) Top face: planar X->U, Z->V mapping, normal up
     glBegin(GL_POLYGON);
     glNormal3f(0.0f, 1.0f, 0.0f);
-    for (int i = 0; i < 4; ++i) glVertex3f(top[i][0], top[i][1], top[i][2]);
+    for (int i = 0; i < 4; ++i) {
+        float u = (top[i][0] + topW * 0.5f) / tw;   // X -> [0,1]
+        float v = (top[i][2] + topD * 0.5f) / td;   // Z -> [0,1]
+        glTexCoord2f(u, v);
+        glVertex3fv(top[i]);
+    }
     glEnd();
 
-    // Bottom face (reverse order so normal points down)
+    // 4) Bottom face: same mapping but draw reversed so normal points down
     glBegin(GL_POLYGON);
     glNormal3f(0.0f, -1.0f, 0.0f);
-    for (int i = 3; i >= 0; --i) glVertex3f(bottom[i][0], bottom[i][1], bottom[i][2]);
+    for (int i = 3; i >= 0; --i) {
+        float u = (bottom[i][0] + bottomW * 0.5f) / bw;
+        float v = (bottom[i][2] + bottomD * 0.5f) / bd;
+        glTexCoord2f(u, v);
+        glVertex3fv(bottom[i]);
+    }
     glEnd();
 
-    // Helper lambdas (or local functions) for vector math
-    auto sub = [](const float a[3], const float b[3], float out[3]) {
-        out[0] = a[0] - b[0]; out[1] = a[1] - b[1]; out[2] = a[2] - b[2];
-        };
-    auto cross = [](const float a[3], const float b[3], float out[3]) {
-        out[0] = a[1] * b[2] - a[2] * b[1];
-        out[1] = a[2] * b[0] - a[0] * b[2];
-        out[2] = a[0] * b[1] - a[1] * b[0];
-        };
-    auto normalize = [](float v[3]) {
-        float len = sqrtf(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
-        if (len > 1e-6f) { v[0] /= len; v[1] /= len; v[2] /= len; }
-        };
-
-    // Sides (4 quads). Each quad connects top[i] -> top[next] -> bottom[next] -> bottom[i]
+    // 5) Sides: 4 quads. Per-quad normal computed with computeNormalFA().
+    //    Each side gets simple UVs (0,1),(1,1),(1,0),(0,0).
     glBegin(GL_QUADS);
     for (int i = 0; i < 4; ++i) {
         int next = (i + 1) % 4;
 
-        // compute normal: cross( top[next] - top[i], bottom[i] - top[i] )
-        float a[3], b[3], n[3];
-        sub(top[next], top[i], a);
-        sub(bottom[i], top[i], b);
-        cross(a, b, n);
-        normalize(n);
+        // compute normal using top[i], top[next], bottom[i]
+        computeNormalFA(top[i], top[next], bottom[i]);
 
-        glNormal3f(n[0], n[1], n[2]);
-
-        glVertex3f(top[i][0], top[i][1], top[i][2]);
-        glVertex3f(top[next][0], top[next][1], top[next][2]);
-        glVertex3f(bottom[next][0], bottom[next][1], bottom[next][2]);
-        glVertex3f(bottom[i][0], bottom[i][1], bottom[i][2]);
+        glTexCoord2f(0.0f, 1.0f); glVertex3fv(top[i]);
+        glTexCoord2f(1.0f, 1.0f); glVertex3fv(top[next]);
+        glTexCoord2f(1.0f, 0.0f); glVertex3fv(bottom[next]);
+        glTexCoord2f(0.0f, 0.0f); glVertex3fv(bottom[i]);
     }
     glEnd();
 }
 
+// ======================================================= Material ==================================================================
+GLuint LoadBMPTexture(const char* filename) {
+    HBITMAP hBMP = (HBITMAP)LoadImage(
+        NULL,
+        filename,
+        IMAGE_BITMAP,
+        0, 0,
+        LR_LOADFROMFILE | LR_CREATEDIBSECTION
+    );
+
+    if (!hBMP) {
+        std::cout << "Failed to load " << filename << std::endl;
+        return 0;
+    }
+
+    BITMAP BMP;
+    GetObject(hBMP, sizeof(BMP), &BMP);
+
+    if (BMP.bmBits == NULL) {
+        std::cout << "BMP.bmBits is NULL for " << filename << std::endl;
+        return 0;
+    }
+
+    GLuint textureID;
+    glGenTextures(1, &textureID);
+    glBindTexture(GL_TEXTURE_2D, textureID);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    gluBuild2DMipmaps(
+        GL_TEXTURE_2D,
+        GL_RGB,
+        BMP.bmWidth,
+        BMP.bmHeight,
+        GL_BGR_EXT,
+        GL_UNSIGNED_BYTE,
+        BMP.bmBits
+    );
+
+    DeleteObject(hBMP);
+    return textureID;
+}
+
+
+void setMetallicMaterial() {
+    GLfloat mat_specular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    GLfloat mat_shininess[] = { 100.0f };  // High = tight, sharp highlights
+
+    glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
+    glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
+}
+
+void setPlasticMaterial() {
+    GLfloat mat_specular[] = { 0.5f, 0.5f, 0.5f, 1.0f };
+    GLfloat mat_shininess[] = { 32.0f };  // Lower = broader highlights
+
+    glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
+    glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
+}
+
+// ======================================================= End Material ==================================================================
+
 
 // ======================================================= Animation =================================================================
-// ---------------- Simple Block animation----------------
-
 enum BlockState {
     BLOCK_IDLE = 0,
     BLOCK_RAISING,
     BLOCK_HOLDING,
-    BLOCK_LOWERING,
-    BLOCK_RECOVERING
+    BLOCK_LOWERING
 };
 
 struct BlockAnim {
@@ -524,7 +608,7 @@ struct BlockAnim {
 
 static BlockAnim blockAnim = { BLOCK_IDLE, 0.0, 0,0,0,0,0 };
 
-// Hard-coded targets (tweak as needed)
+// Hard-coded targets 
 static const float BLOCK_SHOULDER_YAW_TARGET = -68.0f;
 static const float BLOCK_SHOULDER_PITCH_TARGET = -25.0f;
 static const float BLOCK_ELBOW_TARGET = -30.0f;
@@ -537,22 +621,18 @@ static const double DURATION_HOLD = 1.55;
 static const double DURATION_LOWERING = 0.52;
 static const double DURATION_RECOVER = 0.15;
 
-// High-resolution timer (seconds since epoch). Small overhead, good precision.
+// get current time in seconds since computer start
 static double now_seconds()
 {
     using namespace std::chrono;
     return duration<double>(high_resolution_clock::now().time_since_epoch()).count();
 }
 
-// small smooth easing
-static float smoothstep_ease(float t) {
-    if (t <= 0.0f) return 0.0f;
-    if (t >= 1.0f) return 1.0f;
-    return t * t * (3.0f - 2.0f * t);
-}
+// lineear interpolation
+// Start at a, move towards b by t percent
 static float lerp(float a, float b, float t) { return a + (b - a) * t; }
 
-// Start the Block animation (callable from keypress)
+// Start the Block animation
 void startBlock()
 {
     // snapshot current pose as idle
@@ -573,19 +653,19 @@ void updateBlockAnim(double now)
     case BLOCK_IDLE:
         return;
     case BLOCK_RAISING: {
+        // figure out the current animation completion percentage (0% to 100%)
         double t = (now - blockAnim.stateStartTime) / DURATION_RAISING;
-        if (t >= 1.0) t = 1.0;
-        float e = smoothstep_ease((float)t);
+        if (t >= 1.0) t = 1.0; // prevent from going above 100%. t = 0.0 (0%), t = 1.0 (100%)
 
-        leftShoulderYawAngle = lerp(blockAnim.idle_shoulderYaw, BLOCK_SHOULDER_YAW_TARGET, e);
-        leftShoulderPitchAngle = lerp(blockAnim.idle_shoulderPitch, BLOCK_SHOULDER_PITCH_TARGET, e);
-        leftElbowAngle = lerp(blockAnim.idle_elbow, BLOCK_ELBOW_TARGET, e);
-        leftWristAngle = lerp(blockAnim.idle_wrist, BLOCK_WRIST_TARGET, e);
-        leftFingersCurlAngle = lerp(blockAnim.idle_fingers, BLOCK_FINGERS_TARGET, e);
+        leftShoulderYawAngle = lerp(blockAnim.idle_shoulderYaw, BLOCK_SHOULDER_YAW_TARGET, t);
+        leftShoulderPitchAngle = lerp(blockAnim.idle_shoulderPitch, BLOCK_SHOULDER_PITCH_TARGET, t);
+        leftElbowAngle = lerp(blockAnim.idle_elbow, BLOCK_ELBOW_TARGET, t);
+        leftWristAngle = lerp(blockAnim.idle_wrist, BLOCK_WRIST_TARGET, t);
+        leftFingersCurlAngle = lerp(blockAnim.idle_fingers, BLOCK_FINGERS_TARGET, t);
 
         if (t >= 1.0) {
-            blockAnim.state = BLOCK_HOLDING;
-            blockAnim.stateStartTime = now;
+            blockAnim.state = BLOCK_HOLDING; // go to next animation state
+            blockAnim.stateStartTime = now; // reset start time
         }
         return;
     }
@@ -604,36 +684,19 @@ void updateBlockAnim(double now)
         return;
     }
     case BLOCK_LOWERING: {
+        // figure out the current animation completion percentage (0% to 100%)
         double t = (now - blockAnim.stateStartTime) / DURATION_LOWERING;
         if (t >= 1.0) t = 1.0;
-        float e = smoothstep_ease((float)t);
 
-        leftShoulderYawAngle = lerp(BLOCK_SHOULDER_YAW_TARGET, blockAnim.idle_shoulderYaw, e);
-        leftShoulderPitchAngle = lerp(BLOCK_SHOULDER_PITCH_TARGET, blockAnim.idle_shoulderPitch, e);
-        leftElbowAngle = lerp(BLOCK_ELBOW_TARGET, blockAnim.idle_elbow, e);
-        leftWristAngle = lerp(BLOCK_WRIST_TARGET, blockAnim.idle_wrist, e);
-        leftFingersCurlAngle = lerp(BLOCK_FINGERS_TARGET, blockAnim.idle_fingers, e);
-
-        if (t >= 1.0) {
-            blockAnim.state = BLOCK_RECOVERING;
-            blockAnim.stateStartTime = now;
-        }
-        return;
-    }
-    case BLOCK_RECOVERING: {
-        double t = (now - blockAnim.stateStartTime) / DURATION_RECOVER;
-        if (t >= 1.0) t = 1.0;
-        float e = smoothstep_ease((float)t);
-
-        // set final to idle snapshot to avoid numeric drift
-        leftShoulderYawAngle = blockAnim.idle_shoulderYaw;
-        leftShoulderPitchAngle = blockAnim.idle_shoulderPitch;
-        leftElbowAngle = blockAnim.idle_elbow;
-        leftWristAngle = blockAnim.idle_wrist;
-        leftFingersCurlAngle = blockAnim.idle_fingers;
+        leftShoulderYawAngle = lerp(BLOCK_SHOULDER_YAW_TARGET, blockAnim.idle_shoulderYaw, t);
+        leftShoulderPitchAngle = lerp(BLOCK_SHOULDER_PITCH_TARGET, blockAnim.idle_shoulderPitch, t);
+        leftElbowAngle = lerp(BLOCK_ELBOW_TARGET, blockAnim.idle_elbow, t);
+        leftWristAngle = lerp(BLOCK_WRIST_TARGET, blockAnim.idle_wrist, t);
+        leftFingersCurlAngle = lerp(BLOCK_FINGERS_TARGET, blockAnim.idle_fingers, t);
 
         if (t >= 1.0) {
             blockAnim.state = BLOCK_IDLE;
+            blockAnim.stateStartTime = now;
         }
         return;
     }
