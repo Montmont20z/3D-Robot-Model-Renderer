@@ -390,28 +390,28 @@ void Display(HWND hWnd)
     // ---------- compute yaw, pitch, distance into camera eye position ----------
     float yawR = camYaw * DEG2RAD; // yaw in radian
     float pitchR = camPitch * DEG2RAD; // pitch in radian
-    float cp = cosf(pitchR);
-    float sx = sinf(yawR);
-    float cx = cosf(yawR);
-    float sy = sinf(pitchR);
+    /*
+    Spherical → Cartesian mapping used:
+		x=r cos⁡(pitch)sin⁡(yaw)
 
+		y=r sin⁡(pitch)
+
+		z=r cos⁡(pitch)cos⁡(yaw)
+
+		camDistance = r
+    */
     // eye relative to target
-    float eyeX = camTargetX + camDistance * cp * sx;
-    float eyeY = camTargetY + camDistance * sy;
-    float eyeZ = camTargetZ + camDistance * cp * cx;
+    float eyeX = camTargetX + camDistance * cosf(pitchR) * sinf(yawR);
+    float eyeY = camTargetY + camDistance * sinf(pitchR);
+    float eyeZ = camTargetZ + camDistance * cosf(pitchR) * cosf(yawR);
     // ----------------------------------------------------------------------------
 
     // gluLookAt(eyeX, eyeY, eyeZ, lookX, lookY, lookZ, upX, upY, upZ); up usually is (0,1,0)
-    gluLookAt(eyeX, eyeY, eyeZ,
-        camTargetX, camTargetY, camTargetZ,
-        0.0f, 1.0f, 0.0f);
+    gluLookAt(eyeX, eyeY, eyeZ, // eye
+        camTargetX, camTargetY, camTargetZ, // target
+        0.0f, 1.0f, 0.0f); // up
 
     // shape Rotation and Translation
-    //glTranslatef(positionX, positionY, -4.0f + positionZ);
-    //glRotatef(rotateY, 0.0f, 1.0f, 0.0f); // y axis
-    //glRotatef(rotateX, 1.0f, 0.0f, 0.0f); // x axis
-    //glRotatef(rotateZ, 0.0f, 0.0f, 1.0f); // z axis
-   
     glRotatef(robotRotateX, 1.0f, 0.0f, 0.0f); 
     glRotatef(robotRotateY, 0.0f, 1.0f, 0.0f); 
     glRotatef(robotRotateZ, 0.0f, 0.0f, 1.0f);
@@ -419,8 +419,6 @@ void Display(HWND hWnd)
     glPushMatrix();
     glTranslatef(1.0f, 0.0f, 1.0f);
     drawSword();
-    glTranslatef(1.0f, 1.0f, 1.0f);
-    //drawShield();
     glPopMatrix();
 
     glPushMatrix();
@@ -578,26 +576,10 @@ void updateProjection(int width, int height)
         glOrtho(-1.0 * aspect, 3.0 * aspect, -1.0f, 3.0f, -10.0f, 10.0f);
         break;
 
-
     case PERSPECTIVE:
-        // gluPerspective(fovy, aspect, zNear, zFar)
         gluPerspective(fovy, aspect, zNear, zFar);
         break;
-
-
-    case FRUSTUM:
-    {
-        // derive left/right/top/bottom from fovy and aspect for a symmetric frustum
-        float top = zNear * tanf((fovy * (float)PI / 180.0f) * 0.5f);
-        float bottom = -top;
-        float right = top * aspect;
-        float left = -right;
-        // glFrustum(left, right, bottom, top, zNear, zFar)
-        glFrustum(left, right, bottom, top, zNear, zFar);
     }
-    break;
-    }
-
 
     glMatrixMode(GL_MODELVIEW);
 }
