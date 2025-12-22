@@ -30,6 +30,7 @@ float bodyRotation = 0.0f;
 float robotRotateX = 0.0f;
 float robotRotateY = 0.0f;
 float robotRotateZ = 0.0f;
+bool isHeadRotating = false;
 
 //Sword Animation
 float bladeThick = 0.0f;
@@ -212,6 +213,9 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
         case 'B': // press 'B' to trigger Block animation
             startBlock();
             break;
+        case 'Q':
+            isHeadRotating = !isHeadRotating; // Press 'A' to start/stop rotating
+            break;
 
         case 'A': headRotation += 5.0f; break;
         case 'D': headRotation -= 5.0f; break;
@@ -282,6 +286,17 @@ bool initPixelFormat(HDC hdc)
     else
     {
         return false;
+    }
+}
+
+void UpdateHead() {
+    if (isHeadRotating) {
+        headRotation += 2.0f; // Increase this number to make it rotate faster
+
+        // Keep the angle between 0 and 360
+        if (headRotation >= 360.0f) {
+            headRotation -= 360.0f;
+        }
     }
 }
 
@@ -497,6 +512,7 @@ int main(HINSTANCE hInst, HINSTANCE, LPSTR, int nCmdShow)
             DispatchMessage(&msg);
         }
 		UpdateSword();
+        UpdateHead();
         Display(hWnd);
        
 
@@ -567,6 +583,7 @@ void drawGundamHead() {
 
     glPushMatrix();
     glRotatef(headRotation, 0.0f, 1.0f, 0.0f);  // Rotate around Y axis
+    glRotatef(headRotation, 0.0f, 1.0f, 0.0f);
 
     // Centre box
     glColor3f(0.95f, 0.95f, 0.95f);
