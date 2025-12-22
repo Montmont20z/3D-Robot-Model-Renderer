@@ -42,8 +42,8 @@ bool isEnlarging = false;
 bool isWalking = false;
 float leftAngle = 0.0f;
 float rightAngle = 0.0f;
-float leftLegMoveSpeed = 0.05f;
-float rightLegMoveSpeed = 0.05f;
+float leftLegMoveSpeed = 0.025f;
+float rightLegMoveSpeed = 0.025f;
 
 // ----------------- Texture ------------------------------
 GLuint metalWhiteTexture1 = 0;
