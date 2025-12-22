@@ -27,6 +27,9 @@ float rightHipAngle = 0.0f;
 float rightKneeAngle = 0.0f;
 float headRotation = 0.0f;
 float bodyRotation = 0.0f;
+float robotRotateX = 0.0f;
+float robotRotateY = 0.0f;
+float robotRotateZ = 0.0f;
 
 //Sword Animation
 float bladeThick = 0.0f;
@@ -73,8 +76,6 @@ void computeNormal(Vec3 a, Vec3 b, Vec3 c) {
 
     glNormal3f(n.x, n.y, n.z);
 }
-
-
 
 enum ProjectMode { ORTHO = 0, PERSPECTIVE = 1, FRUSTUM = 2 };
 ProjectMode projMode = ORTHO;
@@ -226,8 +227,6 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 		case 'L': 
             isEnlarging = false;
 			break;
-
-
         case VK_ESCAPE: PostQuitMessage(0); break;
             // Projection controls
         case 'P': case 'p': // perspective (gluPerspective)
@@ -238,6 +237,12 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
             projMode = ORTHO;
             updateProjection(WINDOW_WIDTH, WINDOW_HEIGHT); // call with a reasonable default - WM_SIZE will set correct viewport
             break;
+        case '1': robotRotateX += 5.0f; break;
+        case '2': robotRotateX -= 5.0f; break;
+        case '3': robotRotateY += 5.0f; break;
+        case '4': robotRotateY -= 5.0f; break;
+        case '5': robotRotateZ += 5.0f; break;
+        case '6': robotRotateZ -= 5.0f; break;
         default:
             break;
         }
@@ -307,7 +312,6 @@ void initTexture() {
 
 }
 
-
 //--------------------------------------------------------------------
 
 void UpdateSword() {
@@ -362,6 +366,10 @@ void Display(HWND hWnd)
     //glRotatef(rotateY, 0.0f, 1.0f, 0.0f); // y axis
     //glRotatef(rotateX, 1.0f, 0.0f, 0.0f); // x axis
     //glRotatef(rotateZ, 0.0f, 0.0f, 1.0f); // z axis
+   
+    glRotatef(robotRotateX, 1.0f, 0.0f, 0.0f); 
+    glRotatef(robotRotateY, 0.0f, 1.0f, 0.0f); 
+    glRotatef(robotRotateZ, 0.0f, 0.0f, 1.0f);
 
     glPushMatrix();
     glTranslatef(1.0f, 0.0f, 1.0f);
@@ -426,6 +434,7 @@ void Display(HWND hWnd)
 
 }
 
+
 int main(HINSTANCE hInst, HINSTANCE, LPSTR, int nCmdShow)
 {
     WNDCLASSEX wc;
@@ -489,6 +498,7 @@ int main(HINSTANCE hInst, HINSTANCE, LPSTR, int nCmdShow)
         }
 		UpdateSword();
         Display(hWnd);
+       
 
         SwapBuffers(hdc);
     }
@@ -545,8 +555,6 @@ void updateProjection(int width, int height)
 
     glMatrixMode(GL_MODELVIEW);
 }
-
-
 
 void drawGundamHead() {
     // Draw neck first 
@@ -720,15 +728,16 @@ void drawGundamHead() {
     drawCube1(1.0f);
     glPopMatrix();
 
-    glPopMatrix(); // End head rotation matrix
+    glPopMatrix(); 
 }
 
 void drawUpperBody()
 {
     glPushMatrix();
-      glRotatef(bodyRotation, 0.0f, 1.0f, 0.0f);
+    glRotatef(bodyRotation, 0.0f, 1.0f, 0.0f);
     glScalef(2.2f, 2.2f, 2.2f);
 
+    // Main Chest Block
     glColor3f(0.0f, 0.35f, 0.7f);
     glPushMatrix();
     glScalef(2.4f, 1.3f, 1.0f);
@@ -738,35 +747,35 @@ void drawUpperBody()
     glBegin(GL_QUADS);
     glColor3f(0.0f, 0.3f, 0.65f);
 
-    // --- 前突面板 (驾驶舱正面) ---
+    //Front Panel
     glNormal3f(0.0f, 0.0f, 1.0f);
     glVertex3f(-0.55f, 0.65f, 0.9f);
     glVertex3f(0.55f, 0.65f, 0.9f);
     glVertex3f(0.55f, -0.65f, 0.9f);
     glVertex3f(-0.55f, -0.65f, 0.9f);
 
-    // --- 左侧护甲 ---
+    //Left Armor Side
     glNormal3f(-0.8f, 0.0f, 0.6f);
     glVertex3f(-0.55f, 0.65f, 0.9f);
-    glVertex3f(-1.2f, 0.65f, 0.5f); 
-    glVertex3f(-1.2f, -0.65f, 0.5f); 
+    glVertex3f(-1.2f, 0.65f, 0.5f);
+    glVertex3f(-1.2f, -0.65f, 0.5f);
     glVertex3f(-0.55f, -0.65f, 0.9f);
 
-    // --- 右侧护甲 ---
+    //Right Armor Side 
     glNormal3f(0.8f, 0.0f, 0.6f);
     glVertex3f(0.55f, 0.65f, 0.9f);
     glVertex3f(0.55f, -0.65f, 0.9f);
-    glVertex3f(1.2f, -0.65f, 0.5f); 
-    glVertex3f(1.2f, 0.65f, 0.5f); 
+    glVertex3f(1.2f, -0.65f, 0.5f);
+    glVertex3f(1.2f, 0.65f, 0.5f);
 
-    // --- 顶部封盖 ---
+    //Top Cover
     glNormal3f(0.0f, 1.0f, 0.0f);
     glVertex3f(-0.55f, 0.65f, 0.9f);
     glVertex3f(0.55f, 0.65f, 0.9f);
     glVertex3f(1.2f, 0.65f, 0.5f);
     glVertex3f(-1.2f, 0.65f, 0.5f);
 
-    // --- 底部封盖 ---
+    //Bottom Cover
     glNormal3f(0.0f, -1.0f, 0.0f);
     glVertex3f(-0.55f, -0.65f, 0.9f);
     glVertex3f(-1.2f, -0.65f, 0.5f);
@@ -774,7 +783,7 @@ void drawUpperBody()
     glVertex3f(0.55f, -0.65f, 0.9f);
     glEnd();
 
-    // ============ 4. Red Cockpit Cover (Enhanced) ============
+    //Red Cockpit Cover
     glColor3f(0.8f, 0.1f, 0.1f);
     glPushMatrix();
     glTranslatef(0.0f, -0.3f, 1.0f);
@@ -792,34 +801,32 @@ void drawUpperBody()
     glVertex3f(-0.275f, -0.625f, 1.1f);
     glEnd();
 
-	// ============ 4. 黄色通风口（侧面点缀） ============
+    //Yellow Vents 
     glColor3f(1.0f, 0.8f, 0.0f);
     float ventY[] = { 0.35f, 0.15f, -0.05f };
     for (int i = 0; i < 3; i++) {
-        // 左边
+        // Left Side Vents
         glPushMatrix();
         glTranslatef(-0.95f, ventY[i], 0.72f);
-        glRotatef(-32, 0, 1, 0); 
+        glRotatef(-32, 0, 1, 0);
         glScalef(0.55f, 0.12f, 0.1f);
         drawCube1(1.0f);
         glPopMatrix();
-        // 右边
+
+        // Right Side Vents
         glPushMatrix();
         glTranslatef(0.95f, ventY[i], 0.72f);
         glRotatef(32, 0, 1, 0);
         glScalef(0.55f, 0.12f, 0.1f);
         drawCube1(1.0f);
         glPopMatrix();
-
-
-
-  
     }
-     //============ 5. 腹部红色分层（加厚） ============
+
+    //Abdomen Red Layering
     glColor3f(0.8f, 0.1f, 0.1f);
     glPushMatrix();
     glTranslatef(0.0f, -0.75f, 0.0f);
-    glScalef(2.0f, 0.2f, 1.0f); // 第一层
+    glScalef(2.0f, 0.2f, 1.0f); // First Layer
     drawCube1(1.0f);
     glPopMatrix();
 
@@ -1079,6 +1086,10 @@ void drawLeftLeg() {
     drawTaperedCube(0.8f, 0.8f, 0.7f, 0.5f, 0.2f);
     glPopMatrix();
 
+    glTranslatef(0.3f, -1.3f, 0.0f);
+    glRotatef(leftKneeAngle, 1.0f, 0.0f, 0.0f); // Bend backward
+    glTranslatef(-0.3f, 1.3f, 0.0f);
+
     //Joint
     glColor3f(0.75f, 0.75f, 0.75f);
     glPushMatrix();
@@ -1086,7 +1097,6 @@ void drawLeftLeg() {
     glRotatef(90.0f, 0.0f, .0f, 1.0f);
     drawCenteredCylinder(0.38f, 0.7f, 10);
     glPopMatrix();
-
 
     //Lower leg
     glColor3f(1.0f, 1.0f, 1.0f);
@@ -1515,8 +1525,7 @@ void drawRightLeg() {
     glPopMatrix();
 }
 
-
-// Polygon Function
+ //Polygon Function
 void drawSword() {
     // Handle
     glColor3f(1.0f, 1.0f, 1.0f);  //White
