@@ -189,6 +189,8 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
         switch (wParam)
         {
             // robot control
+            // hand controls
+            // left hand
         case 'R':
             if (isShiftPressed) leftShoulderYawAngle -= 5.0f;
             else leftShoulderYawAngle += 5.0f;
@@ -209,6 +211,28 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
             if (isShiftPressed) leftFingersCurlAngle -= 5.0f;
             else leftFingersCurlAngle += 5.0f;
             break;
+
+            // right hand
+		case 'F':
+            if (isShiftPressed) rightShoulderYawAngle -= 5.0f;
+            else rightShoulderYawAngle += 5.0f;
+            break;
+		case 'G':
+            if (isShiftPressed) rightShoulderPitchAngle -= 5.0f;
+            else rightShoulderPitchAngle += 5.0f;
+            break;
+        case 'H': 
+            if (isShiftPressed) rightElbowAngle -= 5.0f;
+            else rightElbowAngle += 5.0f;
+            break;
+        case 'J': 
+            if (isShiftPressed) rightWristAngle -= 5.0f;
+            else rightWristAngle += 5.0f;
+            break;
+        case 'K':
+            if (isShiftPressed) rightFingersCurlAngle -= 5.0f;
+            else rightFingersCurlAngle += 5.0f;
+            break;
         case 'B': // press 'B' to trigger Block animation
             startBlock();
             break;
@@ -218,14 +242,10 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
         case 'W': bodyRotation += 5.0f; break;
         case 'S': bodyRotation -= 5.0f; break;
 
-        case 'k':
-		case 'K':
-            isEnlarging = !isEnlarging;
-            break;
 
         case 'l':
 		case 'L': 
-            isEnlarging = false;
+            isEnlarging = !isEnlarging;
 			break;
         case VK_ESCAPE: PostQuitMessage(0); break;
             // Projection controls
@@ -331,7 +351,7 @@ void UpdateSword() {
 
 void Display(HWND hWnd)
 {
-    // update animations (frame-timed)
+    // update animations
     updateBlockAnim(now_seconds());
 
     glEnable(GL_DEPTH_TEST);
@@ -1813,17 +1833,12 @@ void drawLeftHand()
     float darkGrey[3] = { 0.25f, 0.25f, 0.25f };
     float red[3] = { 0.8f, 0.1f, 0.1f };
 
-
     // enable texture 
 	glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, metalWhiteTexture1);
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE); // or GL_REPLACE
     gluQuadricTexture(gluObject, GL_TRUE); // auto-generates texcoords for quadrics (spheres/cylinders/disks)
     //gluQuadricDrawStyle(gluObject, GLU_FILL);
-
-    // ---------------------------
-    // STATIC SHOULDER ARMOR (attached to torso, NOT affected by arm joint rotations)
-    // ---------------------------
 
     // ---------------------------
     // ARM HIERARCHY (rooted at the shoulder pivot)
