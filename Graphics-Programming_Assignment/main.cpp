@@ -417,11 +417,6 @@ void Display(HWND hWnd)
     glRotatef(robotRotateZ, 0.0f, 0.0f, 1.0f);
 
     glPushMatrix();
-    glTranslatef(1.0f, 0.0f, 1.0f);
-    drawSword();
-    glPopMatrix();
-
-    glPushMatrix();
     glScalef(0.5f, 0.5f, 0.5f);
 
     glPushMatrix();
@@ -572,7 +567,6 @@ void updateProjection(int width, int height)
     switch (projMode)
     {
     case ORTHO:
-        // keep the original small-world units but adapt to aspect
         glOrtho(-1.0 * aspect, 3.0 * aspect, -1.0f, 3.0f, -10.0f, 10.0f);
         break;
 
@@ -2614,6 +2608,15 @@ void drawRightHand()
         drawCenteredCube(0.015f, 0.48f, 0.05f);
         glPopMatrix();
     }
+
+    // sword
+	glPushMatrix();
+    glRotatef(90, 1, 0, 0);
+    glTranslatef(-0.2f, -1.2f, -0.3f);
+    glScalef(2.0, 2.0, 2.0);
+    drawSword();
+    glPopMatrix();
+
     glPopMatrix(); // end fingers
 
     // Thumb - mirrored position
@@ -2622,6 +2625,8 @@ void drawRightHand()
     glRotatef(25, 0.0f, 0.0f, 1.0f);   // negated rotation
     glColor3fv(darkGrey);
     drawCenteredCube(0.12f, 0.4f, 0.18f);
+
+
     glPopMatrix();
 
     glPopMatrix(); // end palm-only group
