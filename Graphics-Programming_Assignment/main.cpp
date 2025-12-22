@@ -49,6 +49,8 @@ float rightLegMoveSpeed = 0.05f;
 GLuint metalWhiteTexture1 = 0;
 GLuint metalWhiteTexture2 = 0;
 GLuint metalWhiteTexture3 = 0;
+GLuint metalWhiteTexture4 = 0;
+GLuint metalWhiteTexture5 = 0;
 GLuint metalTexture = 0;
 
 // ------------------- camera state -----------------------
@@ -356,6 +358,8 @@ void initTexture() {
 	metalWhiteTexture1 = LoadBMPTexture("metal-white-1.bmp");
 	metalWhiteTexture2 = LoadBMPTexture("metal-white-2.bmp");
 	metalWhiteTexture3 = LoadBMPTexture("metal-white-3.bmp");
+    metalWhiteTexture4 = LoadBMPTexture("metal-grey.bmp");
+    metalWhiteTexture5 = LoadBMPTexture("pink-metal.bmp");
     metalTexture = LoadBMPTexture("metal.bmp");
 
 }
@@ -437,11 +441,6 @@ void Display(HWND hWnd)
     glRotatef(robotRotateX, 1.0f, 0.0f, 0.0f); 
     glRotatef(robotRotateY, 0.0f, 1.0f, 0.0f); 
     glRotatef(robotRotateZ, 0.0f, 0.0f, 1.0f);
-
-    glPushMatrix();
-    glTranslatef(1.0f, 0.0f, 1.0f);
-    drawSword();
-    glPopMatrix();
 
     glPushMatrix();
     glScalef(0.5f, 0.5f, 0.5f);
@@ -597,7 +596,6 @@ void updateProjection(int width, int height)
     switch (projMode)
     {
     case ORTHO:
-        // keep the original small-world units but adapt to aspect
         glOrtho(-1.0 * aspect, 3.0 * aspect, -1.0f, 3.0f, -10.0f, 10.0f);
         break;
 
@@ -610,6 +608,7 @@ void updateProjection(int width, int height)
 }
 
 void drawGundamHead() {
+    glDisable(GL_TEXTURE_2D);
     // Draw neck first 
     glColor3f(0.95f, 0.95f, 0.95f);
     glPushMatrix();
@@ -727,6 +726,7 @@ void drawGundamHead() {
     glPopMatrix();
 
     // Left Blade
+    glColor3f(1.0f, 0.0f, 0.0f);
     glPushMatrix();
     glTranslatef(-0.30f, 1.65f, 0.0f);
     glRotatef(-20.0f, 0.0f, 1.0f, 0.0f);
@@ -742,6 +742,10 @@ void drawGundamHead() {
     drawPyramid1(1.0f);
     glPopMatrix();
 
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, metalWhiteTexture4);
+
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
     // Side Armor 
     glColor3f(0.8f, 0.8f, 0.8f);
     // Left Armor
@@ -774,6 +778,8 @@ void drawGundamHead() {
     drawCube1(1.0f);
     glPopMatrix();
 
+    glDisable(GL_TEXTURE_2D);
+
     // Rear Sensor 
     glColor3f(0.2f, 0.2f, 0.2f);
     glPushMatrix();
@@ -782,11 +788,18 @@ void drawGundamHead() {
     drawCube1(1.0f);
     glPopMatrix();
 
+
     glPopMatrix(); 
 }
 
 void drawUpperBody()
 {
+
+    glEnable(GL_TEXTURE_2D); 
+    glBindTexture(GL_TEXTURE_2D, metalWhiteTexture2); 
+
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
     glPushMatrix();
     glRotatef(bodyRotation, 0.0f, 1.0f, 0.0f);
     glRotatef(bodyRotation, 0.0f, 1.0f, 0.0f);
@@ -886,9 +899,14 @@ void drawUpperBody()
     glPopMatrix();
 
     glPopMatrix();
+    glDisable(GL_TEXTURE_2D);
 }
 
 void drawLowerBody() {
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, metalWhiteTexture3);
+
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
     glPushMatrix();
     glRotatef(bodyRotation, 0.0f, 1.0f, 0.0f);
     glRotatef(bodyRotation, 0.0f, 1.0f, 0.0f);
@@ -924,26 +942,11 @@ void drawLowerBody() {
     drawCube1(1.0f);
     glPopMatrix();
 
-    // Belt detail 
-    glColor3f(0.9f, 0.1f, 0.1f);
-    glPushMatrix();
-    glTranslatef(0.0f, -0.8f, 0.0f);
-    glScalef(2.5f, 0.35f, 1.65f);  
-    drawCube1(1.0f);
-    glPopMatrix();
-
-    glColor3f(1.0f, 0.0f, 1.0f);
-    glPushMatrix();
-    glTranslatef(0.0f, -0.8f, 0.85f);
-    glScalef(0.5f, 0.3f, 0.1f);
-    drawCube1(1.0f);
-    glPopMatrix();
-
     // Front groin armor 
     glColor3f(0.85f, 0.85f, 0.85f);
     glPushMatrix();
     glTranslatef(0.0f, -1.3f, 0.55f);
-    glScalef(1.8f, 0.25f, 0.35f);  
+    glScalef(1.8f, 0.25f, 0.35f);
     drawCube1(1.0f);
     glPopMatrix();
 
@@ -952,7 +955,7 @@ void drawLowerBody() {
     glPushMatrix();
     glTranslatef(0.0f, -1.6f, 0.68f);
     glRotatef(-20.0f, 1.0f, 0.0f, 0.0f);
-    glScalef(1.8f, 1.3f, 0.13f);  
+    glScalef(1.8f, 1.3f, 0.13f);
     drawCube1(1.0f);
     glPopMatrix();
 
@@ -961,7 +964,7 @@ void drawLowerBody() {
     glPushMatrix();
     glTranslatef(0.0f, -1.9f, 0.82f);
     glRotatef(-20.0f, 1.0f, 0.0f, 0.0f);
-    glScalef(1.2f, 0.35f, 0.11f); 
+    glScalef(1.2f, 0.35f, 0.11f);
     drawCube1(1.0f);
     glPopMatrix();
 
@@ -969,35 +972,55 @@ void drawLowerBody() {
     glColor3f(0.95f, 0.95f, 0.95f);
     // Left side skirt
     glPushMatrix();
-    glTranslatef(-1.3f, -1.6f, 0.0f);  
+    glTranslatef(-1.3f, -1.6f, 0.0f);
     glRotatef(-10.0f, 0.0f, 0.0f, 1.0f);
-    glScalef(0.8f, 1.4f, 1.3f); 
+    glScalef(0.8f, 1.4f, 1.3f);
     drawCube1(1.0f);
     glPopMatrix();
 
     // Right side skirt
     glPushMatrix();
-    glTranslatef(1.3f, -1.6f, 0.0f);  
+    glTranslatef(1.3f, -1.6f, 0.0f);
     glRotatef(10.0f, 0.0f, 0.0f, 1.0f);
-    glScalef(0.8f, 1.4f, 1.3f);  
+    glScalef(0.8f, 1.4f, 1.3f);
     drawCube1(1.0f);
     glPopMatrix();
 
     // Back left skirt 
     glPushMatrix();
-    glTranslatef(-0.8f, -1.6f, -0.65f); 
+    glTranslatef(-0.8f, -1.6f, -0.65f);
     glRotatef(15.0f, 1.0f, 0.0f, 0.0f);
-    glScalef(0.8f, 1.3f, 0.13f); 
+    glScalef(0.8f, 1.3f, 0.13f);
     drawCube1(1.0f);
     glPopMatrix();
 
     // Back right skirt 
     glPushMatrix();
-    glTranslatef(0.8f, -1.6f, -0.65f);   
+    glTranslatef(0.8f, -1.6f, -0.65f);
     glRotatef(15.0f, 1.0f, 0.0f, 0.0f);
-    glScalef(0.8f, 1.3f, 0.13f);  
+    glScalef(0.8f, 1.3f, 0.13f);
     drawCube1(1.0f);
     glPopMatrix();
+
+    // Belt detail 
+    glColor3f(0.9f, 0.1f, 0.1f);
+    glPushMatrix();
+    glTranslatef(0.0f, -0.8f, 0.0f);
+    glScalef(2.5f, 0.35f, 1.65f);  
+    drawCube1(1.0f);
+    glPopMatrix();
+
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, metalWhiteTexture5);
+
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+    glColor3f(1.0f, 0.0f, 1.0f);
+    glPushMatrix();
+    glTranslatef(0.0f, -0.8f, 0.85f);
+    glScalef(0.5f, 0.3f, 0.1f);
+    drawCube1(1.0f);
+    glPopMatrix();
+    glDisable(GL_TEXTURE_2D);
 
     // Additional hip details
     glColor3f(0.7f, 0.7f, 0.7f);
@@ -2622,6 +2645,15 @@ void drawRightHand()
         drawCenteredCube(0.015f, 0.48f, 0.05f);
         glPopMatrix();
     }
+
+    // sword
+	glPushMatrix();
+    glRotatef(90, 1, 0, 0);
+    glTranslatef(-0.2f, -1.2f, -0.3f);
+    glScalef(2.0, 2.0, 2.0);
+    drawSword();
+    glPopMatrix();
+
     glPopMatrix(); // end fingers
 
     // Thumb - mirrored position
@@ -2630,6 +2662,8 @@ void drawRightHand()
     glRotatef(25, 0.0f, 0.0f, 1.0f);   // negated rotation
     glColor3fv(darkGrey);
     drawCenteredCube(0.12f, 0.4f, 0.18f);
+
+
     glPopMatrix();
 
     glPopMatrix(); // end palm-only group

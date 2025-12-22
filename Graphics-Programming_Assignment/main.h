@@ -86,44 +86,44 @@ void drawCube() {
 }
 
 void drawCube1(float size) {
-    float halfSize = size / 2.0f;
+    float s = size / 2.0f;
     glBegin(GL_QUADS);
-    // Front face
+    // Front Face
     glNormal3f(0.0, 0.0, 1.0);
-    glVertex3f(-halfSize, -halfSize, halfSize);
-    glVertex3f(halfSize, -halfSize, halfSize);
-    glVertex3f(halfSize, halfSize, halfSize);
-    glVertex3f(-halfSize, halfSize, halfSize);
-    // Back face
+    glTexCoord2f(0.0f, 0.0f); glVertex3f(-s, -s, s);
+    glTexCoord2f(1.0f, 0.0f); glVertex3f(s, -s, s);
+    glTexCoord2f(1.0f, 1.0f); glVertex3f(s, s, s);
+    glTexCoord2f(0.0f, 1.0f); glVertex3f(-s, s, s);
+    // Back Face
     glNormal3f(0.0, 0.0, -1.0);
-    glVertex3f(-halfSize, -halfSize, -halfSize);
-    glVertex3f(-halfSize, halfSize, -halfSize);
-    glVertex3f(halfSize, halfSize, -halfSize);
-    glVertex3f(halfSize, -halfSize, -halfSize);
-    // Top face
+    glTexCoord2f(1.0f, 0.0f); glVertex3f(-s, -s, -s);
+    glTexCoord2f(1.0f, 1.0f); glVertex3f(-s, s, -s);
+    glTexCoord2f(0.0f, 1.0f); glVertex3f(s, s, -s);
+    glTexCoord2f(0.0f, 0.0f); glVertex3f(s, -s, -s);
+    // Top Face
     glNormal3f(0.0, 1.0, 0.0);
-    glVertex3f(-halfSize, halfSize, -halfSize);
-    glVertex3f(-halfSize, halfSize, halfSize);
-    glVertex3f(halfSize, halfSize, halfSize);
-    glVertex3f(halfSize, halfSize, -halfSize);
-    // Bottom face
+    glTexCoord2f(0.0f, 1.0f); glVertex3f(-s, s, -s);
+    glTexCoord2f(0.0f, 0.0f); glVertex3f(-s, s, s);
+    glTexCoord2f(1.0f, 0.0f); glVertex3f(s, s, s);
+    glTexCoord2f(1.0f, 1.0f); glVertex3f(s, s, -s);
+    // Bottom Face
     glNormal3f(0.0, -1.0, 0.0);
-    glVertex3f(-halfSize, -halfSize, -halfSize);
-    glVertex3f(halfSize, -halfSize, -halfSize);
-    glVertex3f(halfSize, -halfSize, halfSize);
-    glVertex3f(-halfSize, -halfSize, halfSize);
+    glTexCoord2f(1.0f, 1.0f); glVertex3f(-s, -s, -s);
+    glTexCoord2f(0.0f, 1.0f); glVertex3f(s, -s, -s);
+    glTexCoord2f(0.0f, 0.0f); glVertex3f(s, -s, s);
+    glTexCoord2f(1.0f, 0.0f); glVertex3f(-s, -s, s);
     // Right face
     glNormal3f(1.0, 0.0, 0.0);
-    glVertex3f(halfSize, -halfSize, -halfSize);
-    glVertex3f(halfSize, halfSize, -halfSize);
-    glVertex3f(halfSize, halfSize, halfSize);
-    glVertex3f(halfSize, -halfSize, halfSize);
+    glTexCoord2f(1.0f, 0.0f); glVertex3f(s, -s, -s);
+    glTexCoord2f(1.0f, 1.0f); glVertex3f(s, s, -s);
+    glTexCoord2f(0.0f, 1.0f); glVertex3f(s, s, s);
+    glTexCoord2f(0.0f, 0.0f); glVertex3f(s, -s, s);
     // Left face
     glNormal3f(-1.0, 0.0, 0.0);
-    glVertex3f(-halfSize, -halfSize, -halfSize);
-    glVertex3f(-halfSize, -halfSize, halfSize);
-    glVertex3f(-halfSize, halfSize, halfSize);
-    glVertex3f(-halfSize, halfSize, -halfSize);
+    glTexCoord2f(0.0f, 0.0f); glVertex3f(-s, -s, -s);
+    glTexCoord2f(1.0f, 0.0f); glVertex3f(-s, -s, s);
+    glTexCoord2f(1.0f, 1.0f); glVertex3f(-s, s, s);
+    glTexCoord2f(0.0f, 1.0f); glVertex3f(-s, s, -s);
     glEnd();
 }
 
