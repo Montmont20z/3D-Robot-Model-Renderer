@@ -592,8 +592,7 @@ enum BlockState {
     BLOCK_IDLE = 0,
     BLOCK_RAISING,
     BLOCK_HOLDING,
-    BLOCK_LOWERING,
-    BLOCK_RECOVERING
+    BLOCK_LOWERING
 };
 
 struct BlockAnim {
@@ -696,24 +695,8 @@ void updateBlockAnim(double now)
         leftFingersCurlAngle = lerp(BLOCK_FINGERS_TARGET, blockAnim.idle_fingers, t);
 
         if (t >= 1.0) {
-            blockAnim.state = BLOCK_RECOVERING;
-            blockAnim.stateStartTime = now;
-        }
-        return;
-    }
-    case BLOCK_RECOVERING: {
-        double t = (now - blockAnim.stateStartTime) / DURATION_RECOVER;
-        if (t >= 1.0) t = 1.0;
-
-        // set final to idle snapshot to avoid numeric drift
-        leftShoulderYawAngle = blockAnim.idle_shoulderYaw;
-        leftShoulderPitchAngle = blockAnim.idle_shoulderPitch;
-        leftElbowAngle = blockAnim.idle_elbow;
-        leftWristAngle = blockAnim.idle_wrist;
-        leftFingersCurlAngle = blockAnim.idle_fingers;
-
-        if (t >= 1.0) {
             blockAnim.state = BLOCK_IDLE;
+            blockAnim.stateStartTime = now;
         }
         return;
     }
