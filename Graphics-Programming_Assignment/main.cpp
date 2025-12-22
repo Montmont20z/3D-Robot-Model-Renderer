@@ -42,6 +42,14 @@ float bladeThick = 0.0f;
 float enlargeSpeed = 0.0001f;
 bool isEnlarging = false;
 
+//Movement Animation
+bool isMoving = false;
+float thighAngle = 0.0f;
+float shinAngle = 0.0f;
+float jointSpeed = 0.0f;
+float thighSpeed = 0.0f;
+float shinSpeed = 0.0f;
+
 // ------------------- camera state -----------------------
 float camTargetX = 0.0f, camTargetY = 0.0f, camTargetZ = 0.0f;
 float camDistance = 4.0f;
@@ -231,14 +239,14 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
         case 'W': bodyRotation += 5.0f; break;
         case 'S': bodyRotation -= 5.0f; break;
 
-        case 'k':
-		case 'K':
+        case 'n':
+		case 'N':
             isEnlarging = !isEnlarging;
             break;
 
-        case 'l':
-		case 'L': 
-            isEnlarging = false;
+        case 'm':
+        case 'M':
+            isMoving = !isMoving;
 			break;
 
 
@@ -335,6 +343,17 @@ void UpdateSword() {
         if (bladeThick == 0.0f) {
             bladeThick = 0.0f;
         }
+    }
+}
+
+void MovementAnimation() {
+    thighAngle += thighSpeed;
+    shinAngle += shinSpeed;
+    if (thighAngle > 15.0f || thighAngle < -15.0f) {
+        thighSpeed = -thighSpeed;
+    }
+    if (shinAngle > 30.0f || shinAngle < 0.0f) {
+        shinSpeed = -shinSpeed;
     }
 }
 
@@ -1015,6 +1034,14 @@ void drawLowerBody() {
     gluSphere(gluObject, 0.08f, 8, 8);
     glPopMatrix();
 
+    glPopMatrix();
+
+    //Crouch
+    glColor3f(1.0f, 1.0f, 1.0f);
+    glPushMatrix();
+    glTranslatef(0.0f, -1.8f, 0.0f);
+    glScalef(0.6f, 1.5f, 1.55f);
+    drawCube1(1.0f);
     glPopMatrix();
 }
 
