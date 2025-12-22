@@ -461,7 +461,7 @@ void drawTaperedCube(float topW, float topD, float bottomW, float bottomD, float
 {
     // 1) basic setup
     float halfH = height * 0.5f;
-    const float EPS = 1e-6f;
+	const float EPS = 1e-6f; // prevent division by zero
     float tw = (fabsf(topW) > EPS) ? topW : EPS;
     float td = (fabsf(topD) > EPS) ? topD : EPS;
     float bw = (fabsf(bottomW) > EPS) ? bottomW : EPS;
