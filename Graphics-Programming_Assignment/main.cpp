@@ -31,6 +31,7 @@ float robotRotateX = 0.0f;
 float robotRotateY = 0.0f;
 float robotRotateZ = 0.0f;
 bool isHeadRotating = false;
+bool isBodyRotating = false;
 
 //Sword Animation
 float bladeThick = 0.0f;
@@ -240,7 +241,9 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
         case 'Q':
             isHeadRotating = !isHeadRotating; // Press 'A' to start/stop rotating
             break;
-
+        case 'E':
+            isBodyRotating = !isBodyRotating; // Press 'A' to start/stop rotating
+            break;
         case 'A': headRotation += 5.0f; break;
         case 'D': headRotation -= 5.0f; break;
         case 'W': bodyRotation += 5.0f; break;
@@ -309,14 +312,17 @@ bool initPixelFormat(HDC hdc)
     }
 }
 
-void UpdateHead() {
+void UpdateRobot() {
+    // Handle Head Rotation
     if (isHeadRotating) {
-        headRotation += 2.0f; // Increase this number to make it rotate faster
+        headRotation += 2.0f;
+        if (headRotation >= 360.0f) headRotation -= 360.0f;
+    }
 
-        // Keep the angle between 0 and 360
-        if (headRotation >= 360.0f) {
-            headRotation -= 360.0f;
-        }
+    // Handle Body Rotation
+    if (isBodyRotating) {
+        bodyRotation += 2.0f;
+        if (bodyRotation >= 360.0f) bodyRotation -= 360.0f;
     }
 }
 
@@ -532,7 +538,7 @@ int main(HINSTANCE hInst, HINSTANCE, LPSTR, int nCmdShow)
             DispatchMessage(&msg);
         }
 		UpdateSword();
-        UpdateHead();
+        UpdateRobot();
         Display(hWnd);
        
 
@@ -772,6 +778,7 @@ void drawUpperBody()
 {
     glPushMatrix();
     glRotatef(bodyRotation, 0.0f, 1.0f, 0.0f);
+    glRotatef(bodyRotation, 0.0f, 1.0f, 0.0f);
     glScalef(2.2f, 2.2f, 2.2f);
 
     // Main Chest Block
@@ -872,6 +879,7 @@ void drawUpperBody()
 
 void drawLowerBody() {
     glPushMatrix();
+    glRotatef(bodyRotation, 0.0f, 1.0f, 0.0f);
     glRotatef(bodyRotation, 0.0f, 1.0f, 0.0f);
     glScalef(1.4f, 1.4f, 1.4f);  
 
