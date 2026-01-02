@@ -2,6 +2,7 @@
 
 A hierarchical 3D Gundam-style robot model built from scratch using OpenGL Fixed Pipeline and Win32 API. This project demonstrates deep understanding of computer graphics fundamentals through manual implementation of transformation matrices, lighting calculations, and hierarchical modeling techniques.
 
+![robot](https://github.com/user-attachments/assets/1e10f620-4e4d-47e8-9596-6df1617f9fb0)
 
 
 ## 🎯 Project Overview
