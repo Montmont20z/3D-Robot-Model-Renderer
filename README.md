@@ -85,6 +85,9 @@ Mouse:
   Scroll Wheel       - Zoom in/out
 
 Keyboard:
+  O key to use orthographic view
+  P ket to use pespective view (only pespective are able to zoom in/out)
+
   A key is move head to the left side
   D key is move head to the right side
   W key is move body to the left side
